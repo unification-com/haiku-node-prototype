@@ -1,0 +1,92 @@
+{
+  "types": [],
+  "structs": [
+    {
+      "name": "permission_record",
+      "base": "",
+      "fields": [
+        {
+          "name": "user_account",
+          "type": "uint64"
+        },
+        {
+          "name": "permission_granted",
+          "type": "uint8"
+        }
+      ]
+    },
+    {
+      "name": "grant",
+      "base": "",
+      "fields": [
+        {
+          "name": "user_account",
+          "type": "account_name"
+        },
+        {
+          "name": "requesting_app",
+          "type": "account_name"
+        }
+      ]
+    },
+    {
+      "name": "revoke",
+      "base": "",
+      "fields": [
+        {
+          "name": "user_account",
+          "type": "account_name"
+        },
+        {
+          "name": "requesting_app",
+          "type": "account_name"
+        }
+      ]
+    },
+    {
+      "name": "check",
+      "base": "",
+      "fields": [
+        {
+          "name": "user_account",
+          "type": "account_name"
+        },
+        {
+          "name": "requesting_app",
+          "type": "account_name"
+        }
+      ]
+    }
+  ],
+  "actions": [
+    {
+      "name": "grant",
+      "type": "grant",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "revoke",
+      "type": "revoke",
+      "ricardian_contract": ""
+    },
+    {
+      "name": "check",
+      "type": "check",
+      "ricardian_contract": ""
+    }
+  ],
+  "tables": [
+    {
+      "name": "unifacl",
+      "index_type": "i64",
+      "key_names": [
+        "user_account"
+      ],
+      "key_types": [
+        "uint64"
+      ],
+      "type": "permission_record"
+    }
+  ],
+  "ricardian_clauses": []
+}
