@@ -1,0 +1,6 @@
+{
+  "acl_contract": "unif1",
+  "metadata_contract": "app1_meta",
+  "eos_rpc_ip": "127.0.0.1",
+  "eos_rpc_port": "8888"
+}
