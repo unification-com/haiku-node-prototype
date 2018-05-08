@@ -33,7 +33,7 @@ cleos create account eosio user1 [user1_public_key] [user1_public_key]
 
 repeat for user2, user3, app1 etc. Ensure correct public key is used (i.e. matches the private key imported into each wallet)
 
-6) Save unification_acl.cpp, .hpp and .abi to eos/contracts/unification_acl (each attached to this slack channel as files)
+6) Copy unification_acl/unification_acl.cpp, .hpp and .abi to [download_dir_of_eos_git_]eos/contracts/unification_acl
 
 7) cd [download_dir_of_eos_git]/eos/contracts/unification_acl
 
