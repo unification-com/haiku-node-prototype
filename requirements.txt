@@ -1,2 +1,2 @@
 msgpack==0.5.6
--e git+https://github.com/Netherdrake/py-eos-api#egg=py-eos-api
+git+https://github.com/Netherdrake/py-eos-api#egg=py-eos-api
