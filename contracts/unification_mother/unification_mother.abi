@@ -1,0 +1,131 @@
+{
+	"types": [],
+	"structs": [
+		{
+			"name": "valid_apps",
+			"base": "",
+			"fields": [
+				{
+					"name": "app_account",
+					"type": "uint64"
+				},
+				{
+					"name": "acl_contract",
+					"type": "uint64"
+				},
+				{
+					"name": "metadata_contract",
+					"type": "uint64"
+				},
+				{
+					"name": "app_name",
+					"type": "string"
+				},
+				{
+					"name": "desc",
+					"type": "string"
+				},
+				{
+					"name": "server_ip",
+					"type": "string"
+				}
+			]
+		},
+		{
+			"name": "validate",
+			"base": "",
+			"fields": [
+				{
+					"name": "app_account",
+					"type": "account_name"
+				},
+				{
+					"name": "acl_contract",
+					"type": "account_name"
+				},
+				{
+					"name": "metadata_contract",
+					"type": "account_name"
+				},
+				{
+					"name": "app_name",
+					"type": "string"
+				},
+				{
+					"name": "desc",
+					"type": "string"
+				},
+				{
+					"name": "server_ip",
+					"type": "string"
+				}
+			]
+		},
+		{
+			"name": "invalidate",
+			"base": "",
+			"fields": [
+				{
+					"name": "app_account",
+					"type": "account_name"
+				}
+			]
+		},
+		{
+			"name": "is_valid",
+			"base": "",
+			"fields": [
+				{
+					"name": "app_account",
+					"type": "account_name"
+				}
+			]
+		},
+		{
+			"name": "get_app",
+			"base": "",
+			"fields": [
+				{
+					"name": "app_account",
+					"type": "account_name"
+				}
+			]
+		}
+	],
+	"actions": [
+		{
+			"name": "validate",
+			"type": "validate",
+			"ricardian_contract": ""
+		},
+		{
+			"name": "invalidate",
+			"type": "invalidate",
+			"ricardian_contract": ""
+		},
+		{
+			"name": "isvalid",
+			"type": "is_valid",
+			"ricardian_contract": ""
+		},
+		{
+			"name": "getapp",
+			"type": "get_app",
+			"ricardian_contract": ""
+		}
+	],
+	"tables": [
+		{
+			"name": "validapps",
+			"index_type": "i64",
+			"key_names": [
+				"app_account"
+			],
+			"key_types": [
+				"uint64"
+			],
+			"type": "permission_record"
+		}
+	],
+	"ricardian_clauses": []
+}
