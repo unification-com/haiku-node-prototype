@@ -21,26 +21,29 @@ if (perm):
 else:
     print("tester NOT GRANTED permission for unif2 to access data in unif1")
 
-users_granted = v.get_app_allowed_users("unif1");
+users_granted = v.get_app_allowed_users("unif1")
 print("Users who granted permission for unif1:")
 print(users_granted)
 
-users_revoked = v.get_app_revoked_users("unif1");
+users_revoked = v.get_app_revoked_users("unif1")
 print("Users who revoked permission for unif1:")
 print(users_revoked)
 
-users_granted = v.get_app_allowed_users("unif2");
+users_granted = v.get_app_allowed_users("unif2")
 print("Users who granted permission for unif2:")
 print(users_granted)
 
-users_revoked = v.get_app_revoked_users("unif2");
+users_revoked = v.get_app_revoked_users("unif2")
 print("Users who revoked permission for unif2:")
 print(users_revoked)
 
-users_granted = v.get_app_allowed_users("unif3");
+users_granted = v.get_app_allowed_users("unif3")
 print("Users who granted permission for unif3:")
 print(users_granted)
 
-users_revoked = v.get_app_revoked_users("unif3");
+users_revoked = v.get_app_revoked_users("unif3")
 print("Users who revoked permission for unif3:")
 print(users_revoked)
+
+code_hash = v.get_contract_code_hash("unif1")
+print("unif1 contract code hash:", code_hash)
