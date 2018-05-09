@@ -1,2 +1,2 @@
 msgpack==0.5.6
-git+https://github.com/unification-com/py-eos-api#egg=py-eos-api
+-e git+https://github.com/unification-com/py-eos-api#egg=py-eos-api

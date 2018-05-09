@@ -52,6 +52,11 @@ class UnificationACLValidation:
 
         return revoked
 
-    def get_contract_code_hash(self, contract_account):
+    def check_contract_code_hash(self, contract_account, hash):
+        code_valid = False
         json_data = self.eosClient.get_code(contract_account)
-        return json_data['code_hash']
+        code_hash = json_data['code_hash']
+        if(hash == code_hash):
+            code_valid = True
+
+        return code_valid

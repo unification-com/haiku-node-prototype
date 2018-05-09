@@ -45,5 +45,5 @@ users_revoked = v.get_app_revoked_users("unif3")
 print("Users who revoked permission for unif3:")
 print(users_revoked)
 
-code_hash = v.get_contract_code_hash("unif1")
-print("unif1 contract code hash:", code_hash)
+code_valid = v.check_contract_code_hash("unif1", "a2be684581db0f2ff1b14422c9654004e8229d3f11d0507c7918e54fb613cc68")
+print("unif1 contract code valid:", code_valid)
