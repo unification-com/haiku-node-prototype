@@ -1,0 +1,1 @@
+Validation class(es) which will interact with the Smart Contract to check that a requesting app is valid, and also wheteher or not user(s) have granted permission to the requesting app
