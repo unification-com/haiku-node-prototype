@@ -16,6 +16,24 @@
       ]
     },
     {
+      "name": "data_schema",
+      "base": "",
+      "fields": [
+        {
+          "name": "pkey",
+          "type": "uint64"
+        },
+        {
+          "name": "schema_vers",
+          "type": "uint64"
+        },
+        {
+          "name": "schema",
+          "type": "string"
+        }
+      ]
+    },
+    {
       "name": "grant",
       "base": "",
       "fields": [
@@ -54,6 +72,16 @@
         {
           "name": "requesting_app",
           "type": "account_name"
+        }
+      ]
+    },
+    {
+      "name": "set_schema",
+      "base": "",
+      "fields": [
+        {
+          "name": "schema",
+          "type": "string"
         }
       ]
     }
@@ -73,7 +101,12 @@
       "name": "check",
       "type": "check",
       "ricardian_contract": ""
-    }
+    },
+         {
+           "name": "set.schema",
+           "type": "set_schema",
+           "ricardian_contract": ""
+         }
   ],
   "tables": [
     {
@@ -86,7 +119,18 @@
         "uint64"
       ],
       "type": "permission_record"
-    }
+    },
+    {
+          "name": "unifschema",
+          "index_type": "i64",
+          "key_names": [
+            "pkey"
+          ],
+          "key_types": [
+            "uint64"
+          ],
+          "type": "data_schema"
+        }
   ],
   "ricardian_clauses": []
 }

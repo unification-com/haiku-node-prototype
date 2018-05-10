@@ -6,16 +6,16 @@
 			"base": "",
 			"fields": [
 				{
-					"name": "app_account",
+					"name": "acl_contract_acc",
 					"type": "uint64"
 				},
 				{
-					"name": "acl_contract",
+					"name": "schema_vers",
 					"type": "uint64"
 				},
 				{
-					"name": "metadata_contract",
-					"type": "uint64"
+					"name": "acl_contract_hash",
+					"type": "string"
 				},
 				{
 					"name": "app_name",
@@ -28,7 +28,11 @@
 				{
 					"name": "server_ip",
 					"type": "string"
-				}
+				},
+                {
+                 	"name": "is_valid",
+                 	"type": "uint8"
+                }
 			]
 		},
 		{
@@ -36,17 +40,17 @@
 			"base": "",
 			"fields": [
 				{
-					"name": "app_account",
+					"name": "acl_contract_acc",
 					"type": "account_name"
 				},
 				{
-					"name": "acl_contract",
-					"type": "account_name"
+					"name": "schema_vers",
+					"type": "uint64"
 				},
 				{
-					"name": "metadata_contract",
-					"type": "account_name"
-				},
+				    "name": "acl_contract_hash",
+				    "type": "string"
+				}
 				{
 					"name": "app_name",
 					"type": "string"
@@ -66,7 +70,7 @@
 			"base": "",
 			"fields": [
 				{
-					"name": "app_account",
+					"name": "acl_contract_acc",
 					"type": "account_name"
 				}
 			]
@@ -76,7 +80,7 @@
 			"base": "",
 			"fields": [
 				{
-					"name": "app_account",
+					"name": "acl_contract_acc",
 					"type": "account_name"
 				}
 			]
@@ -86,7 +90,7 @@
 			"base": "",
 			"fields": [
 				{
-					"name": "app_account",
+					"name": "acl_contract_acc",
 					"type": "account_name"
 				}
 			]
@@ -109,7 +113,7 @@
 			"ricardian_contract": ""
 		},
 		{
-			"name": "getapp",
+			"name": "get.app",
 			"type": "get_app",
 			"ricardian_contract": ""
 		}
@@ -119,12 +123,12 @@
 			"name": "validapps",
 			"index_type": "i64",
 			"key_names": [
-				"app_account"
+				"acl_contract_acc"
 			],
 			"key_types": [
 				"uint64"
 			],
-			"type": "permission_record"
+			"type": "valid_apps"
 		}
 	],
 	"ricardian_clauses": []

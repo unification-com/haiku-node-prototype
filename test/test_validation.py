@@ -1,4 +1,4 @@
-import os,sys,inspect
+import os,sys,inspect,json
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -6,44 +6,46 @@ sys.path.insert(0,parentdir)
 
 from validation.validation import UnificationACLValidation
 
-v = UnificationACLValidation()
-perm = v.app_has_user_permission("unif2", "hodge")
+requesting_app = sys.argv[1]
 
+with open(parentdir + '/config/config.json') as f:
+    conf = json.load(f)
+
+print("THIS app is",conf['acl_contract'])
+
+v = UnificationACLValidation(requesting_app)
+
+print("Requesting App", requesting_app, "Valid accoring to MOTHER: ", v.valid_app())
+
+users_granted = v.users_granted()
+print("Users who granted permission for:", requesting_app)
+print(users_granted)
+
+users_revoked = v.users_revoked()
+print("Users who revoked permission for:", requesting_app)
+print(users_revoked)
+
+user = "user1"
+perm = v.app_has_user_permission(user)
 if(perm):
-    print("hodge GRANTED permission for unif2 to access data in unif1")
+    print(user, "GRANTED permission for", requesting_app, "to access data in", conf['acl_contract'])
 else:
-    print("hodge NOT GRANTED permission for unif2 to access data in unif1")
+    print(user, "NOT GRANTED permission for ", requesting_app, " to access data in", conf['acl_contract'])
 
-perm = v.app_has_user_permission("unif2", "tester")
+user = "user2"
+perm = v.app_has_user_permission(user)
+if(perm):
+    print(user, "GRANTED permission for", requesting_app, "to access data in", conf['acl_contract'])
+else:
+    print(user, "NOT GRANTED permission for", requesting_app, "to access data in", conf['acl_contract'])
 
+user = "user3"
+perm = v.app_has_user_permission(user)
 if (perm):
-    print("tester GRANTED permission for unif2 to access data in unif1")
+    print(user, "GRANTED permission for", requesting_app, "to access data in", conf['acl_contract'])
 else:
-    print("tester NOT GRANTED permission for unif2 to access data in unif1")
+    print(user, "NOT GRANTED permission for", requesting_app, "to access data in", conf['acl_contract'])
 
-users_granted = v.get_app_allowed_users("unif1")
-print("Users who granted permission for unif1:")
-print(users_granted)
 
-users_revoked = v.get_app_revoked_users("unif1")
-print("Users who revoked permission for unif1:")
-print(users_revoked)
-
-users_granted = v.get_app_allowed_users("unif2")
-print("Users who granted permission for unif2:")
-print(users_granted)
-
-users_revoked = v.get_app_revoked_users("unif2")
-print("Users who revoked permission for unif2:")
-print(users_revoked)
-
-users_granted = v.get_app_allowed_users("unif3")
-print("Users who granted permission for unif3:")
-print(users_granted)
-
-users_revoked = v.get_app_revoked_users("unif3")
-print("Users who revoked permission for unif3:")
-print(users_revoked)
-
-code_valid = v.check_contract_code_hash("unif1", "a2be684581db0f2ff1b14422c9654004e8229d3f11d0507c7918e54fb613cc68")
-print("unif1 contract code valid:", code_valid)
+#code_valid = v.check_contract_code_hash("unif1", "a2be684581db0f2ff1b14422c9654004e8229d3f11d0507c7918e54fb613cc68")
+#print("unif1 contract code valid:", code_valid)

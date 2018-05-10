@@ -91,4 +91,21 @@ namespace UnificationFoundation {
             });
         }
     }
+
+    void unification_acl::set_schema(const std::string schema) {
+        eosio::print("set_schema()");
+        require_auth(_self);
+
+        unifschema u_schema(_self, _self);
+
+        uint64_t vers = u_schema.available_primary_key() + 1;
+
+
+        u_schema.emplace(_self, [&]( auto& s_rec ) {
+            s_rec.pkey = u_schema.available_primary_key();
+            s_rec.schema_vers = vers;
+            s_rec.schema = schema;
+        });
+
+    }
 }
