@@ -1,3 +1,5 @@
+#Ported from funtions in https://github.com/EOSIO/eos/blob/master/contracts/eosiolib/types.hpp
+
 def string_to_name(s):
     lgth = len(s)
     value = 0;
@@ -18,8 +20,8 @@ def string_to_name(s):
 
 
 def char_to_symbol(c):
-    if (ord(c) >= ord('a') and ord(c) <= ord('z')):
+    if ord(c) >= ord('a') and ord(c) <= ord('z'):
         return (ord(c) - ord('a')) + 6
-    if (ord(c) >= ord('1') and ord(c) <= ord('5')):
+    if ord(c) >= ord('1') and ord(c) <= ord('5'):
         return (ord(c) - ord('1')) + 1
     return 0

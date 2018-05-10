@@ -1,12 +1,12 @@
 import json
-import os,sys,inspect
+import os, sys, inspect
+from esoio_helpers import esoio_account
+from eosapi import Client
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
 
-from esoio_helpers import esoio_account
-from eosapi import Client
 
 class UnificationACLValidation:
 
@@ -78,5 +78,3 @@ class UnificationACLValidation:
                 is_valid = True
 
         self.is_valid_app = is_valid
-
-        return is_valid
