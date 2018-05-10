@@ -25,6 +25,8 @@ cleos wallet unlock -n user1
 ```
 etc. - repeat for each wallet
 
+__Note: You will need to unlock the wallets each time you restart `nodeos`__
+
 3) Create a bunch of keys - one keypair for each wallet will do for testing:
 ```
 cleos create key
