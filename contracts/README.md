@@ -30,7 +30,9 @@ etc. - repeat for each wallet
 cleos create key
 ```
 
-repeat for each wallet created, so you have 6 public/private key pairs
+repeat for each wallet created, so you have 7 public/private key pairs
+
+Make a note of the keys
 
 4) Import PRIVATE keys into the wallets. For each wallet:
 
