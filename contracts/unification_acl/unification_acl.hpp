@@ -25,7 +25,10 @@ namespace UnificationFoundation {
         void check(account_name user_account, account_name requesting_app);
 
         //@abi action
-        void set_schema(std::string schema);
+        void set_schema(std::string schema_name, std::string schema);
+
+        //@abi action
+        void set_source(std::string source_name, std::string source_type);
 
     private:
 
@@ -47,22 +50,47 @@ namespace UnificationFoundation {
         //https://github.com/EOSIO/eos/wiki/Persistence-API#multi-index-constructor
         typedef eosio::multi_index<N(unifacl), permission_record> unifperms;
 
-        struct data_schema {
+        struct data_schemas {
             uint64_t pkey;
+            uint64_t schema_name;
+            std::string schema_name_str;
             uint64_t schema_vers;
             std::string schema;
 
             uint64_t primary_key() const { return pkey; }
-            uint64_t by_vers() const {return schema_vers; }
+            uint64_t by_name() const {return schema_name; }
 
-            EOSLIB_SERIALIZE(data_schema, (pkey)(schema_vers)(schema))
+            EOSLIB_SERIALIZE(data_schemas, (pkey)(schema_name)(schema_name_str)(schema_vers)(schema))
         };
 
-        typedef eosio::multi_index<N(unifschema), data_schema,
-                indexed_by< N(byvers), const_mem_fun<data_schema, uint64_t, &data_schema::by_vers> >
-        > unifschema;
+        typedef eosio::multi_index<N(unifschemas), data_schemas,
+                indexed_by< N(byname), const_mem_fun<data_schemas, uint64_t, &data_schemas::by_name> >
+        > unifschemas;
+
+        struct data_sources {
+            uint64_t pkey;
+            uint64_t source_name;
+            std::string source_name_str;
+            std::string source_type; //"contract", "database", "file", do be decided
+            uint64_t schema_id; //fkey link to data_schema
+            uint64_t acl_contract_acc; //link to remote smart contract, if source = contract
+            uint8_t in_use;
+
+            uint64_t primary_key() const { return pkey; }
+            uint64_t by_name() const {return source_name; }
+
+            EOSLIB_SERIALIZE(data_sources, (pkey)(source_name)(source_name_str)(source_type)(schema_id)(acl_contract_acc)(in_use))
+        };
+
+        typedef eosio::multi_index<N(unifsources), data_sources,
+                indexed_by< N(byname), const_mem_fun<data_sources, uint64_t, &data_sources::by_name> >
+        > unifsources;
+
+//        struct data_rewards {
+//
+//        };
 
     };
 
-    EOSIO_ABI(unification_acl, (grant)(revoke)(check)(set_schema))
+    EOSIO_ABI(unification_acl, (grant)(revoke)(check)(set_schema)(set_source))
 }

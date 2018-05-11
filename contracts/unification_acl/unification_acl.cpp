@@ -92,20 +92,116 @@ namespace UnificationFoundation {
         }
     }
 
-    void unification_acl::set_schema(const std::string schema) {
+    void unification_acl::set_schema(const std::string schema_name, const std::string schema) {
         eosio::print("set_schema()");
+
         require_auth(_self);
+        eosio_assert(schema_name.length() <= 13, "schema_name must be <= 13 characters");
+        eosio_assert(schema_name.find_first_not_of("12345abcdefghijklmnopqrstuvwxyz") == std::string::npos,
+                     "schema_name can only contain 12345abcdefghijklmnopqrstuvwxyz");
 
-        unifschema u_schema(_self, _self);
+        unifschemas u_schema(_self, _self);
 
-        uint64_t vers = u_schema.available_primary_key() + 1;
+        const char *schema_name_cstr = schema_name.c_str();
 
+        uint64_t vers = 0;
+        uint64_t schema_name_int = eosio::string_to_name(schema_name_cstr);
+
+        auto name_index = u_schema.template get_index<N(byname)>();
+        auto itr = name_index.lower_bound(schema_name_int);
+
+        for (; itr != name_index.end() && itr->schema_name == schema_name_int; ++itr) {
+            vers = itr->schema_vers;
+        }
+
+        vers++;
 
         u_schema.emplace(_self, [&]( auto& s_rec ) {
             s_rec.pkey = u_schema.available_primary_key();
+            s_rec.schema_name = schema_name_int;
+            s_rec.schema_name_str = schema_name;
             s_rec.schema_vers = vers;
             s_rec.schema = schema;
         });
+
+    }
+
+    void unification_acl::set_source(const std::string source_name,
+                                          const std::string source_type) {
+
+        eosio::print("call set_data_source()");
+
+        require_auth(_self);
+        eosio_assert(source_name.length() <= 13, "source_name must be <= 13 characters");
+        eosio_assert(source_name.find_first_not_of(".12345abcdefghijklmnopqrstuvwxyz") == std::string::npos,
+                     "source_name can only contain .12345abcdefghijklmnopqrstuvwxyz");
+
+        eosio_assert((source_type.compare("database") == 0
+                      || source_type.compare("contract") == 0
+                      || source_type.compare("file") == 0), "source_type must 'database', 'contract' or 'file'");
+
+        bool update = false;
+        uint64_t source_name_int = eosio::string_to_name(source_name.c_str());
+
+        eosio_assert(source_name_int != _self,"Cannot add self as source");
+
+        unifsources u_sources(_self, _self);
+        auto source_name_index = u_sources.template get_index<N(byname)>();
+        auto src_itr = source_name_index.find(source_name_int);
+        if(src_itr != source_name_index.end()) {
+            eosio::print("SOURCE FOUND");
+            update = true;
+        }
+
+        uint64_t schema_pkey = 0;
+        uint64_t acl_contract_acc_int = 0;
+        unifschemas u_schema(_self, _self);
+        auto schema_name_index = u_schema.template get_index<N(byname)>();
+
+        if(source_type.compare("database") == 0 || source_type.compare("file") == 0) {
+
+            eosio::print("source == database || file. ");
+            auto sch_itr = schema_name_index.lower_bound(source_name_int);
+            eosio_assert(sch_itr != schema_name_index.end(), "Schema not found");
+
+            for (; sch_itr != schema_name_index.end() && sch_itr->schema_name == source_name_int; ++sch_itr) {
+                schema_pkey = sch_itr->pkey;
+            }
+
+
+        } else if (source_type.compare("contract") == 0) {
+
+            eosio::print("source == contract");
+            auto sch_itr = schema_name_index.find(source_name_int);
+            eosio_assert(sch_itr == schema_name_index.end(), "ACL Contract name already exists as a schema!");
+
+            //TODO: Check target contract/account exixts
+            acl_contract_acc_int = source_name_int;
+
+        }
+
+        if(update) {
+            eosio::print("update");
+            source_name_index.modify(src_itr, _self /*payer*/, [&](auto &s_rec) {
+                s_rec.source_name = source_name_int;
+                s_rec.source_name_str = source_name;
+                s_rec.source_type = source_type;
+                s_rec.schema_id = schema_pkey;
+                s_rec.acl_contract_acc = acl_contract_acc_int;
+                s_rec.in_use = 1;
+            });
+        } else {
+            eosio::print("insert");
+            u_sources.emplace(_self, [&]( auto& s_rec ) {
+                s_rec.pkey = u_sources.available_primary_key();
+                s_rec.source_name = source_name_int;
+                s_rec.source_name_str = source_name;
+                s_rec.source_type = source_type;
+                s_rec.schema_id = schema_pkey;
+                s_rec.acl_contract_acc = acl_contract_acc_int;
+                s_rec.in_use = 1;
+            });
+        }
 
     }
 }

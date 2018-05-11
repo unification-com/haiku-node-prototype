@@ -82,26 +82,50 @@ cleos set contract unif.mother unification_mother unification_mother/unification
 
 15) Set the (currently dummy) schema for each app:
 ```
-cleos push action app1 set.schema '{"schema":"test1" }' -p app1
-cleos push action app2 set.schema '{"schema":"test2" }' -p app2
-cleos push action app3 set.schema '{"schema":"test3" }' -p app3
+cleos push action app1 set.schema '{"schema_name":"test1", "schema":"test1" }' -p app1
+cleos push action app2 set.schema '{"schema_name":"test2", "schema":"test2" }' -p app2
+cleos push action app3 set.schema '{"schema_name":"test3", "schema":"test3" }' -p app3
 ```
 
-16) Get the code hash for each deplyed app contract (will probably be the same for each)
+Schema tables can be retrieved:
+
+```
+cleos get table app1 app1 unifschemas
+cleos get table app2 app2 unifschemas
+cleos get table app3 app3 unifschemas
+```
+
+16) Set some sources. Note, for source_type = database, source_name must match an existing schema for the app
+```
+cleos push action app1 set.source '{"source_name":"test1", "source_type":"database"}' -p app1
+cleos push action app2 set.source '{"source_name":"test2", "source_type":"database"}' -p app2
+cleos push action app2 set.source '{"source_name":"app1", "source_type":"contract"}' -p app2
+cleos push action app3 set.source '{"source_name":"test3", "source_type":"database"}' -p app3
+```
+
+Sources tables can be retrieved:
+
+```
+cleos get table app1 app1 unifsources
+cleos get table app2 app2 unifsources
+cleos get table app3 app3 unifsources
+```
+
+17) Get the code hash for each deplyed app contract (will probably be the same for each)
 ```
 cleos get code app1
 cleos get code app2
 cleos get code app3
 ```
 
-16) Validate each app with MOTHER - acl_contract_hash value is from step #16
+18) Validate each app with MOTHER - acl_contract_hash value is from step #16
 ```
 cleos push action unif.mother validate '{"acl_contract_acc":"app1", "schema_vers":"1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "app_name": "Unif Test 1", "desc":"Test app 1", "server_ip": "127.0.0.1" }' -p unif.mother
 cleos push action unif.mother validate '{"acl_contract_acc":"app2", "schema_vers":"1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "app_name": "Unif Test 2", "desc":"Test app 2", "server_ip": "127.0.0.1" }' -p unif.mother
 cleos push action unif.mother validate '{"acl_contract_acc":"app3", "schema_vers":"1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "app_name": "Unif Test 2", "desc":"Test app 3", "server_ip": "127.0.0.1" }' -p unif.mother
 ```
 
-17) Simulate user1 granting access for app2 to access data in app1:
+19) Simulate user1 granting access for app2 to access data in app1:
 ```
 cleos push action app1 grant '{"user_account":"user1", "requesting_app":"app2" }' -p user1
 ```
@@ -110,38 +134,38 @@ so, basically, it's calling the "grant" function on app1's ACL Smart Contract, t
 
 You can also try changing "-p user1" to "-p user2" (leaving everything else in the command as it is), and the transaction should be rejected because user2 doesn't have the authority to speak for user1.
 
-18) Simulate user1 granting access for app3 to access data in app1:
+20) Simulate user1 granting access for app3 to access data in app1:
 ```
 cleos push action app1 grant '{"user_account":"user1", "requesting_app":"app3" }' -p user1
 ```
 
-19) Simulate user3 denying access for app2 to access data in app1:
+21) Simulate user3 denying access for app2 to access data in app1:
 ```
 cleos push action app1 revoke '{"user_account":"user3", "requesting_app":"app2" }' -p user3
 ```
 
-20) Query app1's permissions table for app2:
+22) Query app1's permissions table for app2:
 ```
 cleos get table app1 app2 unifacl
 ```
 
 This basically grabs the table from app1's ACL Smart Contract, and filters it by permissions for app2. "unifacl" is just the name of the table within the Smart Contract
 
-21) Query app1's permissions table for app3:
+23) Query app1's permissions table for app3:
 ```
 cleos get table app1 app3 unifacl
 ```
-22) Check if app2 has access to user1's data:
+24) Check if app2 has access to user1's data:
 ```
 cleos push action app1 check '{"user_account":"user1", "requesting_app":"app2" }' -p app1
 ```
 There's currently no method for specific row queries in EOS Smart Contracts, so this is a temporary workaround, implementing the eosio::print method. I.e., unlike Ethereum/Solidity, there's currently no way to return values from a Smart Contract, and the cleos get table can only return rows for the given scope (in this smart contract, each requesting app has its own scope, and the user's account is used as the primary key within that scope). Hopefully, eventually, cleos get table will support primary key search too
 
-23) get app validation status/info from MOTHER:
+25) get app validation status/info from MOTHER:
 ```
 cleos get table unif.mother unif.mother validapps
 ```
-24) Can also run a validation test, from the git root:
+26) Can also run a validation test, from the git root:
 ```
 python test/test_validation.py app2
 python test/test_validation.py app3
