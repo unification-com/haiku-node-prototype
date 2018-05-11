@@ -50,6 +50,7 @@ namespace UnificationFoundation {
         //https://github.com/EOSIO/eos/wiki/Persistence-API#multi-index-constructor
         typedef eosio::multi_index<N(unifacl), permission_record> unifperms;
 
+        //@abi table data_schemas i64
         struct data_schemas {
             uint64_t pkey;
             uint64_t schema_name;
@@ -67,6 +68,7 @@ namespace UnificationFoundation {
                 indexed_by< N(byname), const_mem_fun<data_schemas, uint64_t, &data_schemas::by_name> >
         > unifschemas;
 
+        //@abi table data_sources i64
         struct data_sources {
             uint64_t pkey;
             uint64_t source_name;

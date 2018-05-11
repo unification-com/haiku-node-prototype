@@ -97,8 +97,8 @@ namespace UnificationFoundation {
 
         require_auth(_self);
         eosio_assert(schema_name.length() <= 13, "schema_name must be <= 13 characters");
-        eosio_assert(schema_name.find_first_not_of("12345abcdefghijklmnopqrstuvwxyz") == std::string::npos,
-                     "schema_name can only contain 12345abcdefghijklmnopqrstuvwxyz");
+        eosio_assert(schema_name.find_first_not_of(".12345abcdefghijklmnopqrstuvwxyz") == std::string::npos,
+                     "schema_name can only contain .12345abcdefghijklmnopqrstuvwxyz");
 
         unifschemas u_schema(_self, _self);
 

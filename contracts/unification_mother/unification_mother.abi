@@ -11,18 +11,10 @@
 				},
 				{
 					"name": "schema_vers",
-					"type": "uint64"
+					"type": "string"
 				},
 				{
 					"name": "acl_contract_hash",
-					"type": "string"
-				},
-				{
-					"name": "app_name",
-					"type": "string"
-				},
-				{
-					"name": "desc",
 					"type": "string"
 				},
 				{
@@ -45,19 +37,11 @@
 				},
 				{
 					"name": "schema_vers",
-					"type": "uint64"
+					"type": "string"
 				},
 				{
 				    "name": "acl_contract_hash",
 				    "type": "string"
-				}
-				{
-					"name": "app_name",
-					"type": "string"
-				},
-				{
-					"name": "desc",
-					"type": "string"
 				},
 				{
 					"name": "server_ip",

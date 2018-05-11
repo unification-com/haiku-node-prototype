@@ -112,7 +112,7 @@ cleos get table app3 app3 unifsources
 ```
 
 17) Get the code hash for each deplyed app contract (will probably be the same for each)
-=======
+
 16) Get the code hash for each deployed app contract (will probably be the same for each)
 
 ```
@@ -124,9 +124,9 @@ cleos get code app3
 18) Validate each app with MOTHER - acl_contract_hash value is from step #16. schema_vers is comman and colon separated list of schema_name:schema_vers, to represent latest valid schemas and versions for the app. Get from: `cleos get table app1 app1 unifschemas`
 
 ```
-cleos push action unif.mother validate '{"acl_contract_acc":"app1", "schema_vers":"14605613945969442816:1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "server_ip": "127.0.0.1" }' -p unif.mother
-cleos push action unif.mother validate '{"acl_contract_acc":"app2", "schema_vers":"14605614495725256704:1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "server_ip": "127.0.0.1" }' -p unif.mother
-cleos push action unif.mother validate '{"acl_contract_acc":"app3", "schema_vers":"14605615045481070592:1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "server_ip": "127.0.0.1" }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app1", "schema_vers":"14605613945969442816:1", "acl_contract_hash": "e5bd60b4c2c14977d870979c3d44eb917fbb1a37377b78db3f27dc1af17e40e5", "server_ip": "127.0.0.1" }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app2", "schema_vers":"14605614495725256704:1", "acl_contract_hash": "e5bd60b4c2c14977d870979c3d44eb917fbb1a37377b78db3f27dc1af17e40e5", "server_ip": "127.0.0.1" }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app3", "schema_vers":"14605615045481070592:1", "acl_contract_hash": "e5bd60b4c2c14977d870979c3d44eb917fbb1a37377b78db3f27dc1af17e40e5", "server_ip": "127.0.0.1" }' -p unif.mother
 ```
 
 19) Simulate user1 granting access for app2 to access data in app1:

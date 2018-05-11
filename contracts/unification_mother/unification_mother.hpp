@@ -17,10 +17,8 @@ namespace UnificationFoundation {
 
         //@abi action
         void validate(account_name acl_contract_acc,
-                      uint64_t schema_vers,
+                      std::string  schema_vers,
                       std::string acl_contract_hash,
-                      std::string app_name,
-                      std::string desc,
                       std::string server_ip);
 
         //@abi action
@@ -37,16 +35,14 @@ namespace UnificationFoundation {
         //@abi table permission_record i64
         struct valid_apps {
             uint64_t acl_contract_acc;
-            uint64_t schema_vers;
+            std::string schema_vers;
             std::string acl_contract_hash;
-            std::string app_name;
-            std::string desc;
             std::string server_ip;
             uint8_t is_valid;
 
             uint64_t primary_key() const { return acl_contract_acc; }
 
-            EOSLIB_SERIALIZE(valid_apps, (acl_contract_acc)(schema_vers)(acl_contract_hash)(app_name)(desc)(server_ip)(is_valid))
+            EOSLIB_SERIALIZE(valid_apps, (acl_contract_acc)(schema_vers)(acl_contract_hash)(server_ip)(is_valid))
         };
 
         //https://github.com/EOSIO/eos/wiki/Persistence-API#multi-index-constructor

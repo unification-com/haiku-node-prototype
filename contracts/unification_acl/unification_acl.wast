@@ -46,7 +46,7 @@
  (table 6 6 anyfunc)
  (elem (i32.const 0) $__wasm_nullptr $_ZN21UnificationFoundation15unification_acl5grantEyy $_ZN21UnificationFoundation15unification_acl10set_schemaENSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_ $_ZN21UnificationFoundation15unification_acl10set_sourceENSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_ $_ZN21UnificationFoundation15unification_acl5checkEyy $_ZN21UnificationFoundation15unification_acl6revokeEyy)
  (memory $0 1)
- (data (i32.const 4) "Pg\00\00")
+ (data (i32.const 4) "0g\00\00")
  (data (i32.const 16) "call set_data_source()\00")
  (data (i32.const 48) "source_name must be <= 13 characters\00")
  (data (i32.const 96) ".12345abcdefghijklmnopqrstuvwxyz\00")
@@ -79,19 +79,18 @@
  (data (i32.const 1120) "object passed to iterator_to is not in multi_index\00")
  (data (i32.const 1184) "set_schema()\00")
  (data (i32.const 1200) "schema_name must be <= 13 characters\00")
- (data (i32.const 1248) "12345abcdefghijklmnopqrstuvwxyz\00")
- (data (i32.const 1280) "schema_name can only contain 12345abcdefghijklmnopqrstuvwxyz\00")
- (data (i32.const 1344) "{\"user_account\":\"\00")
- (data (i32.const 1376) "\", \"requesting_app\":\"\00")
- (data (i32.const 1408) "\",\"permission_granted\":\00")
- (data (i32.const 1440) "}\00")
- (data (i32.const 1456) " Called revoke()\00")
- (data (i32.const 1488) " added \00")
- (data (i32.const 1504) " record for \00")
- (data (i32.const 1520) " set access to \00")
- (data (i32.const 1536) " for \00")
- (data (i32.const 1552) " Called grant()\00")
- (data (i32.const 9968) "malloc_from_freed was designed to only be called after _heap was completely allocated\00")
+ (data (i32.const 1248) "schema_name can only contain .12345abcdefghijklmnopqrstuvwxyz\00")
+ (data (i32.const 1312) "{\"user_account\":\"\00")
+ (data (i32.const 1344) "\", \"requesting_app\":\"\00")
+ (data (i32.const 1376) "\",\"permission_granted\":\00")
+ (data (i32.const 1408) "}\00")
+ (data (i32.const 1424) " Called revoke()\00")
+ (data (i32.const 1456) " added \00")
+ (data (i32.const 1472) " record for \00")
+ (data (i32.const 1488) " set access to \00")
+ (data (i32.const 1504) " for \00")
+ (data (i32.const 1520) " Called grant()\00")
+ (data (i32.const 9936) "malloc_from_freed was designed to only be called after _heap was completely allocated\00")
  (export "memory" (memory $0))
  (export "_ZeqRK11checksum256S1_" (func $_ZeqRK11checksum256S1_))
  (export "_ZN5eosio12require_authERKNS_16permission_levelE" (func $_ZN5eosio12require_authERKNS_16permission_levelE))
@@ -350,7 +349,7 @@
    (get_local $1)
   )
   (call $prints
-   (i32.const 1552)
+   (i32.const 1520)
   )
   (call $require_auth
    (get_local $1)
@@ -563,7 +562,7 @@
    (get_local $1)
   )
   (call $prints
-   (i32.const 1456)
+   (i32.const 1424)
   )
   (call $require_auth
    (get_local $1)
@@ -664,25 +663,25 @@
    )
   )
   (call $prints
-   (i32.const 1344)
+   (i32.const 1312)
   )
   (call $printn
    (get_local $1)
   )
   (call $prints
-   (i32.const 1376)
+   (i32.const 1344)
   )
   (call $printn
    (get_local $2)
   )
   (call $prints
-   (i32.const 1408)
+   (i32.const 1376)
   )
   (call $printi
    (get_local $7)
   )
   (call $prints
-   (i32.const 1440)
+   (i32.const 1408)
   )
   (block $label$1
    (br_if $label$1
@@ -876,7 +875,7 @@
   )
   (set_local $3
    (call $strlen
-    (i32.const 1248)
+    (i32.const 96)
    )
   )
   (set_local $5
@@ -904,7 +903,7 @@
      (br_if $label$5
       (i32.eqz
        (call $memchr
-        (i32.const 1248)
+        (i32.const 96)
         (i32.load8_u
          (get_local $8)
         )
@@ -944,7 +943,7 @@
   )
   (call $eosio_assert
    (get_local $5)
-   (i32.const 1280)
+   (i32.const 1248)
   )
   (i32.store
    (i32.add
@@ -9345,7 +9344,7 @@
        (get_local $1)
       )
       (call $prints
-       (i32.const 1520)
+       (i32.const 1488)
       )
       (call $printi
        (i64.extend_s/i32
@@ -9353,7 +9352,7 @@
        )
       )
       (call $prints
-       (i32.const 1536)
+       (i32.const 1504)
       )
       (call $printn
        (get_local $2)
@@ -9486,7 +9485,7 @@
       (get_local $1)
      )
      (call $prints
-      (i32.const 1488)
+      (i32.const 1456)
      )
      (call $printi
       (i64.extend_s/i32
@@ -9494,7 +9493,7 @@
       )
      )
      (call $prints
-      (i32.const 1504)
+      (i32.const 1472)
      )
      (call $printn
       (get_local $2)
@@ -10228,7 +10227,7 @@
     (br_if $label$0
      (i32.eqz
       (tee_local $2
-       (i32.load offset=1568
+       (i32.load offset=1536
         (i32.const 0)
        )
       )
@@ -11212,7 +11211,7 @@
  )
  (func $malloc (param $0 i32) (result i32)
   (call $_ZN5eosio14memory_manager6mallocEm
-   (i32.const 1572)
+   (i32.const 1540)
    (get_local $0)
   )
  )
@@ -11457,7 +11456,7 @@
          )
         )
        )
-       (i32.const 9968)
+       (i32.const 9936)
       )
       (set_local $13
        (i32.add
@@ -11681,13 +11680,13 @@
    (block $label$1
     (br_if $label$1
      (i32.eqz
-      (i32.load8_u offset=10054
+      (i32.load8_u offset=10022
        (i32.const 0)
       )
      )
     )
     (set_local $7
-     (i32.load offset=10056
+     (i32.load offset=10024
       (i32.const 0)
      )
     )
@@ -11696,11 +11695,11 @@
    (set_local $7
     (current_memory)
    )
-   (i32.store8 offset=10054
+   (i32.store8 offset=10022
     (i32.const 0)
     (i32.const 1)
    )
-   (i32.store offset=10056
+   (i32.store offset=10024
     (i32.const 0)
     (tee_local $7
      (i32.shl
@@ -11751,7 +11750,7 @@
        )
       )
       (set_local $3
-       (i32.load offset=10056
+       (i32.load offset=10024
         (i32.const 0)
        )
       )
@@ -11759,7 +11758,7 @@
      (set_local $8
       (i32.const 0)
      )
-     (i32.store offset=10056
+     (i32.store offset=10024
       (i32.const 0)
       (get_local $3)
      )
@@ -11813,18 +11812,18 @@
      )
      (block $label$6
       (br_if $label$6
-       (i32.load8_u offset=10054
+       (i32.load8_u offset=10022
         (i32.const 0)
        )
       )
       (set_local $3
        (current_memory)
       )
-      (i32.store8 offset=10054
+      (i32.store8 offset=10022
        (i32.const 0)
        (i32.const 1)
       )
-      (i32.store offset=10056
+      (i32.store offset=10024
        (i32.const 0)
        (tee_local $3
         (i32.shl
@@ -11892,12 +11891,12 @@
        )
       )
       (set_local $6
-       (i32.load offset=10056
+       (i32.load offset=10024
         (i32.const 0)
        )
       )
      )
-     (i32.store offset=10056
+     (i32.store offset=10024
       (i32.const 0)
       (i32.add
        (get_local $6)
@@ -12157,7 +12156,7 @@
     (br_if $label$1
      (i32.lt_s
       (tee_local $2
-       (i32.load offset=9956
+       (i32.load offset=9924
         (i32.const 0)
        )
       )
@@ -12165,7 +12164,7 @@
      )
     )
     (set_local $3
-     (i32.const 9764)
+     (i32.const 9732)
     )
     (set_local $1
      (i32.add
@@ -12173,7 +12172,7 @@
        (get_local $2)
        (i32.const 12)
       )
-      (i32.const 9764)
+      (i32.const 9732)
      )
     )
     (loop $label$2

@@ -11,14 +11,18 @@ sys.path.insert(0,parentdir)
 class UnificationACLValidation:
 
     def __init__(self, requesting_app):
+        self.requesting_app = requesting_app
+        self.is_valid_app = False
+        self.is_valid_code = False
+        self.granted = []
+        self.revoked = []
+
         with open(parentdir + '/config/config.json') as f:
             self.conf = json.load(f)
 
         self.eosClient = Client(nodes=['http://' + self.conf['eos_rpc_ip'] + ':' + self.conf['eos_rpc_port']])
-        self.requesting_app = requesting_app
-        self._call_mother()
-        self._get_app_permissions()
-        self._check_acl_contract_code_hash()
+
+        self._run()
 
     def app_has_user_permission(self, user_account):
         has_permission = False
@@ -42,22 +46,12 @@ class UnificationACLValidation:
     def valid_code(self):
         return self.is_valid_code
 
-    def _check_acl_contract_code_hash(self):
-        self.is_valid_code = False
-        json_data = self.eosClient.get_code(self.requesting_app)
-        code_hash = json_data['code_hash']
-
-        req_app_uint64 = eosio_account.string_to_name(self.requesting_app)
-
-        mother_data = self.eosClient.get_table_rows("unif.mother", "unif.mother", "validapps", True, 0, -1, -1)
-
-        for i in mother_data['rows']:
-            if int(i['acl_contract_acc']) == req_app_uint64 and i['acl_contract_hash'] == code_hash:
-                self.is_valid_code = True
+    def _run(self):
+        self._call_mother()
+        if self.is_valid_app and self.is_valid_code:
+            self._get_app_permissions()
 
     def _get_app_permissions(self):
-        self.granted = []
-        self.revoked = []
         table_data = self.eosClient.get_table_rows(self.requesting_app, self.conf['acl_contract'], "unifacl", True, 0,
                                                    -1, -1)
 
@@ -68,13 +62,16 @@ class UnificationACLValidation:
                 self.revoked.append(int(i['user_account']))
 
     def _call_mother(self):
-        is_valid = False
+        json_data = self.eosClient.get_code(self.requesting_app)
+        code_hash = json_data['code_hash']
+
         table_data = self.eosClient.get_table_rows("unif.mother", "unif.mother", "validapps", True, 0, -1, -1)
 
         req_app_uint64 = eosio_account.string_to_name(self.requesting_app)
 
         for i in table_data['rows']:
             if int(i['acl_contract_acc']) == req_app_uint64 and int(i['is_valid']) == 1:
-                is_valid = True
+                self.is_valid_app = True
+            if int(i['acl_contract_acc']) == req_app_uint64 and i['acl_contract_hash'] == code_hash:
+                self.is_valid_code = True
 
-        self.is_valid_app = is_valid
