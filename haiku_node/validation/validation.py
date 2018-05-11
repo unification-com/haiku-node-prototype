@@ -1,11 +1,10 @@
-import json
 import os, sys, inspect
-from eosio_helpers import eosio_account
+from haiku_node.eosio_helpers import eosio_account
 from eosapi import Client
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
+sys.path.insert(0, parentdir)
 
 
 class UnificationACLValidation:

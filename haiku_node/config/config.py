@@ -1,11 +1,9 @@
 import json
 import os, sys, inspect
-from eosio_helpers import eosio_account
-from eosapi import Client
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
+sys.path.insert(0, parentdir)
 
 
 class UnificationConfig:
@@ -19,5 +17,5 @@ class UnificationConfig:
 
     def set_conf(self, key, val):
         self.conf[key] = val
-        with open(parentdir + '/config/config.json','w') as f:
+        with open(parentdir + '/config/config.json', 'w') as f:
             json.dump(self.conf, f, indent=4)

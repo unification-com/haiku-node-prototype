@@ -2,9 +2,9 @@
 
 def string_to_name(s):
     lgth = len(s)
-    value = 0;
+    value = 0
     for i in range(0, 13):
-        c = 0;
+        c = 0
         if i < lgth and i <= 12:
             c = char_to_symbol(s[i])
 
@@ -15,7 +15,7 @@ def string_to_name(s):
         else:
             c &= 0x0f
 
-        value |= c;
+        value |= c
     return int(value)
 
 

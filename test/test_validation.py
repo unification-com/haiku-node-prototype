@@ -1,7 +1,6 @@
-import os,sys,inspect,json
-from eosio_helpers import eosio_account
-from validation.validation import UnificationACLValidation
-from config.config import UnificationConfig
+import os,sys,inspect
+from haiku_node.validation.validation import UnificationACLValidation
+from haiku_node.config.config import UnificationConfig
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
