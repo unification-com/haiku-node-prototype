@@ -87,6 +87,7 @@ cleos push action app2 set.schema '{"schema_name":"test2", "schema":"test2" }' -
 cleos push action app3 set.schema '{"schema_name":"test3", "schema":"test3" }' -p app3
 ```
 
+<<<<<<< HEAD
 Schema tables can be retrieved:
 
 ```
@@ -112,6 +113,9 @@ cleos get table app3 app3 unifsources
 ```
 
 17) Get the code hash for each deplyed app contract (will probably be the same for each)
+=======
+16) Get the code hash for each deployed app contract (will probably be the same for each)
+>>>>>>> 28114a1844e953f24c891db40a5b69faf9a8648c
 ```
 cleos get code app1
 cleos get code app2
@@ -171,4 +175,4 @@ python test/test_validation.py app2
 python test/test_validation.py app3
 ```
 
-config/config.json currently set up with "app1" as the data provider, so the above command is checking app2 and app3's validity/permissions as the data requestors.
+config/config.json currently set up with "app1" as the data provider, so the above command is checking app2 and app3's validity/permissions as the data requesters.
