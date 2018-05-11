@@ -1,10 +1,10 @@
 import os,sys,inspect,json
+from eosio_helpers import eosio_account
+from validation.validation import UnificationACLValidation
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0,parentdir)
-
-from validation.validation import UnificationACLValidation
 
 #get requesting app
 requesting_app = sys.argv[1]
@@ -42,7 +42,7 @@ if app_valid and code_valid:
         if (perm):
             print(user, "GRANTED permission for", requesting_app, "to access data in", conf['acl_contract'])
         else:
-            print(user, "NOT GRANTED permission for ", requesting_app, " to access data in", conf['acl_contract'])
+            print(user, "NOT GRANTED permission for", requesting_app, "to access data in", conf['acl_contract'])
 
 else:
     if app_valid is False:

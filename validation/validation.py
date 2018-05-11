@@ -1,6 +1,6 @@
 import json
 import os, sys, inspect
-from esoio_helpers import esoio_account
+from eosio_helpers import eosio_account
 from eosapi import Client
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -23,7 +23,7 @@ class UnificationACLValidation:
     def app_has_user_permission(self, user_account):
         has_permission = False
 
-        user_acc_uint64 = esoio_account.string_to_name(user_account)
+        user_acc_uint64 = eosio_account.string_to_name(user_account)
 
         if user_acc_uint64 in self.granted:
             has_permission = True
@@ -47,7 +47,7 @@ class UnificationACLValidation:
         json_data = self.eosClient.get_code(self.requesting_app)
         code_hash = json_data['code_hash']
 
-        req_app_uint64 = esoio_account.string_to_name(self.requesting_app)
+        req_app_uint64 = eosio_account.string_to_name(self.requesting_app)
 
         mother_data = self.eosClient.get_table_rows("unif.mother", "unif.mother", "validapps", True, 0, -1, -1)
 
@@ -71,7 +71,7 @@ class UnificationACLValidation:
         is_valid = False
         table_data = self.eosClient.get_table_rows("unif.mother", "unif.mother", "validapps", True, 0, -1, -1)
 
-        req_app_uint64 = esoio_account.string_to_name(self.requesting_app)
+        req_app_uint64 = eosio_account.string_to_name(self.requesting_app)
 
         for i in table_data['rows']:
             if int(i['acl_contract_acc']) == req_app_uint64 and int(i['is_valid']) == 1:

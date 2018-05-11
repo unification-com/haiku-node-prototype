@@ -5,10 +5,10 @@ def string_to_name(s):
     value = 0;
     for i in range(0, 13):
         c = 0;
-        if (i < lgth and i <= 12):
+        if i < lgth and i <= 12:
             c = char_to_symbol(s[i])
 
-        if (i < 12):
+        if i < 12:
             c &= 0x1f
             c <<= 64 - 5 * (i + 1)
 
