@@ -1,6 +1,7 @@
 import os,sys,inspect,json
 from eosio_helpers import eosio_account
 from validation.validation import UnificationACLValidation
+from config.config import UnificationConfig
 
 currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
@@ -12,12 +13,12 @@ requesting_app = sys.argv[1]
 #list of users to test - EOS account names.
 users_to_test = ["user1", "user2", "user3"]
 
-with open(parentdir + '/config/config.json') as f:
-    conf = json.load(f)
+config = UnificationConfig()
+conf = config.get_conf()
 
 print("THIS app is", conf['acl_contract'])
 
-v = UnificationACLValidation(requesting_app)
+v = UnificationACLValidation(conf, requesting_app)
 
 app_valid = v.valid_app()
 print("Requesting App", requesting_app, "Valid according to MOTHER: ", app_valid)
