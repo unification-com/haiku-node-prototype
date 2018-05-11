@@ -46,6 +46,6 @@ if app_valid and code_valid:
 
 else:
     if app_valid is False:
-        print("App ont valid according to MOTHER")
+        print("App not valid according to MOTHER")
     if code_valid is False:
         print("Code hash did not match hash held by MOTHER")

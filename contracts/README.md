@@ -87,7 +87,6 @@ cleos push action app2 set.schema '{"schema_name":"test2", "schema":"test2" }' -
 cleos push action app3 set.schema '{"schema_name":"test3", "schema":"test3" }' -p app3
 ```
 
-<<<<<<< HEAD
 Schema tables can be retrieved:
 
 ```
@@ -115,18 +114,19 @@ cleos get table app3 app3 unifsources
 17) Get the code hash for each deplyed app contract (will probably be the same for each)
 =======
 16) Get the code hash for each deployed app contract (will probably be the same for each)
->>>>>>> 28114a1844e953f24c891db40a5b69faf9a8648c
+
 ```
 cleos get code app1
 cleos get code app2
 cleos get code app3
 ```
 
-18) Validate each app with MOTHER - acl_contract_hash value is from step #16
+18) Validate each app with MOTHER - acl_contract_hash value is from step #16. schema_vers is comman and colon separated list of schema_name:schema_vers, to represent latest valid schemas and versions for the app. Get from: `cleos get table app1 app1 unifschemas`
+
 ```
-cleos push action unif.mother validate '{"acl_contract_acc":"app1", "schema_vers":"1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "app_name": "Unif Test 1", "desc":"Test app 1", "server_ip": "127.0.0.1" }' -p unif.mother
-cleos push action unif.mother validate '{"acl_contract_acc":"app2", "schema_vers":"1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "app_name": "Unif Test 2", "desc":"Test app 2", "server_ip": "127.0.0.1" }' -p unif.mother
-cleos push action unif.mother validate '{"acl_contract_acc":"app3", "schema_vers":"1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "app_name": "Unif Test 2", "desc":"Test app 3", "server_ip": "127.0.0.1" }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app1", "schema_vers":"14605613945969442816:1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "server_ip": "127.0.0.1" }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app2", "schema_vers":"14605614495725256704:1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "server_ip": "127.0.0.1" }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app3", "schema_vers":"14605615045481070592:1", "acl_contract_hash": "25c9eeb55dcfc903fcdfa4bda3b4df0036770c928e81099e4f383a426ccfc4d1", "server_ip": "127.0.0.1" }' -p unif.mother
 ```
 
 19) Simulate user1 granting access for app2 to access data in app1:
