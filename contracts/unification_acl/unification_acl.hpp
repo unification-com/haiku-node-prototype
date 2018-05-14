@@ -51,7 +51,7 @@ namespace UnificationFoundation {
         };
 
         //https://github.com/EOSIO/eos/wiki/Persistence-API#multi-index-constructor
-        typedef eosio::multi_index<N(unifacl), permrecords> unifperms;
+        typedef eosio::multi_index<N(permrecords), permrecords> unifperms;
 
         //@abi table dataschemas i64
         struct dataschemas {
@@ -67,7 +67,7 @@ namespace UnificationFoundation {
             EOSLIB_SERIALIZE(dataschemas, (pkey)(schema_name)(schema_name_str)(schema_vers)(schema))
         };
 
-        typedef eosio::multi_index<N(unifschemas), dataschemas,
+        typedef eosio::multi_index<N(dataschemas), dataschemas,
                 indexed_by< N(byname), const_mem_fun<dataschemas, uint64_t, &dataschemas::by_name> >
         > unifschemas;
 
@@ -87,7 +87,7 @@ namespace UnificationFoundation {
             EOSLIB_SERIALIZE(datasources, (pkey)(source_name)(source_name_str)(source_type)(schema_id)(acl_contract_acc)(in_use))
         };
 
-        typedef eosio::multi_index<N(unifsources), datasources,
+        typedef eosio::multi_index<N(datasources), datasources,
                 indexed_by< N(byname), const_mem_fun<datasources, uint64_t, &datasources::by_name> >
         > unifsources;
 
@@ -104,7 +104,7 @@ namespace UnificationFoundation {
             EOSLIB_SERIALIZE(datahashes, (pkey)(schema_id)(timestamp)(data_hash))
         };
 
-        typedef eosio::multi_index<N(unifhashes), datahashes,
+        typedef eosio::multi_index<N(datahashes), datahashes,
                 indexed_by< N(bytime), const_mem_fun<datahashes, uint64_t, &datahashes::by_time> >
         > unifhashes;
 
