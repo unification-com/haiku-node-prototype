@@ -131,9 +131,9 @@ cleos get code app3
 18) Validate each app with MOTHER - acl_contract_hash value is from step #16. schema_vers is comman and colon separated list of schema_name:schema_vers, to represent latest valid schemas and versions for the app. Get from: `cleos get table app1 app1 unifschemas`
 
 ```
-cleos push action unif.mother validate '{"acl_contract_acc":"app1", "schema_vers":"14605613945969442816:1", "acl_contract_hash": "6e89e37bb62e781ec301c9c0584f08ca8f2328e94f70bed2e589c358bff9b7ae", "server_ip": "127.0.0.1" }' -p unif.mother
-cleos push action unif.mother validate '{"acl_contract_acc":"app2", "schema_vers":"14605614495725256704:1", "acl_contract_hash": "6e89e37bb62e781ec301c9c0584f08ca8f2328e94f70bed2e589c358bff9b7ae", "server_ip": "127.0.0.1" }' -p unif.mother
-cleos push action unif.mother validate '{"acl_contract_acc":"app3", "schema_vers":"14605615045481070592:1", "acl_contract_hash": "6e89e37bb62e781ec301c9c0584f08ca8f2328e94f70bed2e589c358bff9b7ae", "server_ip": "127.0.0.1" }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app1", "schema_vers":"14605613945969442816:1", "acl_contract_hash": "af7d290c84332e8c5597b3c8365f5c583eb0326fe9f3cffb1a2d3e2e5e60d01e", "server_ip": "127.0.0.1" }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app2", "schema_vers":"14605614495725256704:1", "acl_contract_hash": "af7d290c84332e8c5597b3c8365f5c583eb0326fe9f3cffb1a2d3e2e5e60d01e", "server_ip": "127.0.0.1" }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app3", "schema_vers":"14605615045481070592:1", "acl_contract_hash": "af7d290c84332e8c5597b3c8365f5c583eb0326fe9f3cffb1a2d3e2e5e60d01e", "server_ip": "127.0.0.1" }' -p unif.mother
 ```
 
 19) Simulate user1 granting access for app2 to access data in app1:
