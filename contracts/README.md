@@ -1,8 +1,15 @@
-Some instructions for compiling/testing the ACL smart contract on EOS installation. Assumes eosio is built/installed, and nodeos is running:
+Some instructions for compiling/testing the ACL smart contract on EOS installation. Assumes eosio Dawn 4,0 (latest EOS github master branch) is built/installed, and nodeos is running:
 
 0) for brevity, run nodeos with the following plugins:
 ```
-nodeos -e -p eosio --plugin eosio::wallet_api_plugin --plugin eosio::chain_api_plugin --plugin eosio::account_history_api_plugin
+nodeos -e -p eosio --plugin eosio::wallet_api_plugin --plugin eosio::chain_api_plugin --plugin eosio::history_api_plugin --plugin eosio::net_api_plugin --plugin eosio::net_plugin --plugin eosio::http_plugin --plugin eosio::producer_plugin
+```
+
+make sure eosio.bios contract is running:
+
+```
+cd /path/to/eos/github/download
+cleos set contract eosio build/contracts/eosio.bios -p eosio
 ```
 
 1) Create some wallets:
@@ -82,33 +89,33 @@ cleos set contract unif.mother unification_mother unification_mother/unification
 
 15) Set the (currently dummy) schema for each app:
 ```
-cleos push action app1 set.schema '{"schema_name":"test1", "schema":"test1" }' -p app1
-cleos push action app2 set.schema '{"schema_name":"test2", "schema":"test2" }' -p app2
-cleos push action app3 set.schema '{"schema_name":"test3", "schema":"test3" }' -p app3
+cleos push action app1 setschema '{"schema_name":"test1", "schema":"test1" }' -p app1
+cleos push action app2 setschema '{"schema_name":"test2", "schema":"test2" }' -p app2
+cleos push action app3 setschema '{"schema_name":"test3", "schema":"test3" }' -p app3
 ```
 
 Schema tables can be retrieved:
 
 ```
-cleos get table app1 app1 unifschemas
-cleos get table app2 app2 unifschemas
-cleos get table app3 app3 unifschemas
+cleos get table app1 app1 dataschemas
+cleos get table app2 app2 dataschemas
+cleos get table app3 app3 dataschemas
 ```
 
 16) Set some sources. Note, for source_type = database, source_name must match an existing schema for the app
 ```
-cleos push action app1 set.source '{"source_name":"test1", "source_type":"database"}' -p app1
-cleos push action app2 set.source '{"source_name":"test2", "source_type":"database"}' -p app2
-cleos push action app2 set.source '{"source_name":"app1", "source_type":"contract"}' -p app2
-cleos push action app3 set.source '{"source_name":"test3", "source_type":"database"}' -p app3
+cleos push action app1 setsource '{"source_name":"test1", "source_type":"database"}' -p app1
+cleos push action app2 setsource '{"source_name":"test2", "source_type":"database"}' -p app2
+cleos push action app2 setsource '{"source_name":"app1", "source_type":"contract"}' -p app2
+cleos push action app3 setsource '{"source_name":"test3", "source_type":"database"}' -p app3
 ```
 
 Sources tables can be retrieved:
 
 ```
-cleos get table app1 app1 unifsources
-cleos get table app2 app2 unifsources
-cleos get table app3 app3 unifsources
+cleos get table app1 app1 datasources
+cleos get table app2 app2 datasources
+cleos get table app3 app3 datasources
 ```
 
 17) Get the code hash for each deplyed app contract (will probably be the same for each)
@@ -150,14 +157,14 @@ cleos push action app1 revoke '{"user_account":"user3", "requesting_app":"app2" 
 
 22) Query app1's permissions table for app2:
 ```
-cleos get table app1 app2 unifacl
+cleos get table app1 app2 permrecords
 ```
 
 This basically grabs the table from app1's ACL Smart Contract, and filters it by permissions for app2. "unifacl" is just the name of the table within the Smart Contract
 
 23) Query app1's permissions table for app3:
 ```
-cleos get table app1 app3 unifacl
+cleos get table app1 app3 permrecords
 ```
 24) Check if app2 has access to user1's data:
 ```

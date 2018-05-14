@@ -92,8 +92,8 @@ namespace UnificationFoundation {
         }
     }
 
-    void unification_acl::set_schema(const std::string schema_name, const std::string schema) {
-        eosio::print("set_schema()");
+    void unification_acl::setschema(const std::string schema_name, const std::string schema) {
+        eosio::print("setschema()");
 
         require_auth(_self);
         eosio_assert(schema_name.length() <= 13, "schema_name must be <= 13 characters");
@@ -126,10 +126,10 @@ namespace UnificationFoundation {
 
     }
 
-    void unification_acl::set_source(const std::string source_name,
+    void unification_acl::setsource(const std::string source_name,
                                           const std::string source_type) {
 
-        eosio::print("call set_data_source()");
+        eosio::print("call set_source()");
 
         require_auth(_self);
         eosio_assert(source_name.length() <= 13, "source_name must be <= 13 characters");
@@ -202,6 +202,48 @@ namespace UnificationFoundation {
                 s_rec.in_use = 1;
             });
         }
+
+    }
+
+    void unification_acl::addhash(const std::string schema_name,
+                                   const uint64_t schema_vers,
+                                   const uint64_t timestamp,
+                                   const std::string data_hash) {
+        eosio::print("call add_hash()");
+
+        //TODO: see if we can get the schema_vers value from MOTHER
+
+        require_auth(_self);
+
+        uint64_t schema_name_int = eosio::string_to_name(schema_name.c_str());
+
+        unifhashes u_hashes(_self, _self);
+        auto time_index = u_hashes.template get_index<N(bytime)>();
+        auto tm_itr = time_index.find(timestamp);
+        eosio_assert(tm_itr == time_index.end(), "Hash already added for this timestamp");
+
+
+        unifschemas u_schema(_self, _self);
+        uint64_t sch_pkey = 0;
+        bool sch_ver_ok = false;
+
+        auto name_index = u_schema.template get_index<N(byname)>();
+        auto itr = name_index.lower_bound(schema_name_int);
+
+        for (; itr != name_index.end() && itr->schema_name == schema_name_int && itr->schema_vers == schema_vers; ++itr) {
+            sch_pkey = itr->pkey;
+            sch_ver_ok = true;
+        }
+
+        eosio_assert(sch_ver_ok, "Valid Schema version mismatch");
+
+        u_hashes.emplace(_self, [&]( auto& h_rec ) {
+            h_rec.pkey = u_hashes.available_primary_key();
+            h_rec.timestamp = timestamp;
+            h_rec.data_hash = data_hash;
+            h_rec.schema_id = sch_pkey; //fkey link to data_schemas table
+        });
+
 
     }
 }

@@ -11,14 +11,13 @@ class UnificationACLValidation:
 
     def __init__(self, conf, requesting_app):
         self.__requesting_app = requesting_app
+        self.__conf = conf
+        self.__eosClient = Client(nodes=['http://' + self.__conf['eos_rpc_ip'] + ':' + self.__conf['eos_rpc_port']])
+
         self.__is_valid_app = False
         self.__is_valid_code = False
         self.__granted = []
         self.__revoked = []
-
-        self.__conf = conf
-
-        self.__eosClient = Client(nodes=['http://' + self.__conf['eos_rpc_ip'] + ':' + self.__conf['eos_rpc_port']])
 
         self.__run()
 
@@ -53,8 +52,8 @@ class UnificationACLValidation:
             self.__revoked = []
 
     def __get_app_permissions(self):
-        table_data = self.__eosClient.get_table_rows(self.__requesting_app, self.__conf['acl_contract'], "unifacl", True, 0,
-                                                     -1, -1)
+        table_data = self.__eosClient.get_table_rows(self.__requesting_app, self.__conf['acl_contract'], "permrecords",
+                                                     True, 0, -1, -1)
 
         for i in table_data['rows']:
             if int(i['permission_granted']) == 1:

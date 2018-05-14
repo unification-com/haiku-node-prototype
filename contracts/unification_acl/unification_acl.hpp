@@ -25,17 +25,20 @@ namespace UnificationFoundation {
         void check(account_name user_account, account_name requesting_app);
 
         //@abi action
-        void set_schema(std::string schema_name, std::string schema);
+        void setschema(std::string schema_name, std::string schema);
 
         //@abi action
-        void set_source(std::string source_name, std::string source_type);
+        void setsource(std::string source_name, std::string source_type);
+
+        //@abi action
+        void addhash(std::string schema_name, uint64_t schema_vers, uint64_t timestamp, std::string data_hash);
 
     private:
 
         void set_permission(account_name user_account, account_name requesting_app, int permission);
 
-        //@abi table permission_record i64
-        struct permission_record {
+        //@abi table permrecords i64
+        struct permrecords {
             uint64_t user_account; //user account ID
             uint8_t permission_granted; //whether or not user has granted access. 1 = true, 0 = false
                                         //bool type not yet supported in EOS
@@ -43,15 +46,15 @@ namespace UnificationFoundation {
 
             uint64_t primary_key() const { return user_account; }
 
-            EOSLIB_SERIALIZE(permission_record, (user_account)(permission_granted))
+            EOSLIB_SERIALIZE(permrecords, (user_account)(permission_granted))
 
         };
 
         //https://github.com/EOSIO/eos/wiki/Persistence-API#multi-index-constructor
-        typedef eosio::multi_index<N(unifacl), permission_record> unifperms;
+        typedef eosio::multi_index<N(unifacl), permrecords> unifperms;
 
-        //@abi table data_schemas i64
-        struct data_schemas {
+        //@abi table dataschemas i64
+        struct dataschemas {
             uint64_t pkey;
             uint64_t schema_name;
             std::string schema_name_str;
@@ -61,15 +64,15 @@ namespace UnificationFoundation {
             uint64_t primary_key() const { return pkey; }
             uint64_t by_name() const {return schema_name; }
 
-            EOSLIB_SERIALIZE(data_schemas, (pkey)(schema_name)(schema_name_str)(schema_vers)(schema))
+            EOSLIB_SERIALIZE(dataschemas, (pkey)(schema_name)(schema_name_str)(schema_vers)(schema))
         };
 
-        typedef eosio::multi_index<N(unifschemas), data_schemas,
-                indexed_by< N(byname), const_mem_fun<data_schemas, uint64_t, &data_schemas::by_name> >
+        typedef eosio::multi_index<N(unifschemas), dataschemas,
+                indexed_by< N(byname), const_mem_fun<dataschemas, uint64_t, &dataschemas::by_name> >
         > unifschemas;
 
-        //@abi table data_sources i64
-        struct data_sources {
+        //@abi table datasources i64
+        struct datasources {
             uint64_t pkey;
             uint64_t source_name;
             std::string source_name_str;
@@ -79,14 +82,31 @@ namespace UnificationFoundation {
             uint8_t in_use;
 
             uint64_t primary_key() const { return pkey; }
-            uint64_t by_name() const {return source_name; }
+            uint64_t by_name() const { return source_name; }
 
-            EOSLIB_SERIALIZE(data_sources, (pkey)(source_name)(source_name_str)(source_type)(schema_id)(acl_contract_acc)(in_use))
+            EOSLIB_SERIALIZE(datasources, (pkey)(source_name)(source_name_str)(source_type)(schema_id)(acl_contract_acc)(in_use))
         };
 
-        typedef eosio::multi_index<N(unifsources), data_sources,
-                indexed_by< N(byname), const_mem_fun<data_sources, uint64_t, &data_sources::by_name> >
+        typedef eosio::multi_index<N(unifsources), datasources,
+                indexed_by< N(byname), const_mem_fun<datasources, uint64_t, &datasources::by_name> >
         > unifsources;
+
+        //@abi table datahashes i64
+        struct datahashes {
+            uint64_t pkey;
+            uint64_t schema_id;
+            uint64_t timestamp;
+            std::string data_hash;
+
+            uint64_t primary_key() const { return pkey; }
+            uint64_t by_time() const { return timestamp; }
+
+            EOSLIB_SERIALIZE(datahashes, (pkey)(schema_id)(timestamp)(data_hash))
+        };
+
+        typedef eosio::multi_index<N(unifhashes), datahashes,
+                indexed_by< N(bytime), const_mem_fun<datahashes, uint64_t, &datahashes::by_time> >
+        > unifhashes;
 
 //        struct data_rewards {
 //
@@ -94,5 +114,5 @@ namespace UnificationFoundation {
 
     };
 
-    EOSIO_ABI(unification_acl, (grant)(revoke)(check)(set_schema)(set_source))
+    EOSIO_ABI(unification_acl, (grant)(revoke)(check)(setschema)(setsource)(addhash))
 }

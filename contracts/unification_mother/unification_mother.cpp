@@ -31,7 +31,7 @@ namespace UnificationFoundation {
         // make sure authorised by unification
         require_auth(_self);
 
-        validapps v_apps(_self, _self);
+        valapps v_apps(_self, _self);
 
         auto itr = v_apps.find(acl_contract_acc);
 
@@ -61,7 +61,7 @@ namespace UnificationFoundation {
         // make sure authorised by unification
         require_auth(_self);
 
-        validapps v_apps(_self, _self);
+        valapps v_apps(_self, _self);
 
         // verify already exist
         auto itr = v_apps.find(acl_contract_acc);
@@ -73,10 +73,10 @@ namespace UnificationFoundation {
 
     }
 
-    void unification_mother::is_valid(const account_name acl_contract_acc) {
+    void unification_mother::isvalid(const account_name acl_contract_acc) {
 
         // code, scope. Scope = requesting app.
-        validapps v_apps(_self, _self);
+        valapps v_apps(_self, _self);
 
         int is_valid = 0;
 
@@ -89,10 +89,10 @@ namespace UnificationFoundation {
 
     }
 
-    void unification_mother::get_app(const account_name acl_contract_acc) {
+    void unification_mother::getapp(const account_name acl_contract_acc) {
 
         // code, scope. Scope = requesting app.
-        validapps v_apps(_self, _self);
+        valapps v_apps(_self, _self);
 
         auto itr = v_apps.find(acl_contract_acc);
         if (itr != v_apps.end()) {
