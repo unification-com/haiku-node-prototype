@@ -14,6 +14,10 @@ sys.path.insert(0, parentdir)
 class UnificationACLValidation:
 
     def __init__(self, conf, requesting_app):
+        """
+        :param conf: config.json dictionary
+        :param requesting_app: the eos account name of the requesting app
+        """
         self.__requesting_app = requesting_app
         self.__conf = conf
         self.__eosClient = Client(
