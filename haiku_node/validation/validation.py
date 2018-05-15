@@ -61,6 +61,10 @@ class UnificationACLValidation:
             self.__revoked = []
 
     def __get_app_permissions(self):
+        """
+        App checks it's own smart contract to see which users are granted
+        permission to access it's data.
+        """
         table_data = self.__eosClient.get_table_rows(
             self.__requesting_app,
             self.__conf['acl_contract'], "permrecords", True, 0, -1, -1)
@@ -72,6 +76,11 @@ class UnificationACLValidation:
                 self.__revoked.append(int(i['user_account']))
 
     def __call_mother(self):
+        """
+        Call the Mother Smart Contract, and check if the requesting_app is both
+        a verified app, and that it's smart contract code is valid (by checking
+        the code's hash).
+        """
         json_data = self.__eosClient.get_code(self.__requesting_app)
         code_hash = json_data['code_hash']
 
