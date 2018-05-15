@@ -2,7 +2,8 @@ import os, sys, inspect
 from haiku_node.eosio_helpers import eosio_account
 from eosapi import Client
 
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+currentdir = os.path.dirname(
+    os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
 sys.path.insert(0, parentdir)
 
@@ -12,8 +13,9 @@ class UnificationACLValidation:
     def __init__(self, conf, requesting_app):
         self.__requesting_app = requesting_app
         self.__conf = conf
-        self.__eosClient = Client(nodes=['http://' + self.__conf['eos_rpc_ip'] + ':' + self.__conf['eos_rpc_port']])
-
+        self.__eosClient = Client(
+            nodes=[f"http://{self.__conf['eos_rpc_ip']}"
+                   f":{self.__conf['eos_rpc_port']}"])
         self.__is_valid_app = False
         self.__is_valid_code = False
         self.__granted = []
@@ -52,8 +54,9 @@ class UnificationACLValidation:
             self.__revoked = []
 
     def __get_app_permissions(self):
-        table_data = self.__eosClient.get_table_rows(self.__requesting_app, self.__conf['acl_contract'], "permrecords",
-                                                     True, 0, -1, -1)
+        table_data = self.__eosClient.get_table_rows(
+            self.__requesting_app,
+            self.__conf['acl_contract'], "permrecords", True, 0, -1, -1)
 
         for i in table_data['rows']:
             if int(i['permission_granted']) == 1:
@@ -65,14 +68,19 @@ class UnificationACLValidation:
         json_data = self.__eosClient.get_code(self.__requesting_app)
         code_hash = json_data['code_hash']
 
-        table_data = self.__eosClient.get_table_rows("unif.mother", "unif.mother", "validapps", True, 0, -1, -1)
+        table_data = self.__eosClient.get_table_rows(
+            "unif.mother", "unif.mother", "validapps", True, 0, -1, -1)
 
         req_app_uint64 = eosio_account.string_to_name(self.__requesting_app)
 
         for i in table_data['rows']:
-            if int(i['acl_contract_acc']) == req_app_uint64 and int(i['is_valid']) == 1:
+
+            if int(i['acl_contract_acc']) == req_app_uint64 and \
+                    int(i['is_valid']) == 1:
                 self.__is_valid_app = True
-            if int(i['acl_contract_acc']) == req_app_uint64 and i['acl_contract_hash'] == code_hash:
+
+            if int(i['acl_contract_acc']) == req_app_uint64 and \
+                    i['acl_contract_hash'] == code_hash:
                 self.__is_valid_code = True
 
 
