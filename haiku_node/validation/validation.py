@@ -1,4 +1,7 @@
-import os, sys, inspect
+import inspect
+import os
+import sys
+
 from haiku_node.eosio_helpers import eosio_account
 from eosapi import Client
 
