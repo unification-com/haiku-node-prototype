@@ -75,3 +75,6 @@ class UnificationACLValidation:
             if int(i['acl_contract_acc']) == req_app_uint64 and i['acl_contract_hash'] == code_hash:
                 self.__is_valid_code = True
 
+
+if __name__ == '__main__':
+    print("Nope.")

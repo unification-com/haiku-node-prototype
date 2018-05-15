@@ -3,6 +3,7 @@
  *  @copyright Paul Hodgson @ Unification Foundation
  */
 
+#include <regex>
 #include <eosiolib/eosio.hpp>
 #include <eosiolib/action.hpp>
 #include <eosiolib/contract.hpp>
@@ -25,13 +26,13 @@ namespace UnificationFoundation {
         void check(account_name user_account, account_name requesting_app);
 
         //@abi action
-        void setschema(std::string schema_name, std::string schema);
+        void setschema(account_name schema_name, std::string schema);
 
         //@abi action
-        void setsource(std::string source_name, std::string source_type);
+        void setsource(account_name source_name, std::string source_type);
 
         //@abi action
-        void addhash(std::string schema_name, uint64_t schema_vers, uint64_t timestamp, std::string data_hash);
+        void addhash(account_name schema_name, uint64_t schema_vers, uint64_t timestamp, std::string data_hash);
 
     private:
 
@@ -51,13 +52,14 @@ namespace UnificationFoundation {
         };
 
         //https://github.com/EOSIO/eos/wiki/Persistence-API#multi-index-constructor
+        //eosio::multi_index<N([name_match_abi]), [name_match_struct]> [anything];
         typedef eosio::multi_index<N(permrecords), permrecords> unifperms;
 
         //@abi table dataschemas i64
         struct dataschemas {
             uint64_t pkey;
             uint64_t schema_name;
-            std::string schema_name_str;
+            account_name schema_name_str;
             uint64_t schema_vers;
             std::string schema;
 
@@ -75,7 +77,7 @@ namespace UnificationFoundation {
         struct datasources {
             uint64_t pkey;
             uint64_t source_name;
-            std::string source_name_str;
+            account_name source_name_str;
             std::string source_type; //"contract", "database", "file", do be decided
             uint64_t schema_id; //fkey link to data_schema
             uint64_t acl_contract_acc; //link to remote smart contract, if source = contract
