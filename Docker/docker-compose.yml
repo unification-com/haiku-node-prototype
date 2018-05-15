@@ -8,3 +8,7 @@ services:
     ports:
     - "8888:8888"
     - "9876:9876"
+  haiku:
+    image: haiku
+    ports:
+    - "8850:8050"
