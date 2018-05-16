@@ -11,6 +11,8 @@ from haiku_node.rpc import app
 # A plain text on the file-system password to ease automated systems
 HAIKU_PASSWORD_FILE = Path('/etc/haiku-password')
 
+PORT = 8050
+
 
 def spawn_haiku_node(pw, conf):
     print(pw)
@@ -34,7 +36,7 @@ def spawn_haiku_node(pw, conf):
     print("Private auth key: ", ks.get_rpc_auth_private_key())
     print("Public auth key: ", ks.get_rpc_auth_public_key())
 
-    app.run(debug=False, host="0.0.0.0", port=8050)
+    app.run(debug=False, host="0.0.0.0", port=PORT)
 
 
 if __name__ == '__main__':
