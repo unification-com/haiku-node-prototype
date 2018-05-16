@@ -15,9 +15,13 @@ class UnificationACLValidation:
 
     def __init__(self, conf, requesting_app):
         """
-        :param conf: config.json dictionary
+        :param conf: config json object
         :param requesting_app: the eos account name of the requesting app
         """
+        self.__mother = "unif.mother"
+        self.__valid_apps_table = "validapps"
+        self.__permission_rec_table = "permrecords"
+
         self.__requesting_app = requesting_app
         self.__conf = conf
         self.__eosClient = Client(
@@ -65,9 +69,11 @@ class UnificationACLValidation:
         App checks it's own smart contract to see which users are granted
         permission to access it's data.
         """
+
+        # TODO: run in loop and check JSON result for "more" value
         table_data = self.__eosClient.get_table_rows(
             self.__requesting_app,
-            self.__conf['acl_contract'], "permrecords", True, 0, -1, -1)
+            self.__conf['acl_contract'], self.__permission_rec_table, True, 0, -1, -1)
 
         for i in table_data['rows']:
             if int(i['permission_granted']) == 1:
@@ -85,7 +91,7 @@ class UnificationACLValidation:
         code_hash = json_data['code_hash']
 
         table_data = self.__eosClient.get_table_rows(
-            "unif.mother", "unif.mother", "validapps", True, 0, -1, -1)
+            self.__mother, self.__mother, self.__valid_apps_table, True, 0, -1, -1)
 
         req_app_uint64 = eosio_account.string_to_name(self.__requesting_app)
 
