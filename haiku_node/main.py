@@ -1,16 +1,8 @@
-import os
 import sys
-import inspect
 
-currentdir = os.path.dirname(
-    os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
-sys.path.append("..")
-
-from config.config import UnificationConfig
+from haiku_node.config.config import UnificationConfig
 from cryptography.fernet import Fernet
-from keystore.keystore import UnificationKeystore
+from haiku_node.keystore.keystore import UnificationKeystore
 
 
 def spawn_haiku_node(pw, conf):
