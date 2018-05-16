@@ -35,5 +35,6 @@ if __name__ == '__main__':
         sys.stdout.buffer.write(pw)
         print("\n")
         print("IMPORTANT: KEEP THIS SAFE!! YOU WILL NEED IT TO RUN THE SERVER")
-        config.set_conf("server_initialised", True)
         print("Run again with pw")
+
+        config.set_conf("server_initialised", True)
