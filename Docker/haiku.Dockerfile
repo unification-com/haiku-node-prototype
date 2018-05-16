@@ -16,7 +16,8 @@ COPY haiku_node /haiku/haiku_node
 WORKDIR /haiku
 RUN /root/.pyenv/versions/3.6.0/bin/pip3 install -r requirements.txt
 
-WORKDIR /haiku/haiku_node
 EXPOSE 8050
 
-CMD ["/root/.pyenv/versions/3.6.0/bin/python3", "rpc.py"]
+ENV PYTHONPATH /haiku
+
+CMD ["/root/.pyenv/versions/3.6.0/bin/python3", "haiku_node/rpc.py"]
