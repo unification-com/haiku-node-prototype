@@ -1,21 +1,26 @@
 import flask
 
+from haiku_node.config.keys import get_public_key
+from haiku_node.validation.encryption import verify_request
+
 app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
 
 logger = app.logger
 
 
-def authorized_client(client_id, access_token):
-    # TODO: Implement me
-    return True
+def authorized_client(eos_account_name, body, signature):
+    logger.info(f"Attempting to authorize {eos_account_name}")
+
+    public_key = get_public_key(eos_account_name)
+    return verify_request(public_key, body, signature)
 
 
 def encrypt_data(data):
     return data
 
 
-def obtain_data(data_id):
+def obtain_data(body):
     data = 'DATA'
     return encrypt_data(data)
 
@@ -24,7 +29,7 @@ def obtain_data(data_id):
 def data_request():
     d = flask.request.get_json()
 
-    if not authorized_client(d['client_id'], d['access_token']):
+    if not authorized_client(d['eos_account_name'], d['body'], d['signature']):
         return flask.jsonify(
             {
                 'success': False,
@@ -37,7 +42,7 @@ def data_request():
         {
             'success': True,
             'message': 'Success',
-            'result': obtain_data(d['data_id'])
+            'result': obtain_data(d['body'])
         }
     )
 
