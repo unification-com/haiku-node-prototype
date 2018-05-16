@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  nodeosd:
+    image: unification-node
+    command: /opt/eosio/bin/nodeosd.sh --resync
+    hostname: nodeosd
+    ports:
+    - "8888:8888"
+    - "9876:9876"
+  haiku:
+    image: haiku
+    ports:
+    - "8850:8050"
