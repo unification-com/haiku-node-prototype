@@ -1,7 +1,8 @@
 import sys
 
-from cryptography.fernet import Fernet
 from pathlib import Path
+
+from cryptography.fernet import Fernet
 
 from haiku_node.config.config import UnificationConfig
 from haiku_node.keystore.keystore import UnificationKeystore
