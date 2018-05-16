@@ -1,7 +1,8 @@
 import sys
 
-from haiku_node.config.config import UnificationConfig
 from cryptography.fernet import Fernet
+
+from haiku_node.config.config import UnificationConfig
 from haiku_node.keystore.keystore import UnificationKeystore
 
 
