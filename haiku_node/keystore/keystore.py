@@ -10,12 +10,12 @@ sys.path.insert(0, parentdir)
 class UnificationKeystore:
 
     def __init__(self, pw):
-        self.__fern = Fernet(str.encode(pw))
         self.__is_empty = True
-        with open(parentdir + '/keystore/keys.store', 'rb') as f:
-            self.__encrypted_store = f.read()
-            if len(self.__encrypted_store) > 0:
-                self.__is_empty = False
+        self.__encrypted_store = ""
+
+        if len(pw) > 0:
+            self.__fern = Fernet(str.encode(pw))
+            self.__load_encrypted_keys()
 
     def get_key(self, account_name, requesting_app):
         if not self.__is_empty:
@@ -41,3 +41,13 @@ class UnificationKeystore:
         with open(parentdir + '/keystore/keys.store', 'wb') as f:
             f.write(self.__encrypted_store)
             self.__is_empty = False
+
+    def __load_encrypted_keys(self):
+        with open(parentdir + '/keystore/keys.store', 'rb') as f:
+            self.__encrypted_store = f.read()
+            if len(self.__encrypted_store) > 0:
+                self.__is_empty = False
+
+
+if __name__ == '__main__':
+    print("Nope.")
