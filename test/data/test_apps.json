@@ -1,0 +1,61 @@
+{
+    "app1": {
+        "eos_sc_account": "app1",
+        "rpc_server": "haiku-app1",
+        "rpc_server_port": "8050",
+        "db_schemas": [
+          {
+            "schema_name": "app1.db1",
+            "schema": "PLACEHOLDER"
+          }
+        ],
+        "data_sources": [
+          {
+            "source_name": "app1.db1",
+            "source_type": "database"
+          }
+        ]
+    },
+    "app2": {
+        "eos_sc_account": "app2",
+        "rpc_server": "haiku-app2",
+        "rpc_server_port": "8050",
+        "db_schemas": [
+          {
+            "schema_name": "app2.db1",
+            "schema": "PLACEHOLDER"
+          }
+        ],
+        "data_sources": [
+          {
+            "source_name": "app2.db1",
+            "source_type": "database"
+          }
+        ]
+    },
+    "app3": {
+        "eos_sc_account": "app3",
+        "rpc_server": "haiku-app3",
+        "rpc_server_port": "8050",
+        "db_schemas": [
+          {
+            "schema_name": "app3.db1",
+            "schema": "PLACEHOLDER"
+          }
+        ],
+        "data_sources": [
+          {
+            "source_name": "app3.db1",
+            "source_type": "database"
+          },
+          {
+            "source_name": "app1",
+            "source_type": "contract"
+          },
+          {
+            "source_name": "app2",
+            "source_type": "contract"
+          }
+        ]
+    }
+}

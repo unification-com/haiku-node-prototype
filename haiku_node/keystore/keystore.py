@@ -95,6 +95,10 @@ class UnificationKeystore:
             keystore['enc_keys'][account_name] = {}
             keystore['enc_keys'][account_name][requesting_app] = ""
 
+        if account_name not in keystore['enc_keys']:
+            keystore['enc_keys'][account_name] = {}
+            keystore['enc_keys'][account_name][requesting_app] = ""
+
         keystore['enc_keys'][account_name][requesting_app] = key
         json_string = json.dumps(keystore)
         self.__encrypted_store = self.__fern.encrypt(str.encode(json_string))

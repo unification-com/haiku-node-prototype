@@ -24,7 +24,8 @@ namespace UnificationFoundation {
     void unification_mother::validate(const account_name acl_contract_acc,
                                       const std::string  schema_vers,
                                       const std::string acl_contract_hash,
-                                      const std::string server_ip) {
+                                      const std::string rpc_server_ip,
+                                      const uint16_t rpc_server_port) {
 
         eosio::print(name{_self}, " Called validate()");
 
@@ -41,7 +42,8 @@ namespace UnificationFoundation {
                 v_rec.acl_contract_acc = acl_contract_acc;
                 v_rec.schema_vers = schema_vers;
                 v_rec.acl_contract_hash = acl_contract_hash;
-                v_rec.server_ip = server_ip;
+                v_rec.rpc_server_ip = rpc_server_ip;
+                v_rec.rpc_server_port = rpc_server_port;
                 v_rec.is_valid = 1;
             });
         } else {
@@ -49,7 +51,8 @@ namespace UnificationFoundation {
             v_apps.modify(itr, _self /*payer*/, [&](auto &v_rec) {
                 v_rec.schema_vers = schema_vers;
                 v_rec.acl_contract_hash = acl_contract_hash;
-                v_rec.server_ip = server_ip;
+                v_rec.rpc_server_ip = rpc_server_ip;
+                v_rec.rpc_server_port = rpc_server_port;
                 v_rec.is_valid = 1;
             });
         }
