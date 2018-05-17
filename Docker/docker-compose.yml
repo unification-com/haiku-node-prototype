@@ -8,7 +8,15 @@ services:
     ports:
     - "8888:8888"
     - "9876:9876"
-  haiku:
+  haiku-app1:
     image: haiku
+    environment:
+    - app_name=app1
     ports:
-    - "8850:8050"
+    - "8851:8050"
+  haiku-app2:
+    image: haiku
+    environment:
+    - app_name=app2
+    ports:
+    - "8852:8050"
