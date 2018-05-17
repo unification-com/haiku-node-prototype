@@ -1,23 +1,33 @@
 import json
 import os, inspect
 
+from pathlib import Path
+
 from cryptography.fernet import Fernet
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-
 
 class UnificationKeystore:
 
-    def __init__(self, pw):
+    def __init__(self, pw, app_name=None):
         self.__is_empty = True
         self.__encrypted_store = ""
+        self.__app_name = app_name
 
         if len(pw) > 0:
             self.__fern = Fernet(str.encode(pw))
             self.__load_encrypted_keys()
+
+    def key_store_file(self):
+        currentdir = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        parentdir = os.path.dirname(currentdir)
+
+        if self.__app_name is None:
+            return Path(parentdir + '/keystore/keys.store')
+        else:
+            return Path(parentdir + f"/keystore/keys-{ self.__app_name }.store")
 
     def get_rpc_auth_public_key(self):
         if not self.__is_empty:
@@ -57,7 +67,7 @@ class UnificationKeystore:
         json_string = json.dumps(keystore)
         self.__encrypted_store = self.__fern.encrypt(str.encode(json_string))
 
-        with open(parentdir + '/keystore/keys.store', 'wb') as f:
+        with self.key_store_file().open('wb') as f:
             f.write(self.__encrypted_store)
             self.__is_empty = False
 
@@ -85,12 +95,12 @@ class UnificationKeystore:
         json_string = json.dumps(keystore)
         self.__encrypted_store = self.__fern.encrypt(str.encode(json_string))
 
-        with open(parentdir + '/keystore/keys.store', 'wb') as f:
+        with self.key_store_file().open('wb') as f:
             f.write(self.__encrypted_store)
             self.__is_empty = False
 
     def __load_encrypted_keys(self):
-        with open(parentdir + '/keystore/keys.store', 'rb') as f:
+        with self.key_store_file().open('rb') as f:
             self.__encrypted_store = f.read()
             if len(self.__encrypted_store) > 0:
                 self.__is_empty = False
