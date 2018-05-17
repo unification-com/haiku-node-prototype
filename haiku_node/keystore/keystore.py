@@ -11,12 +11,16 @@ from cryptography.hazmat.primitives import serialization
 class UnificationKeystore:
 
     def __init__(self, pw, app_name=None):
+        """
+        :param pw: binary encoded password
+        :param app_name: optional app specific keystore
+        """
         self.__is_empty = True
         self.__encrypted_store = ""
         self.__app_name = app_name
 
         if len(pw) > 0:
-            self.__fern = Fernet(str.encode(pw))
+            self.__fern = Fernet(pw)
             self.__load_encrypted_keys()
 
     def key_store_file(self):
