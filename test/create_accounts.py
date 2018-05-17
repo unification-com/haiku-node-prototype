@@ -176,7 +176,7 @@ def set_permissions():
     print('Setting permissions')
     with open('data/test_permissions.json') as f:
         test_permissions = json.load(f)
-        for user_perms in test_permissions:
+        for user_perms in test_permissions['permissions']:
             user = user_perms['user']
             for haiku in user_perms['haiku_nodes']:
                 app = haiku['app']
