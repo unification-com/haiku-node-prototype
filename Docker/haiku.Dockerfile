@@ -12,13 +12,13 @@ RUN /root/.pyenv/bin/pyenv install 3.6.0
 RUN mkdir /haiku
 COPY requirements.txt /haiku
 COPY haiku_node /haiku/haiku_node
+COPY test /test
 
 WORKDIR /haiku
 RUN /root/.pyenv/versions/3.6.0/bin/pip3 install -r requirements.txt
 
 EXPOSE 8050
 
-RUN echo 'y0Vo6WvS9Z1X4u-8PHsfMn84f5o8xNK7jSdjLRggn1I=' > /etc/haiku-password
 ENV PYTHONPATH /haiku
 
-CMD ["/root/.pyenv/versions/3.6.0/bin/python3", "haiku_node/main.py"]
+CMD ["/test/bootstrap.sh"]

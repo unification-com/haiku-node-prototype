@@ -17,7 +17,9 @@ PORT = 8050
 def spawn_haiku_node(pw, conf):
     print(pw)
     print(conf)
-    ks = UnificationKeystore(pw)
+
+    encoded_password = str.encode(pw)
+    ks = UnificationKeystore(encoded_password)
     ks.set_encryption_key(
         "user1", "app2",
         "EOS4yMT6jNNsrsSxX26xeVCjQkqsUUiMzCEaHCTvLo5tR1JmBuE3C")
