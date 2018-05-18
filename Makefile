@@ -18,4 +18,4 @@ run:
 	docker run -it systemtest /bin/bash
 
 pytest:
-	export PYTHONPATH="."; pytest test/test_asymmetric.py
+	export PYTHONPATH="."; pytest .
