@@ -16,3 +16,10 @@ def test_sign_and_verify():
 
     assert verify_request(public_key, message, broken_signature) is False
     assert verify_request(public_key, message, signature) is True
+
+
+def test_get_public_key():
+    from haiku_node.config.keys import get_public_key, get_private_key
+
+    assert get_public_key('app2') is not None
+    assert get_private_key('app2') is not None
