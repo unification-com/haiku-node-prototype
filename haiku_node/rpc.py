@@ -16,13 +16,9 @@ def verify_account(eos_account_name, body, signature) -> bool:
     return verify_request(public_key, body, signature)
 
 
-def encrypt_data(data):
-    return data
-
-
 def obtain_data(body):
     data = 'DATA'
-    return encrypt_data(data)
+    return data
 
 
 def sign_data(body):
