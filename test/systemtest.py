@@ -36,11 +36,14 @@ def main():
     init_logging()
 
 
-def systest_auth(protocol, host, port):
+def base_url(protocol, host, port):
+    return f"{protocol}://{host}:{port}"
+
+
+def systest_auth(base):
     """
     App2 makes a data request to App1
     """
-    base_url = f"{protocol}://{host}:{port}"
     body = 'request body'
     requesting_app = 'app2'
 
@@ -57,8 +60,7 @@ def systest_auth(protocol, host, port):
                "signature": broken_signature,
                "body": body}
 
-    log.info('Making request')
-    r = requests.post(f"{base_url}/data_request", json=payload, verify=False)
+    r = requests.post(f"{base}/data_request", json=payload, verify=False)
 
     assert r.status_code == 401
     assert r.json()['success'] is False
@@ -68,7 +70,7 @@ def systest_auth(protocol, host, port):
                "signature": signature,
                "body": body}
 
-    r = requests.post(f"{base_url}/data_request", json=payload, verify=False)
+    r = requests.post(f"{base}/data_request", json=payload, verify=False)
     assert r.status_code == 200
     d = r.json()
     assert d['success'] is True
@@ -82,7 +84,8 @@ def probe():
     """
     Run a few tests on a system that is already up
     """
-    systest_auth('https', 'haiku-app1', 8050)
+    url_base = base_url('https', 'haiku-app1', 8050)
+    systest_auth(url_base)
 
 
 @main.command()
@@ -90,7 +93,8 @@ def host():
     """
     Test from the host machine
     """
-    systest_auth('http', 'localhost', 8050)
+    url_base = base_url('http', 'localhost', 8050)
+    systest_auth(url_base)
 
 
 @main.command()
@@ -103,8 +107,11 @@ def wait():
     # TODO: Implementing sleeping for now
     print("Sleeping")
     time.sleep(10)
-    systest_auth('https', 'haiku-app1', 8050)
-    systest_auth('https', 'haiku-app2', 8050)
+
+    url_base = base_url('https', 'haiku-app1', 8050)
+    systest_auth(url_base)
+    systest_auth(url_base)
+
     time.sleep(6000)
 
 
