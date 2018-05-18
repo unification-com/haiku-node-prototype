@@ -9,7 +9,7 @@ app.logger_name = "haiku-rpc"
 logger = app.logger
 
 
-def authorized_client(eos_account_name, body, signature):
+def verify_account(eos_account_name, body, signature) -> bool:
     logger.info(f"Attempting to authorize {eos_account_name}")
 
     public_key = get_public_key(eos_account_name)
@@ -36,13 +36,13 @@ def sign_data(body):
 def data_request():
     d = flask.request.get_json()
 
-    if not authorized_client(d['eos_account_name'], d['body'], d['signature']):
+    if not verify_account(d['eos_account_name'], d['body'], d['signature']):
         return flask.jsonify(
             {
                 'success': False,
                 'message': 'Unauthorized',
                 'signature': None,
-                'result': None
+                'body': None
             }
         )
 
@@ -51,7 +51,7 @@ def data_request():
             'success': True,
             'message': 'Success',
             'signature': sign_data(d['body']),
-            'result': obtain_data(d['body'])
+            'body': obtain_data(d['body'])
         }
     )
 
