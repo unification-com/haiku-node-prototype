@@ -88,7 +88,7 @@ def host():
     """
     Test from the host machine
     """
-    systest_auth('http', 'localhost', 5000)
+    systest_auth('http', 'localhost', 8050)
 
 
 @main.command()
