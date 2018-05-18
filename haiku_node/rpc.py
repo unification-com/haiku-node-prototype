@@ -1,7 +1,7 @@
 import flask
 
 from haiku_node.config.keys import get_public_key
-from haiku_node.validation.encryption import verify_request
+from haiku_node.validation.encryption import verify_request, sign_request
 
 app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
@@ -25,6 +25,13 @@ def obtain_data(body):
     return encrypt_data(data)
 
 
+def sign_data(body):
+    keystore = getattr(app, 'keystore')
+    private_key = keystore.get_rpc_auth_private_key()
+    signature = sign_request(private_key, body)
+    return signature
+
+
 @app.route('/data_request', methods=['POST'])
 def data_request():
     d = flask.request.get_json()
@@ -34,6 +41,7 @@ def data_request():
             {
                 'success': False,
                 'message': 'Unauthorized',
+                'signature': None,
                 'result': None
             }
         )
@@ -42,6 +50,7 @@ def data_request():
         {
             'success': True,
             'message': 'Success',
+            'signature': sign_data(d['body']),
             'result': obtain_data(d['body'])
         }
     )
