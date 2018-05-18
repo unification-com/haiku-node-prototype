@@ -11,9 +11,7 @@ logger = app.logger
 
 def verify_account(eos_account_name, body, signature) -> bool:
     logger.info(f"Attempting to authorize {eos_account_name}")
-
-    public_key = get_public_key(eos_account_name)
-    return verify_request(public_key, body, signature)
+    return verify_request(get_public_key(eos_account_name), body, signature)
 
 
 def obtain_data(body):
@@ -24,8 +22,7 @@ def obtain_data(body):
 def sign_data(body):
     keystore = getattr(app, 'keystore')
     private_key = keystore.get_rpc_auth_private_key()
-    signature = sign_request(private_key, body)
-    return signature
+    return sign_request(private_key, body)
 
 
 @app.route('/data_request', methods=['POST'])
@@ -33,23 +30,21 @@ def data_request():
     d = flask.request.get_json()
 
     if not verify_account(d['eos_account_name'], d['body'], d['signature']):
-        return flask.jsonify(
-            {
+        return flask.jsonify({
                 'success': False,
                 'message': 'Unauthorized',
                 'signature': None,
                 'body': None
-            }
-        ), 401
+            }), 401
 
-    return flask.jsonify(
-        {
+    data = obtain_data(d['body'])
+
+    return flask.jsonify({
             'success': True,
             'message': 'Success',
-            'signature': sign_data(d['body']),
-            'body': obtain_data(d['body'])
-        }
-    ), 200
+            'signature': sign_data(data),
+            'body': data
+        }), 200
 
 
 if __name__ == '__main__':
