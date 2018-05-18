@@ -1,16 +1,11 @@
-import inspect
-import os
-import sys
-
 from haiku_node.eosio_helpers import eosio_account
-from eosapi import Client
-
-currentdir = os.path.dirname(
-    os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
+from haiku_node.blockchain.mother import UnificationMother
+from haiku_node.blockchain.acl import UnificationACL
 
 
+"""
+Validation class for a single REQUESTING app.
+"""
 class UnificationACLValidation:
 
     def __init__(self, conf, requesting_app):
@@ -24,9 +19,6 @@ class UnificationACLValidation:
 
         self.__requesting_app = requesting_app
         self.__conf = conf
-        self.__eosClient = Client(
-            nodes=[f"http://{self.__conf['eos_rpc_ip']}"
-                   f":{self.__conf['eos_rpc_port']}"])
         self.__is_valid_app = False
         self.__is_valid_code = False
         self.__granted = []
@@ -56,54 +48,33 @@ class UnificationACLValidation:
     def valid_code(self):
         return self.__is_valid_code
 
-    def __run(self):
-        self.__call_mother()
-        if self.__is_valid_app and self.__is_valid_code:
-            self.__get_app_permissions()
-        else:
-            self.__granted = []
-            self.__revoked = []
-
     def __get_app_permissions(self):
         """
         App checks it's own smart contract to see which users are granted
         permission to access it's data.
         """
 
-        # TODO: run in loop and check JSON result for "more" value
-        table_data = self.__eosClient.get_table_rows(
-            self.__requesting_app,
-            self.__conf['acl_contract'], self.__permission_rec_table, True, 0, -1, -1)
+        u_acl = UnificationACL(self.__conf['eos_rpc_ip'], self.__conf['eos_rpc_port'], self.__conf['acl_contract'])
+        self.__granted, self.__revoked = u_acl.get_perms_for_req_app(self.__requesting_app)
 
-        for i in table_data['rows']:
-            if int(i['permission_granted']) == 1:
-                self.__granted.append(int(i['user_account']))
-            else:
-                self.__revoked.append(int(i['user_account']))
-
-    def __call_mother(self):
+    def __check_req_app_valid(self):
         """
         Call the Mother Smart Contract, and check if the requesting_app is both
         a verified app, and that it's smart contract code is valid (by checking
         the code's hash).
         """
-        json_data = self.__eosClient.get_code(self.__requesting_app)
-        code_hash = json_data['code_hash']
 
-        table_data = self.__eosClient.get_table_rows(
-            self.__mother, self.__mother, self.__valid_apps_table, True, 0, -1, -1)
+        um = UnificationMother(self.__conf['eos_rpc_ip'], self.__conf['eos_rpc_port'], self.__requesting_app)
+        self.__is_valid_app = um.valid_app()
+        self.__is_valid_code = um.valid_code()
 
-        req_app_uint64 = eosio_account.string_to_name(self.__requesting_app)
-
-        for i in table_data['rows']:
-
-            if int(i['acl_contract_acc']) == req_app_uint64 and \
-                    int(i['is_valid']) == 1:
-                self.__is_valid_app = True
-
-            if int(i['acl_contract_acc']) == req_app_uint64 and \
-                    i['acl_contract_hash'] == code_hash:
-                self.__is_valid_code = True
+    def __run(self):
+        self.__check_req_app_valid()
+        if self.__is_valid_app and self.__is_valid_code:
+            self.__get_app_permissions()
+        else:
+            self.__granted = []
+            self.__revoked = []
 
 
 if __name__ == '__main__':

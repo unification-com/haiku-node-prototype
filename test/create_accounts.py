@@ -5,6 +5,8 @@ import logging
 import requests
 
 from eosapi import Client
+from haiku_node.blockchain.mother import UnificationMother
+from haiku_node.blockchain.acl import UnificationACL
 
 log = logging.getLogger(__name__)
 
@@ -195,17 +197,6 @@ def set_permissions():
                         print(ret)
 
 
-# def deny_access():
-#     d = {
-#         'user_account': 'user3',
-#         'requesting_app': 'app2'
-#     }
-#     # TODO: Notice the app1 in here
-#     cmd = cleos() + ['push', 'action', 'app1', 'revoke', json.dumps(d), '-p',
-#                      'user1']
-#     ret = subprocess.check_output(cmd, universal_newlines=True)
-
-
 def get_table():
     print('Getting table')
     d = {
@@ -216,6 +207,44 @@ def get_table():
     cmd = cleos() + ['get', 'table', 'app1', 'app2', 'unifacl']
     ret = subprocess.check_output(cmd, universal_newlines=True)
     print(ret)
+
+
+def run_test_mother(app):
+    print("Contacting MOTHER FOR: ", app)
+
+    um = UnificationMother(d['eos_rpc_ip'], d['eos_rpc_port'], app)
+    print("Valid app: ", um.valid_app())
+    print("ACL Hash: ", um.get_hash())
+    print("Valid Code: ", um.valid_code())
+    print("RPC IP: ", um.get_haiku_rpc_ip())
+    print("RPC Port: ", um.get_haiku_rpc_port())
+    print("RPC Server: ", um.get_haiku_rpc_server())
+    print("Valid DB Schemas: ")
+    print(um.get_valid_db_schemas())
+    print("-----------------------------------")
+
+
+def run_test_acl(app):
+
+    print("Loading ACL/Meta Contract for: ", app)
+
+    u_acl = UnificationACL(d['eos_rpc_ip'], d['eos_rpc_port'], app)
+
+    print("Data Schemas:")
+    print(u_acl.get_db_schemas())
+    print("Data Sources:")
+    print(u_acl.get_data_sources())
+
+    print("Check Permissions")
+    for req_app in appnames:
+        print("Check perms for Requesting App: ", req_app)
+        granted, revoked = u_acl.get_perms_for_req_app(req_app)
+        print("Users who Granted:")
+        print(granted)
+        print("Users who Revoked:")
+        print(revoked)
+
+    print("-----------------------------------")
 
 
 def process():
@@ -238,7 +267,12 @@ def process():
         validate_with_mother(appname)
 
     set_permissions()
-    get_table()
+    #get_table()
+    for appname in appnames:
+        print(f'==========RUN CONTRACT TESTS FOR {appname}==========')
+        run_test_mother(appname)
+        run_test_acl(appname)
+        print(f'==========END CONTRACT TESTS FOR {appname}==========')
 
 
 def configure_logging():
