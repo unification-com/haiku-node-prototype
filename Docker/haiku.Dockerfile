@@ -8,17 +8,21 @@ RUN apt-get update && \
 
 RUN curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
 RUN /root/.pyenv/bin/pyenv install 3.6.0
+RUN ln -s /root/.pyenv/versions/3.6.0/bin/python3 /usr/bin/python
+RUN ln -s /root/.pyenv/versions/3.6.0/bin/pip3 /usr/bin/pip
 
 RUN mkdir /haiku
 COPY requirements.txt /haiku
 COPY haiku_node /haiku/haiku_node
-COPY test /test
+COPY test /haiku/test
 
 WORKDIR /haiku
-RUN /root/.pyenv/versions/3.6.0/bin/pip3 install -r requirements.txt
+RUN pip install -r requirements.txt
 
 EXPOSE 8050
 
+ENV LC_ALL C.UTF-8
+ENV LANG C.UTF-8
 ENV PYTHONPATH /haiku
 
-CMD ["/test/bootstrap.sh"]
+CMD ["/haiku/test/bootstrap.sh"]
