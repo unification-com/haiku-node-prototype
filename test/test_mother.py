@@ -1,9 +1,14 @@
+import json
+from pathlib import Path
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.config.config import UnificationConfig
 
 apps_to_test = ['app1', 'app2', 'app3']
 config = UnificationConfig()
 conf = config.get_conf()
+app_config = {}
+
+app_config = json.loads(Path('test/data/test_apps.json').read_text())
 
 
 def run_test(app):
@@ -13,10 +18,21 @@ def run_test(app):
 
     um = UnificationMother(conf['eos_rpc_ip'], conf['eos_rpc_port'], app)
     print("Valid app: ", um.valid_app())
-    print("ACL Hash: ", um.get_hash())
+    assert um.valid_app() is True
+
+    print("ACL Hash in MOTHER: ", um.get_hash_in_mother())
+    print("Deployed ACL Contract hash: ", um.get_deployed_contract_hash())
+    assert um.get_hash_in_mother() == um.get_deployed_contract_hash()
+
     print("Valid Code: ", um.valid_code())
+    assert um.valid_code() is True
+
     print("RPC IP: ", um.get_haiku_rpc_ip())
+    assert um.get_haiku_rpc_ip() == app_config[app]['rpc_server']
+
     print("RPC Port: ", um.get_haiku_rpc_port())
+    assert int(um.get_haiku_rpc_port()) == int(app_config[app]['rpc_server_port'])
+
     print("RPC Server: ", um.get_haiku_rpc_server())
     print("Valid DB Schemas: ")
     print(um.get_valid_db_schemas())

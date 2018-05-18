@@ -20,8 +20,9 @@ class UnificationMother:
                    f":{eos_rpc_port}"])
         self.__is_valid_app = False
         self.__is_valid_code = False
+        self.__deployed_code_hash = ""  # the actual deployed contract
         self.__valid_db_schemas = {}
-        self.__acl_contract_hash = ""
+        self.__acl_contract_hash_in_mother = ""  # hash held in MOTHER
         self.__rpc_server_ip = ""
         self.__rpc_server_port = 0
 
@@ -33,8 +34,11 @@ class UnificationMother:
     def valid_code(self):
         return self.__is_valid_code
 
-    def get_hash(self):
-        return self.__acl_contract_hash
+    def get_hash_in_mother(self):
+        return self.__acl_contract_hash_in_mother
+
+    def get_deployed_contract_hash(self):
+        return self.__deployed_code_hash
 
     def get_valid_db_schemas(self):
         return self.__valid_db_schemas
@@ -55,7 +59,7 @@ class UnificationMother:
         the code's hash).
         """
         json_data = self.__eosClient.get_code(self.__acl_contract_acc)
-        code_hash = json_data['code_hash']
+        self.__deployed_code_hash = json_data['code_hash']
 
         table_data = self.__eosClient.get_table_rows(
             self.__mother, self.__mother, self.__valid_apps_table, True, 0, -1, -1)
@@ -69,9 +73,9 @@ class UnificationMother:
             if int(i['acl_contract_acc']) == req_app_uint64:
                 if int(i['is_valid']) == 1:
                     self.__is_valid_app = True
-                if i['acl_contract_hash'] == code_hash:
+                if i['acl_contract_hash'] == self.__deployed_code_hash:
                     self.__is_valid_code = True
-                self.__acl_contract_hash = i['acl_contract_hash']
+                self.__acl_contract_hash_in_mother = i['acl_contract_hash']
                 self.__rpc_server_ip = i['rpc_server_ip']
                 self.__rpc_server_port = i['rpc_server_port']
                 db_schemas = i['schema_vers']

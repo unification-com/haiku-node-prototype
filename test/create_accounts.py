@@ -4,6 +4,8 @@ import logging
 
 import requests
 
+from pathlib import Path
+
 from eosapi import Client
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
@@ -22,13 +24,7 @@ eosClient = Client(
 
 appnames = ['app1', 'app2', 'app3']
 usernames = ['user1', 'user2', 'user3', 'unif.mother']
-app_config = {}
-
-
-def get_app_config():
-    global app_config
-    with open('data/test_apps.json') as f:
-        app_config = json.load(f)
+app_config = json.loads(Path('test/data/test_apps.json').read_text())
 
 
 def base_url():
@@ -210,14 +206,26 @@ def get_table():
 
 
 def run_test_mother(app):
+
     print("Contacting MOTHER FOR: ", app)
 
     um = UnificationMother(d['eos_rpc_ip'], d['eos_rpc_port'], app)
     print("Valid app: ", um.valid_app())
-    print("ACL Hash: ", um.get_hash())
+    assert um.valid_app() is True
+
+    print("ACL Hash in MOTHER: ", um.get_hash_in_mother())
+    print("Deployed ACL Contract hash: ", um.get_deployed_contract_hash())
+    assert um.get_hash_in_mother() == um.get_deployed_contract_hash()
+
     print("Valid Code: ", um.valid_code())
+    assert um.valid_code() is True
+
     print("RPC IP: ", um.get_haiku_rpc_ip())
+    assert um.get_haiku_rpc_ip() == app_config[app]['rpc_server']
+
     print("RPC Port: ", um.get_haiku_rpc_port())
+    assert int(um.get_haiku_rpc_port()) == int(app_config[app]['rpc_server_port'])
+
     print("RPC Server: ", um.get_haiku_rpc_server())
     print("Valid DB Schemas: ")
     print(um.get_valid_db_schemas())
@@ -248,8 +256,6 @@ def run_test_acl(app):
 
 
 def process():
-    get_app_config()
-
     create_users(usernames + appnames)
 
     keys = [create_key() for x in range(len(usernames + appnames))]
