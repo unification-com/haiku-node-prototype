@@ -23,20 +23,16 @@ def sign_request(private_key, message):
 
 
 def verify_request(public_key, body, signature):
-    try:
-        verifier = public_key.verifier(
-            base64.b64decode(signature),
-            padding.PSS(
-                mgf=padding.MGF1(hashes.SHA256()),
-                salt_length=padding.PSS.MAX_LENGTH
-            ),
-            hashes.SHA256()
-        )
-        verifier.update(bytes(body, encoding='utf8'))
-        verifier.verify()
-        return True
-    except InvalidSignature:
-        return False
+    verifier = public_key.verifier(
+        base64.b64decode(signature),
+        padding.PSS(
+            mgf=padding.MGF1(hashes.SHA256()),
+            salt_length=padding.PSS.MAX_LENGTH
+        ),
+        hashes.SHA256()
+    )
+    verifier.update(bytes(body, encoding='utf8'))
+    verifier.verify()
 
 
 def generate_keys():
