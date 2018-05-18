@@ -1,5 +1,5 @@
 import os,sys,inspect
-from haiku_node.validation.validation import UnificationACLValidation
+from haiku_node.validation.validation import UnificationAppScValidation
 from haiku_node.config.config import UnificationConfig
 from haiku_node.eosio_helpers import eosio_account
 
@@ -17,7 +17,7 @@ def run_test(requesting_app):
 
     print("THIS app is", conf['acl_contract'])
 
-    v = UnificationACLValidation(conf, requesting_app)
+    v = UnificationAppScValidation(conf, requesting_app)
 
     app_valid = v.valid_app()
     print("Requesting App", requesting_app, "Valid according to MOTHER: ", app_valid)

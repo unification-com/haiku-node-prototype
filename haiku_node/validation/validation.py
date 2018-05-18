@@ -6,7 +6,7 @@ from haiku_node.blockchain.acl import UnificationACL
 """
 Validation class for a single REQUESTING app.
 """
-class UnificationACLValidation:
+class UnificationAppScValidation:
 
     def __init__(self, conf, requesting_app, get_perms=True):
         """
