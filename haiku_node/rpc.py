@@ -40,7 +40,7 @@ def data_request():
                 'signature': None,
                 'body': None
             }
-        )
+        ), 403
 
     return flask.jsonify(
         {
@@ -49,7 +49,7 @@ def data_request():
             'signature': sign_data(d['body']),
             'body': obtain_data(d['body'])
         }
-    )
+    ), 200
 
 
 if __name__ == '__main__':

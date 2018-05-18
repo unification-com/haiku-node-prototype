@@ -49,10 +49,10 @@ def systest_auth(protocol, host, port):
     ks = UnificationKeystore(encoded_password, app_name=requesting_app)
 
     private_key = ks.get_rpc_auth_private_key()
-
     signature = sign_request(private_key, body)
-    broken_signature = 'unlucky' + signature[7:]
 
+    # An unsuccessfully query
+    broken_signature = 'unlucky' + signature[7:]
     payload = {"eos_account_name": requesting_app,
                "signature": broken_signature,
                "body": body}
@@ -60,14 +60,16 @@ def systest_auth(protocol, host, port):
     log.info('Making request')
     r = requests.post(f"{base_url}/data_request", json=payload, verify=False)
 
-    assert r.status_code == 200
+    assert r.status_code == 403
     assert r.json()['success'] is False
 
+    # Now, a successful query
     payload = {"eos_account_name": requesting_app,
                "signature": signature,
                "body": body}
 
     r = requests.post(f"{base_url}/data_request", json=payload, verify=False)
+    assert r.status_code == 200
     d = r.json()
     assert d['success'] is True
 
