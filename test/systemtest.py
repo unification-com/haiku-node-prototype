@@ -60,7 +60,7 @@ def systest_auth(protocol, host, port):
     log.info('Making request')
     r = requests.post(f"{base_url}/data_request", json=payload, verify=False)
 
-    assert r.status_code == 403
+    assert r.status_code == 401
     assert r.json()['success'] is False
 
     # Now, a successful query
