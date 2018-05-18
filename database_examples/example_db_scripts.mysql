@@ -1,0 +1,240 @@
+**************** HEARTRATE DATABASE ***************************
+create database heartbit;
+use heartbit;
+
+CREATE TABLE Users (
+    ID int NOT NULL,
+    LastName varchar(255) NOT NULL,
+    FirstName varchar(255),
+    Email varchar(255),
+    PRIMARY KEY (ID)
+);
+
+CREATE TABLE UserData (
+    DataID int NOT NULL,
+    Heartrate int,
+    Pulse int,
+	UserID int NOT NULL,
+    PRIMARY KEY (DataID),
+    FOREIGN KEY (UserID) REFERENCES Users(ID)
+);
+
+INSERT INTO Users
+    (ID,LastName,FirstName,Email)
+VALUES
+    (1,'McLean','Shawn','syonara@hotmail.com'),
+	(2,'Hodge','Paul','paul@hotmail.com'),
+	(3,'Ney','Ma','neyma@hotmail.com');
+	
+INSERT INTO UserData
+    (DataID,Heartrate,Pulse,UserID)
+VALUES
+    (1,223,12,1),
+	(2,228,1,1),
+	(3,229,11,1),
+	(4,243,17,1),
+	(5,223,19,1),
+	(6,223,14,1),
+	(7,111,9,1),
+	(8,118,2,1),
+	(9,998,187,1),
+	(10,776,32,1),
+	(11,121,99,1),
+	(12,228,108,2),
+	(13,213,44,2),
+	(14,334,65,2),
+	(15,875,98,2),
+	(16,983,22,2),
+	(17,111,33,2),
+	(18,191,18,2),
+	(19,181,21,2),
+	(20,171,97,3),
+	(21,223,101,2),
+	(22,228,87,2),
+	(23,333,86,2),
+	(24,896,31,3),
+	(25,213,38,3),
+	(26,999,17,3),
+	(27,991,14,3),
+	(28,872,121,3),
+	(29,346,141,3),
+	(30,298,191,3),
+	(31,219,107,3),
+	(32,217,191,3);
+*********************** END HEARTRATE DB *****************************
+
+*********************** GEOLOCATION DATABASE *************************
+create database geolocation;
+use geolocation;
+
+CREATE TABLE People (
+    PeopleID int NOT NULL,
+    Name varchar(255) NOT NULL,
+    Surname varchar(255),
+    Email varchar(255),
+    PRIMARY KEY (PeopleID)
+);
+
+CREATE TABLE PeopleData (
+    DataID int NOT NULL,
+    GeoLocation int,
+    TimeStamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	PeopleID int NOT NULL,
+    PRIMARY KEY (DataID),
+    FOREIGN KEY (PeopleID) REFERENCES People(PeopleID)
+);
+
+INSERT INTO People
+    (PeopleID,Name,SurName,Email)
+VALUES
+    (1,'Mint','Siripuri','siri@hotmail.com'),
+	(2,'Mike','Judge','mike@hotmail.com'),
+	(3,'John','Carmak','john@hotmail.com');
+
+INSERT INTO PeopleData
+    (DataID,GeoLocation,PeopleID)
+VALUES
+    (1,22312,1),
+	(2,224321,1),
+	(3,22911,1),
+	(4,2446517,1),
+	(5,22319,1),
+	(6,22314,1),
+	(7,1119,1),
+	(8,1182,1),
+	(9,998187,1),
+	(10,77632,1),
+	(11,12199,1),
+	(12,228108,2),
+	(13,21344,2),
+	(14,33465,2),
+	(15,87598,2),
+	(16,98322,2),
+	(17,11133,2),
+	(18,19118,2),
+	(19,18121,2),
+	(20,17197,3),
+	(21,223101,2),
+	(22,22887,2),
+	(23,33386,2),
+	(24,89631,3),
+	(25,21338,3),
+	(26,99917,3),
+	(27,99114,3),
+	(28,872121,3),
+	(29,346141,3),
+	(30,298191,3),
+	(31,219107,3),
+	(32,217191,3);
+*********************** END GEOLOCATION DATABASE *************************
+
+********************** IMAGE BLOBS, LOCAL STORAGE UNSTRUCTURED ***********
+create database ImageStorage;
+use database ImageStorage;
+
+CREATE TABLE ImageOwners (
+    OwnerID int NOT NULL,
+	FacebookID int,
+    PRIMARY KEY (OwnerID)
+);
+
+CREATE TABLE ImageData (
+    ImageID int NOT NULL,
+    ImageLocation varchar(255),
+	OwnerID int,
+    PRIMARY KEY (ImageID),
+    FOREIGN KEY (OwnerID) REFERENCES ImageOwners(OwnerID)
+);
+
+INSERT INTO ImageOwners
+    (OwnerID,FacebookID)
+VALUES
+    (1, 34983984),
+	(2, 37438784),
+	(3, 93849344);
+	
+INSERT INTO ImageData
+    (ImageID,ImageLocation,OwnerID)
+VALUES
+	(1, '/data/imageblobs/img1.jpg', 1),
+	(2, '/data/imageblobs/img2.jpg', 1),
+	(3, '/data/imageblobs/img3.jpg', 1),
+	(4, '/data/imageblobs/img4.jpg', 1),
+	(5, '/data/imageblobs/img5.jpg', 1),
+	(6, '/data/imageblobs/img6.jpg', 1),
+	(7, '/data/imageblobs/img7.jpg', 1),
+	(8, '/data/imageblobs/img8.jpg', 1),
+	(9, '/data/imageblobs/img9.jpg', 1),
+	(10, '/data/imageblobs/img10.jpg', 1),
+	(11, '/data/imageblobs/img11.jpg', 2),
+	(12, '/data/imageblobs/img12.jpg', 2),
+	(13, '/data/imageblobs/img13.jpg', 2),
+	(14, '/data/imageblobs/img14.jpg', 2),
+	(15, '/data/imageblobs/img15.jpg', 2),
+	(16, '/data/imageblobs/img16.jpg', 2),
+	(17, '/data/imageblobs/img17.jpg', 2),
+	(18, '/data/imageblobs/img18.jpg', 2),
+	(19, '/data/imageblobs/img19.jpg', 2),
+	(20, '/data/imageblobs/img20.jpg', 2),
+	(21, '/data/imageblobs/img21.jpg', 2),
+	(22, '/data/imageblobs/img22.jpg', 3),
+	(23, '/data/imageblobs/img23.jpg', 3),
+	(24, '/data/imageblobs/img24.jpg', 3),
+	(25, '/data/imageblobs/img25.jpg', 3),
+	(26, '/data/imageblobs/img26.jpg', 3),
+	(27, '/data/imageblobs/img27.jpg', 3),
+	(28, '/data/imageblobs/img28.jpg', 3),
+	(29, '/data/imageblobs/img29.jpg', 3),
+	(30, '/data/imageblobs/img30.jpg', 3),
+	(31, '/data/imageblobs/img31.jpg', 3),
+	(32, '/data/imageblobs/img32.jpg', 3),
+	(33, '/data/imageblobs/img33.jpg', 3);
+	
+********************** END IMAGE BLOBS DB *********************************
+
+********************** BINARY DATA BLOBS, STRUCTURED DATABASE *************
+create database Datablobs;
+use database Datablobs;
+
+CREATE TABLE BlobCreator (
+    CreatorID int NOT NULL,
+	Name varchar(255),
+    PRIMARY KEY (CreatorID)
+);
+
+CREATE TABLE BlobData (
+    BlobID int NOT NULL,
+    DataBlob BLOB,
+	BlobSize int,
+	CreatorID int,
+    PRIMARY KEY (BlobID),
+    FOREIGN KEY (CreatorID) REFERENCES BlobCreator(CreatorID)
+);
+
+INSERT INTO BlobCreator
+    (CreatorID,Name)
+VALUES
+    (1, 'Shawn'),
+	(2, 'Nwahs'),
+	(3, 'Pickleman');
+	
+INSERT INTO BlobData
+    (BlobID, BlobSize, DataBlob, CreatorID)
+VALUES
+    (1, 40, UNHEX('4D2AFF4D2AFF4D2AFF4D2AFF'), 1),
+	(2, 50, UNHEX('4D2AFF4DFF4D2AFF'), 1),
+	(3, 89, UNHEX('4D2AFF4D2AFF4D2AFF4D2AFFBDC2F21'), 1),
+	(4, 101, UNHEX('2AFF2AFF2AFF4D2AFF4D2AFF4D2AFF4D2AFF'), 1),
+	(5, 12, UNHEX('2AFF2AFF2AFF2AFF2AFF4D2AFF4D2AFF4D2AFF4D2AFF'), 2),
+	(6, 45, UNHEX('4D2AFF4D2AFF4BCCAAAD2AFF4D2AFF'), 2),
+	(7, 98, UNHEX('CCAAAD2ACCAAAD2ACCAAAD2A4D2AFF4D2AFF4D2AFF4D2AFF'), 2),
+	(8, 93, UNHEX('CCAAAD2ACCAAAD2A4D2AFF4D2AFF4D2AFF4D2AFFCCAAAD2ACCAAAD2A'), 2),
+	(9, 111, UNHEX('4D2AFF4D2AFF4D2AFF4D2AFF'), 2),
+	(10, 12, UNHEX('2ACCAAAD2AACCAAAD2A4D2AFF4D2AFF4D2AFF4D2AFF'), 3),
+	(11, 65, UNHEX('4D2AFF4D2AFF4D2AFF4D2AFF'), 3),
+	(12, 87, UNHEX('CCAAAD2A2ACCAAAD2A2ACCAAAD2A4D2AFF4D2AFF4D2AFF4D2AFF'), 3),
+	(13, 91, UNHEX('4D2AFF4D2AFF4D2AFF4D2AFF'), 3),
+	(14, 103, UNHEX('4ACCAAAD2A4D2A2AFF4D2ACCAAAD2A4D2AACCAAAD2A4D2AACCAAAD2A4D2A2AFF'), 3),
+	(15, 143, UNHEX('4D2AFACCAAAD2A4D2AACCAAAD2A4D2AF4D2AFF4D2AFF'), 3),
+	(16, 985, UNHEX('42ACCAAAD2A2ACCAAAD2A2ACCAAAD2AF4D2AFF4D2AFF4D2AFF'), 3);
+	
