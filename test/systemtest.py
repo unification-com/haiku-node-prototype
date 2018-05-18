@@ -7,6 +7,7 @@ import click
 
 from pathlib import Path
 
+from haiku_node.rpc import verify_account
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.validation.encryption import sign_request
 
@@ -36,9 +37,13 @@ def main():
 
 
 def systest_auth(protocol, host, port):
+    """
+    App2 makes a data request to App1
+    """
     base_url = f"{protocol}://{host}:{port}"
     body = 'request body'
     requesting_app = 'app2'
+
     password = password_d[requesting_app]['password']
     encoded_password = str.encode(password)
     ks = UnificationKeystore(encoded_password, app_name=requesting_app)
@@ -63,7 +68,11 @@ def systest_auth(protocol, host, port):
                "body": body}
 
     r = requests.post(f"{base_url}/data_request", json=payload, verify=False)
-    assert r.json()['success'] is True
+    d = r.json()
+    assert d['success'] is True
+
+    # Now verify the response
+    verify_account('app1', d['body'], d['signature'])
 
 
 @main.command()
