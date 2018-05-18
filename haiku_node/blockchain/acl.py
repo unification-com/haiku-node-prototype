@@ -32,6 +32,9 @@ class UnificationACL:
     def get_data_sources(self):
         return self.__data_sources
 
+    def get_current_valid_schema(self, schema_name, schema_vers):
+        return self.__db_schemas[f'{schema_name}.{schema_vers}']
+
     def get_perms_for_req_app(self, requesting_app):
         # TODO: run in loop and check JSON result for "more" value
         table_data = self.__eosClient.get_table_rows(

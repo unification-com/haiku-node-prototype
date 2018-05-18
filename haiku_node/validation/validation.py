@@ -8,17 +8,16 @@ Validation class for a single REQUESTING app.
 """
 class UnificationACLValidation:
 
-    def __init__(self, conf, requesting_app):
+    def __init__(self, conf, requesting_app, get_perms=True):
         """
         :param conf: config json object
         :param requesting_app: the eos account name of the requesting app
         """
-        self.__mother = "unif.mother"
-        self.__valid_apps_table = "validapps"
         self.__permission_rec_table = "permrecords"
 
         self.__requesting_app = requesting_app
         self.__conf = conf
+        self.__get_perms = get_perms
         self.__is_valid_app = False
         self.__is_valid_code = False
         self.__granted = []
@@ -70,7 +69,7 @@ class UnificationACLValidation:
 
     def __run(self):
         self.__check_req_app_valid()
-        if self.__is_valid_app and self.__is_valid_code:
+        if self.__is_valid_app and self.__is_valid_code and self.__get_perms:
             self.__get_app_permissions()
         else:
             self.__granted = []
