@@ -30,6 +30,15 @@ def invalid_response():
     }), 401
 
 
+def generic_error():
+    return flask.jsonify({
+        'success': False,
+        'message': 'Internal Server Error',
+        'signature': None,
+        'body': None
+    }), 500
+
+
 def obtain_data(body):
     data = 'DATA'
     return flask.jsonify({
@@ -41,7 +50,7 @@ def obtain_data(body):
 
 
 def ingest_data(body):
-    #TODO: The response body needs to be signed before jsonified
+    # TODO: The response body needs to be signed before jsonified
     response_body = "body"
     return flask.jsonify({
         'success': True,
@@ -71,6 +80,10 @@ def data_ingest():
 
     except InvalidSignature:
         return invalid_response()
+
+    except Exception as e:
+        logger.exception(e)
+        return generic_error()
 
 
 if __name__ == '__main__':
