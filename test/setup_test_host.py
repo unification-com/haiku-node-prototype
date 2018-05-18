@@ -19,6 +19,6 @@ with open('/etc/haiku-password', 'w') as f:
 
 os.unlink('/haiku/haiku_node/keystore/keys.store')
 
-shutil.move(
+shutil.copy(
     f"/haiku/haiku_node/keystore/keys-{app_name}.store",
     "/haiku/haiku_node/keystore/keys.store")
