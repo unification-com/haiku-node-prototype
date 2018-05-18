@@ -1,11 +1,11 @@
 import json
 import logging
-import requests
 import time
 
-import click
-
 from pathlib import Path
+
+import click
+import requests
 
 from haiku_node.rpc import verify_account
 from haiku_node.keystore.keystore import UnificationKeystore
@@ -17,8 +17,6 @@ contents = password_config.read_text()
 password_d = json.loads(contents)
 
 log = logging.getLogger(__name__)
-
-print("System test where App2 makes a request to App1")
 
 
 def init_logging():
@@ -42,7 +40,7 @@ def base_url(protocol, host, port):
 
 def systest_auth(base):
     """
-    App2 makes a data request to App1
+    Testing signing and verifying a data request.
     """
     body = 'request body'
     requesting_app = 'app2'
@@ -50,8 +48,8 @@ def systest_auth(base):
     password = password_d[requesting_app]['password']
     encoded_password = str.encode(password)
     ks = UnificationKeystore(encoded_password, app_name=requesting_app)
-
     private_key = ks.get_rpc_auth_private_key()
+
     signature = sign_request(private_key, body)
 
     # An unsuccessfully query
@@ -79,28 +77,57 @@ def systest_auth(base):
     verify_account('app1', d['body'], d['signature'])
 
 
+def systest_ingest(base):
+    """
+    Test the ingestion endpoint.
+    """
+    body = 'ingestion body'
+    requesting_app = 'app2'
+
+    password = password_d[requesting_app]['password']
+    encoded_password = str.encode(password)
+    ks = UnificationKeystore(encoded_password, app_name=requesting_app)
+    private_key = ks.get_rpc_auth_private_key()
+
+    signature = sign_request(private_key, body)
+
+    payload = {"eos_account_name": requesting_app,
+               "signature": signature,
+               "body": body}
+
+    r = requests.post(f"{base}/data_ingest", json=payload, verify=False)
+    assert r.status_code == 200
+    d = r.json()
+    assert d['success'] is True
+
+    # Now verify the response
+    verify_account('app1', d['body'], d['signature'])
+
+
 @main.command()
 def probe():
     """
-    Run a few tests on a system that is already up
+    Run a few tests on a system that is already up.
     """
     url_base = base_url('https', 'haiku-app1', 8050)
     systest_auth(url_base)
+    systest_ingest(url_base)
 
 
 @main.command()
 def host():
     """
-    Test from the host machine
+    Test from the host machine.
     """
     url_base = base_url('http', 'localhost', 8050)
     systest_auth(url_base)
+    systest_ingest(url_base)
 
 
 @main.command()
 def wait():
     """
-    Wait for the system to come up
+    Wait for the system to come up.
     """
     log.info('Waiting for the system to come up')
 
@@ -110,7 +137,11 @@ def wait():
 
     url_base = base_url('https', 'haiku-app1', 8050)
     systest_auth(url_base)
+    systest_ingest(url_base)
+
+    url_base = base_url('https', 'haiku-app2', 8050)
     systest_auth(url_base)
+    systest_ingest(url_base)
 
     time.sleep(6000)
 
