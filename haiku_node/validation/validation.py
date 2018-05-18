@@ -47,6 +47,12 @@ class UnificationAppScValidation:
     def valid_code(self):
         return self.__is_valid_code
 
+    def valid(self):
+        if self.__is_valid_app and self.__is_valid_code:
+            return True
+        else:
+            return False
+
     def __get_app_permissions(self):
         """
         App checks it's own smart contract to see which users are granted

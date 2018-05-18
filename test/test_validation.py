@@ -25,7 +25,10 @@ def run_test(requesting_app):
     code_valid = v.valid_code()
     print(requesting_app, "contract code hash valid:", code_valid)
 
-    if app_valid and code_valid:
+    both_valid = v.valid()
+    print(requesting_app, "is considered valid:", both_valid)
+
+    if both_valid:
 
         print("App valid according to MOTHER. App code hash valid. Check user permissions.")
 
