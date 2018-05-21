@@ -34,7 +34,7 @@ class UnificationLookup:
 
         return res
 
-    def get_native_meta(self):
+    def get_native_user_meta(self):
         self.__open_con()
         self.__c.execute('SELECT * FROM lookup_meta WHERE 1')
         res = self.__c.fetchone()
@@ -48,9 +48,9 @@ class UnificationLookup:
 
         return dt
 
-    def get_schema_map(self,account_name):
+    def get_schema_map(self, schema_name):
         self.__open_con()
-        t = (account_name,)
+        t = (schema_name,)
         self.__c.execute('SELECT * FROM schema_map WHERE sc_schema_name=?', t)
 
         res = self.__c.fetchone()

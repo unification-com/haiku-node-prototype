@@ -4,7 +4,7 @@ ul = UnificationLookup()
 
 id = ul.get_native_user_id('user2')
 eos_acc = ul.get_eos_account(3)
-meta_data = ul.get_native_meta()
+meta_data = ul.get_native_user_meta()
 schema_map = ul.get_schema_map('app1.db1')
 
 print("user2 native ID:", id)

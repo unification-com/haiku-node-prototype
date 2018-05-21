@@ -25,6 +25,8 @@ currentdir = os.path.dirname(
 parentdir = os.path.dirname(currentdir)
 app_config = json.loads(Path(parentdir + '/test/data/test_apps.json').read_text())
 
+test_permissions = json.loads(Path(parentdir + '/test/data/test_permissions.json').read_text())
+
 
 def base_url():
     return f"http://{d['eos_rpc_ip']}:{d['eos_rpc_port']}"
@@ -178,29 +180,29 @@ def validate_with_mother(appname):
 
 def set_permissions():
     print('Setting permissions')
-    with open('data/test_permissions.json') as f:
-        test_permissions = json.load(f)
-        for user_perms in test_permissions['permissions']:
-            user = user_perms['user']
-            for haiku in user_perms['haiku_nodes']:
-                app = haiku['app']
-                for req_app in haiku['req_apps']:
-                    d = {
-                        'user_account': user,
-                        'requesting_app': req_app['account']
-                    }
-                    if req_app['granted']:
-                        cmd = cleos() + ['push', 'action', app, 'grant',
-                                         json.dumps(d), '-p', user]
-                        ret = subprocess.check_output(cmd,
-                                                      universal_newlines=True)
-                        print(ret)
-                    else:
-                        cmd = cleos() + ['push', 'action', app, 'revoke',
-                                         json.dumps(d), '-p', user]
-                        ret = subprocess.check_output(cmd,
-                                                      universal_newlines=True)
-                        print(ret)
+    global test_permissions
+
+    for user_perms in test_permissions['permissions']:
+        user = user_perms['user']
+        for haiku in user_perms['haiku_nodes']:
+            app = haiku['app']
+            for req_app in haiku['req_apps']:
+                d = {
+                    'user_account': user,
+                    'requesting_app': req_app['account']
+                }
+                if req_app['granted']:
+                    cmd = cleos() + ['push', 'action', app, 'grant',
+                                     json.dumps(d), '-p', user]
+                    ret = subprocess.check_output(cmd,
+                                                  universal_newlines=True)
+                    print(ret)
+                else:
+                    cmd = cleos() + ['push', 'action', app, 'revoke',
+                                     json.dumps(d), '-p', user]
+                    ret = subprocess.check_output(cmd,
+                                                  universal_newlines=True)
+                    print(ret)
 
 
 def get_table():

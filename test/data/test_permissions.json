@@ -96,11 +96,11 @@
           "req_apps": [
             {
               "account": "app2",
-              "granted": true
+              "granted": false
             },
             {
               "account": "app3",
-              "granted": true
+              "granted": false
             }
           ]
         },
