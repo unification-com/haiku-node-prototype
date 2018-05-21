@@ -1,0 +1,59 @@
+{
+	"HeartrateDatabase":{
+		"Users":{
+			"ID":{"type":"int","size":32},
+			"LastName":{"type":"string","size":255},
+			"FirstName":{"type":"string","size":255},
+			"Email":{"type":"int","size":32},
+			"Age":{"type":"int","size":32},
+			"GenderCode":"int","size":32
+		},
+		"UserData":{
+			"DataID":{"type":"int","size":32},
+			"Heartrate":{"type":"int","size":32},
+			"Pulse":{"type":"int","size":32},
+			"UserID":{"type":"int","size":32}
+		}
+	},
+	
+	"geolocationDatabase":{
+		"People":{
+			"PeopleID":{"type":"int","size":32},
+			"Name":{"type":"varchar","size":255},
+			"Surname":{"type":"varchar","size":255},
+			"Email":{"type":"varchar","size":255},
+			"ResidentCountry":{"type":"varchar","size":255}
+		},
+		"PeopleData":{
+			"DataID":{"type":"int","size":32},
+			"GeoLocation":{"type":"int","size":32},
+			"TimeStamp":{"type":"timestamp", "size":32},
+			"PeopleID":{"type":"int","size":32}
+		}
+	},
+	
+	"binaryfileDatabase":{
+		"ImageOwners":{
+			"OwnerID":{"type":"int","size":32},
+			"FacebookID":{"type":"int","size":32}
+		},
+		"ImageData":{
+			"ImageID":{"type":"int","size":32},
+			"ImageLocation":{"type":"binarydata","size":"????"},
+			"OwnerID":{"type":"int","size":32}
+		}
+	},
+	
+	"binaryblobDatabase":{
+		"BlobCreator":{
+			"CreatorID":{"type":"int","size":32},
+			"Name":{"type":"varchar","size":255}
+		},
+		"BlobData":{
+			"BlobID":{"type":"int","size":32},
+			"DataBlob":{"type":"binarydata","size":"????"},
+			"BlobSize":{"type":"int","size":32},
+			"CreatorID":{"type":"int","size":32}
+		}
+	}	
+}
