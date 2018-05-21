@@ -8,8 +8,8 @@ RUN apt-get update && \
 
 RUN curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash
 RUN /root/.pyenv/bin/pyenv install 3.6.0
-RUN ln -s /root/.pyenv/versions/3.6.0/bin/python3 /usr/bin/python
-RUN ln -s /root/.pyenv/versions/3.6.0/bin/pip3 /usr/bin/pip
+RUN ln -s /root/.pyenv/versions/3.6.0/bin/python3 /usr/bin/python && \
+    ln -s /root/.pyenv/versions/3.6.0/bin/pip3 /usr/bin/pip
 
 RUN mkdir /haiku
 COPY requirements.txt /haiku
