@@ -214,7 +214,8 @@ def run_test_mother(app):
     assert um.get_haiku_rpc_ip() == app_config[app]['rpc_server']
 
     print("RPC Port: ", um.get_haiku_rpc_port())
-    assert int(um.get_haiku_rpc_port()) == int(app_config[app]['rpc_server_port'])
+    assert int(um.get_haiku_rpc_port()) == int(
+        app_config[app]['rpc_server_port'])
 
     print("RPC Server: ", um.get_haiku_rpc_server())
     print("Valid DB Schemas: ")
@@ -223,7 +224,6 @@ def run_test_mother(app):
 
 
 def run_test_acl(app):
-
     print("Loading ACL/Meta Contract for: ", app)
 
     u_acl = UnificationACL(d['eos_rpc_ip'], d['eos_rpc_port'], app)
