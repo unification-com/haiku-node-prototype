@@ -108,6 +108,7 @@ def mother_contract(username):
                      "/eos/contracts/unification_mother/unification_mother.wast",
                      "/eos/contracts/unification_mother/unification_mother.abi",
                      "-p", username]
+
     ret = subprocess.check_output(cmd, universal_newlines=True)
     print(ret)
 
@@ -115,17 +116,25 @@ def mother_contract(username):
 def set_schema(appname):
     app_conf = app_config[appname]
     for i in app_conf['db_schemas']:
+        d = {
+            'schema_name': i['schema_name'],
+            'schema': i['schema'],
+        }
         cmd = cleos() + ['push', 'action', appname, 'setschema',
-                     f'{"schema_name":"{i["schema_name"]},"schema":"{i["schema"]}" }', '-p', appname]
-        ret = subprocess.check_output(cmd, universal_newlines=True)
-        print(ret)
+                         json.dumps(d), '-p', appname]
+        subprocess.check_output(cmd, universal_newlines=True)
 
 
 def set_data_sources(appname):
     app_conf = app_config[appname]
     for i in app_conf['data_sources']:
-        cmd = cleos() + ['push', 'action', appname, 'setsource',
-                         f'{"source_name":"{i["source_name"]},"source_type":"{i["source_type"]}" }', '-p', appname]
+        d = {
+            'source_name': i['source_name'],
+            'source_type': i['source_type'],
+        }
+
+        cmd = cleos() + ['push', 'action', appname, 'setsource', json.dumps(d),
+               '-p', appname]
         ret = subprocess.check_output(cmd, universal_newlines=True)
         print(ret)
 
@@ -174,12 +183,16 @@ def set_permissions():
                         'requesting_app': req_app['account']
                     }
                     if req_app['granted']:
-                        cmd = cleos() + ['push', 'action', app, 'grant', json.dumps(d), '-p', user]
-                        ret = subprocess.check_output(cmd, universal_newlines=True)
+                        cmd = cleos() + ['push', 'action', app, 'grant',
+                                         json.dumps(d), '-p', user]
+                        ret = subprocess.check_output(cmd,
+                                                      universal_newlines=True)
                         print(ret)
                     else:
-                        cmd = cleos() + ['push', 'action', app, 'revoke', json.dumps(d), '-p', user]
-                        ret = subprocess.check_output(cmd, universal_newlines=True)
+                        cmd = cleos() + ['push', 'action', app, 'revoke',
+                                         json.dumps(d), '-p', user]
+                        ret = subprocess.check_output(cmd,
+                                                      universal_newlines=True)
                         print(ret)
 
 
@@ -196,7 +209,6 @@ def get_table():
 
 
 def run_test_mother(app):
-
     print("Contacting MOTHER FOR: ", app)
 
     um = UnificationMother(d['eos_rpc_ip'], d['eos_rpc_port'], app)
