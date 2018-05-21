@@ -2,6 +2,7 @@ import os, inspect
 import json
 import logging
 import subprocess
+import sqlite3
 
 import requests
 
@@ -23,9 +24,11 @@ usernames = ['user1', 'user2', 'user3', 'unif.mother']
 currentdir = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-app_config = json.loads(Path(parentdir + '/test/data/test_apps.json').read_text())
 
-test_permissions = json.loads(Path(parentdir + '/test/data/test_permissions.json').read_text())
+demo_config = json.loads(Path(parentdir + '/test/data/demo_config.json').read_text())
+
+demo_apps = demo_config['demo_apps']
+demo_permissions = demo_config['demo_permissions']
 
 
 def base_url():
@@ -121,7 +124,7 @@ def mother_contract(username):
 
 def set_schema(appname):
     log.info('Set Schemas')
-    app_conf = app_config[appname]
+    app_conf = demo_apps[appname]
     for i in app_conf['db_schemas']:
         d = {
             'schema_name': i['schema_name'],
@@ -134,7 +137,7 @@ def set_schema(appname):
 
 def set_data_sources(appname):
     log.info('Set Data sources')
-    app_conf = app_config[appname]
+    app_conf = demo_apps[appname]
     for i in app_conf['data_sources']:
         d = {
             'source_name': i['source_name'],
@@ -159,7 +162,7 @@ def validate_with_mother(appname):
     log.info('Validate with MOTHER')
     contract_hash = get_code_hash(appname)
 
-    app_conf = app_config[appname]
+    app_conf = demo_apps[appname]
     schema_vers = ""
     for i in app_conf['db_schemas']:
         schema_vers = schema_vers + i['schema_name'] + ":1,"
@@ -180,9 +183,9 @@ def validate_with_mother(appname):
 
 def set_permissions():
     print('Setting permissions')
-    global test_permissions
+    global demo_permissions
 
-    for user_perms in test_permissions['permissions']:
+    for user_perms in demo_permissions['permissions']:
         user = user_perms['user']
         for haiku in user_perms['haiku_nodes']:
             app = haiku['app']
@@ -232,11 +235,11 @@ def run_test_mother(app):
     assert um.valid_code() is True
 
     print("RPC IP: ", um.get_haiku_rpc_ip())
-    assert um.get_haiku_rpc_ip() == app_config[app]['rpc_server']
+    assert um.get_haiku_rpc_ip() == demo_apps[app]['rpc_server']
 
     print("RPC Port: ", um.get_haiku_rpc_port())
     assert int(um.get_haiku_rpc_port()) == int(
-        app_config[app]['rpc_server_port'])
+        demo_apps[app]['rpc_server_port'])
 
     print("RPC Server: ", um.get_haiku_rpc_server())
     print("Valid DB Schemas: ")
@@ -266,6 +269,56 @@ def run_test_acl(app):
     print("-----------------------------------")
 
 
+def create_lookup_db(app):
+    global demo_apps
+    app_conf = demo_apps[app]
+
+    log.info(f'Create {app} Lookup database')
+    currentdir = os.path.dirname(
+        os.path.abspath(inspect.getfile(inspect.currentframe())))
+    parentdir = os.path.dirname(currentdir)
+    db_path = Path(f'{parentdir}/test/data/{app}_unification_lookup.db')
+    db_name = str(db_path.resolve())
+
+    log.info(db_name)
+
+    conn = sqlite3.connect(db_name)
+    c = conn.cursor()
+
+    c.execute('''CREATE TABLE lookup
+                             (native_id text, eos_account text)''')
+
+    c.execute('''CREATE TABLE lookup_meta
+                                     (native_table text, native_field text, field_type text)''')
+
+    c.execute('''CREATE TABLE schema_map
+                                         (sc_schema_name text, native_db text, native_db_platform text)''')
+
+    c.execute(f"INSERT INTO lookup_meta VALUES ('{app_conf['lookup']['lookup_meta']['native_table']}', "
+              f"'{app_conf['lookup']['lookup_meta']['native_field']}', "
+              f"'{app_conf['lookup']['lookup_meta']['field_type']}')")
+
+    for u in app_conf['lookup']['lookup_users']:
+        c.execute(f"INSERT INTO lookup VALUES ('{u['native_id']}', '{u['eos_account']}')")
+
+    for sc in app_conf['db_schemas']:
+        c.execute(f"INSERT INTO schema_map VALUES ('{sc['schema_name']}', '{sc['database']}', '{sc['db_platform']}')")
+
+    conn.commit()
+    conn.close()
+
+    conn = sqlite3.connect(db_name)
+    c = conn.cursor()
+
+    log.info('check user2 == 2')
+    t = ('user2',)
+    c.execute('SELECT native_id FROM lookup WHERE eos_account=?', t)
+    res = c.fetchone()[0]
+    print("user2 native ID:", res)
+
+    conn.close()
+
+
 def process():
     delete_wallet_files()
 
@@ -289,6 +342,7 @@ def process():
         set_schema(appname)
         set_data_sources(appname)
         validate_with_mother(appname)
+        create_lookup_db(appname)
 
     set_permissions()
     #get_table()

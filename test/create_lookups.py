@@ -8,18 +8,26 @@ log = logging.getLogger(__name__)
 currentdir = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-app_config = json.loads(Path(parentdir + '/test/data/test_apps.json').read_text())
+demo_config = json.loads(Path(parentdir + '/test/data/demo_config.json').read_text())
+demo_apps = demo_config['demo_apps']
+appnames = ['app1', 'app2', 'app3']
+
+demo_apps = demo_config['demo_apps']
+demo_permissions = demo_config['demo_permissions']
+
+print(demo_apps)
+print(demo_permissions)
 
 
-def create_app1():
-    global app_config
-    app_conf = app_config['app1']
+def create_lookup_db(app):
+    global demo_apps
+    app_conf = demo_apps[app]
 
-    log.info('Create App1 Lookup')
+    log.info(f'Create {app} Lookup')
     currentdir = os.path.dirname(
         os.path.abspath(inspect.getfile(inspect.currentframe())))
     parentdir = os.path.dirname(currentdir)
-    db_path = Path(parentdir + '/test/data/app1_unification_lookup.db')
+    db_path = Path(f'{parentdir}/test/data/{app}_unification_lookup.db')
     db_name = str(db_path.resolve())
 
     log.info(db_name)
@@ -28,120 +36,23 @@ def create_app1():
     c = conn.cursor()
 
     c.execute('''CREATE TABLE lookup
-                         (native_id text, eos_account text)''')
+                             (native_id text, eos_account text)''')
 
     c.execute('''CREATE TABLE lookup_meta
-                                 (native_table text, native_field text, field_type text)''')
+                                     (native_table text, native_field text, field_type text)''')
 
     c.execute('''CREATE TABLE schema_map
-                                     (sc_schema_name text, native_db text, native_db_platform text)''')
+                                         (sc_schema_name text, native_db text, native_db_platform text)''')
 
-    c.execute("INSERT INTO lookup_meta VALUES ('Users','ID','int')")
+    c.execute(f"INSERT INTO lookup_meta VALUES ('{app_conf['lookup']['lookup_meta']['native_table']}', "
+              f"'{app_conf['lookup']['lookup_meta']['native_field']}', "
+              f"'{app_conf['lookup']['lookup_meta']['field_type']}')")
 
-    c.execute("INSERT INTO lookup VALUES ('1', 'user1')")
-    c.execute("INSERT INTO lookup VALUES ('2', 'user2')")
-    c.execute("INSERT INTO lookup VALUES ('3', 'user3')")
+    for u in app_conf['lookup']['lookup_users']:
+        c.execute(f"INSERT INTO lookup VALUES ('{u['native_id']}', '{u['eos_account']}')")
 
-    for i in app_conf['db_schemas']:
-        c.execute(f"INSERT INTO schema_map VALUES ('{i['schema_name']}', '{i['database']}', '{i['db_platform']}')")
-
-    conn.commit()
-    conn.close()
-
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-
-    log.info('Test user2 == 2')
-    t = ('user2',)
-    c.execute('SELECT native_id FROM lookup WHERE eos_account=?', t)
-    res = c.fetchone()[0]
-    print("user2 native ID:", res)
-
-    conn.close()
-
-
-def create_app2():
-    global app_config
-    app_conf = app_config['app2']
-
-    log.info('Create App2 Lookup')
-    currentdir = os.path.dirname(
-        os.path.abspath(inspect.getfile(inspect.currentframe())))
-    parentdir = os.path.dirname(currentdir)
-    db_path = Path(parentdir + '/test/data/app2_unification_lookup.db')
-    db_name = str(db_path.resolve())
-
-    log.info(db_name)
-
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-
-    c.execute('''CREATE TABLE lookup
-                         (native_id text, eos_account text)''')
-
-    c.execute('''CREATE TABLE lookup_meta
-                                 (native_table text, native_field text, field_type text)''')
-
-    c.execute('''CREATE TABLE schema_map
-                                     (sc_schema_name text, native_db text, native_db_platform text)''')
-
-    c.execute("INSERT INTO lookup_meta VALUES ('People','PeopleID','int')")
-
-    c.execute("INSERT INTO lookup VALUES ('1', 'user1')")
-    c.execute("INSERT INTO lookup VALUES ('2', 'user2')")
-    c.execute("INSERT INTO lookup VALUES ('3', 'user3')")
-
-    for i in app_conf['db_schemas']:
-        c.execute(f"INSERT INTO schema_map VALUES ('{i['schema_name']}', '{i['database']}', '{i['db_platform']}')")
-
-    conn.commit()
-    conn.close()
-
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-
-    log.info('Test user2 == 2')
-    t = ('user2',)
-    c.execute('SELECT native_id FROM lookup WHERE eos_account=?', t)
-    res = c.fetchone()[0]
-    print("user2 native ID:", res)
-
-    conn.close()
-
-
-def create_app3():
-    global app_config
-    app_conf = app_config['app2']
-
-    log.info('Create App3 Lookup')
-    currentdir = os.path.dirname(
-        os.path.abspath(inspect.getfile(inspect.currentframe())))
-    parentdir = os.path.dirname(currentdir)
-    db_path = Path(parentdir + '/test/data/app3_unification_lookup.db')
-    db_name = str(db_path.resolve())
-
-    log.info(db_name)
-
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-
-    c.execute('''CREATE TABLE lookup
-                         (native_id text, eos_account text)''')
-
-    c.execute('''CREATE TABLE lookup_meta
-                                 (native_table text, native_field text, field_type text)''')
-
-    c.execute('''CREATE TABLE schema_map
-                                     (sc_schema_name text, native_db text, native_db_platform text)''')
-
-    c.execute("INSERT INTO lookup_meta VALUES ('ImageOwners','OwnerID','int')")
-
-    c.execute("INSERT INTO lookup VALUES ('1', 'user1')")
-    c.execute("INSERT INTO lookup VALUES ('2', 'user2')")
-    c.execute("INSERT INTO lookup VALUES ('3', 'user3')")
-
-    for i in app_conf['db_schemas']:
-        c.execute(f"INSERT INTO schema_map VALUES ('{i['schema_name']}', '{i['database']}', '{i['db_platform']}')")
+    for sc in app_conf['db_schemas']:
+        c.execute(f"INSERT INTO schema_map VALUES ('{sc['schema_name']}', '{sc['database']}', '{sc['db_platform']}')")
 
     conn.commit()
     conn.close()
@@ -159,9 +70,8 @@ def create_app3():
 
 
 def process():
-    create_app1()
-    create_app2()
-    create_app3()
+    for app in appnames:
+        create_lookup_db(app)
     # TODO: have Docker composer copy respective lookup DBs to haiku_node/lookup/unification_lookup.db
 
 
