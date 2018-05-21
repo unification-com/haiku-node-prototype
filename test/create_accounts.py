@@ -80,17 +80,7 @@ def wallet_import_key(username, private_key):
     print(f"Importing account for {username}")
 
     cmd = cleos() + ["wallet", "import", "-n", username, private_key]
-    ret = subprocess.check_output(cmd, universal_newlines=True)
-    print(ret)
-
-
-def create_users(names):
-    for username in names:
-        password = create_user(username)
-        print(f"User {username} with password {password}")
-
-        unlock_wallet(username, password)
-        print(f"Wallet unlocked")
+    subprocess.check_output(cmd, universal_newlines=True)
 
 
 def create_account(username, public_key):
@@ -256,7 +246,14 @@ def run_test_acl(app):
 
 
 def process():
-    create_users(usernames + appnames)
+    delete_wallet_files()
+
+    for username in usernames + appnames:
+        password = create_user(username)
+        print(f"User {username} with password {password}")
+
+        unlock_wallet(username, password)
+        print(f"Wallet unlocked")
 
     keys = [create_key() for x in range(len(usernames + appnames))]
 
