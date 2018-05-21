@@ -4,7 +4,11 @@ import logging
 
 import requests
 
+from pathlib import Path
+
 from eosapi import Client
+from haiku_node.blockchain.mother import UnificationMother
+from haiku_node.blockchain.acl import UnificationACL
 
 log = logging.getLogger(__name__)
 
@@ -20,13 +24,7 @@ eosClient = Client(
 
 appnames = ['app1', 'app2', 'app3']
 usernames = ['user1', 'user2', 'user3', 'unif.mother']
-app_config = {}
-
-
-def get_app_config():
-    global app_config
-    with open('data/test_apps.json') as f:
-        app_config = json.load(f)
+app_config = json.loads(Path('test/data/test_apps.json').read_text())
 
 
 def base_url():
@@ -118,7 +116,7 @@ def mother_contract(username):
     cmd = cleos() + ["set", "contract", username,
                      "/eos/contracts/unification_mother",
                      "/eos/contracts/unification_mother/unification_mother.wast",
-                     "/eos/contracts/unification_acl/unification_mother.abi",
+                     "/eos/contracts/unification_mother/unification_mother.abi",
                      "-p", username]
     ret = subprocess.check_output(cmd, universal_newlines=True)
     print(ret)
@@ -195,17 +193,6 @@ def set_permissions():
                         print(ret)
 
 
-# def deny_access():
-#     d = {
-#         'user_account': 'user3',
-#         'requesting_app': 'app2'
-#     }
-#     # TODO: Notice the app1 in here
-#     cmd = cleos() + ['push', 'action', 'app1', 'revoke', json.dumps(d), '-p',
-#                      'user1']
-#     ret = subprocess.check_output(cmd, universal_newlines=True)
-
-
 def get_table():
     print('Getting table')
     d = {
@@ -218,9 +205,57 @@ def get_table():
     print(ret)
 
 
-def process():
-    get_app_config()
+def run_test_mother(app):
 
+    print("Contacting MOTHER FOR: ", app)
+
+    um = UnificationMother(d['eos_rpc_ip'], d['eos_rpc_port'], app)
+    print("Valid app: ", um.valid_app())
+    assert um.valid_app() is True
+
+    print("ACL Hash in MOTHER: ", um.get_hash_in_mother())
+    print("Deployed ACL Contract hash: ", um.get_deployed_contract_hash())
+    assert um.get_hash_in_mother() == um.get_deployed_contract_hash()
+
+    print("Valid Code: ", um.valid_code())
+    assert um.valid_code() is True
+
+    print("RPC IP: ", um.get_haiku_rpc_ip())
+    assert um.get_haiku_rpc_ip() == app_config[app]['rpc_server']
+
+    print("RPC Port: ", um.get_haiku_rpc_port())
+    assert int(um.get_haiku_rpc_port()) == int(app_config[app]['rpc_server_port'])
+
+    print("RPC Server: ", um.get_haiku_rpc_server())
+    print("Valid DB Schemas: ")
+    print(um.get_valid_db_schemas())
+    print("-----------------------------------")
+
+
+def run_test_acl(app):
+
+    print("Loading ACL/Meta Contract for: ", app)
+
+    u_acl = UnificationACL(d['eos_rpc_ip'], d['eos_rpc_port'], app)
+
+    print("Data Schemas:")
+    print(u_acl.get_db_schemas())
+    print("Data Sources:")
+    print(u_acl.get_data_sources())
+
+    print("Check Permissions")
+    for req_app in appnames:
+        print("Check perms for Requesting App: ", req_app)
+        granted, revoked = u_acl.get_perms_for_req_app(req_app)
+        print("Users who Granted:")
+        print(granted)
+        print("Users who Revoked:")
+        print(revoked)
+
+    print("-----------------------------------")
+
+
+def process():
     create_users(usernames + appnames)
 
     keys = [create_key() for x in range(len(usernames + appnames))]
@@ -238,7 +273,12 @@ def process():
         validate_with_mother(appname)
 
     set_permissions()
-    get_table()
+    #get_table()
+    for appname in appnames:
+        print(f'==========RUN CONTRACT TESTS FOR {appname}==========')
+        run_test_mother(appname)
+        run_test_acl(appname)
+        print(f'==========END CONTRACT TESTS FOR {appname}==========')
 
 
 def configure_logging():
