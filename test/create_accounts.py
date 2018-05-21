@@ -48,22 +48,21 @@ def serialise(xs):
 
 
 def unlock_wallet(username, password):
-    url = f"{base_url()}/v1/wallet/unlock"
+    url = f"{keos_url()}/v1/wallet/unlock"
     r = requests.post(url, data=serialise([username, password]))
 
 
-def delete_users():
-    print('Deleting users')
-
-    cmd = ["/usr/local/bin/docker", "exec", "docker_nodeosd_1", "/bin/bash",
-           '-c',
-           'rm -f /root/.local/share/eosio/nodeos/data/*.wallet']
-    ret = subprocess.check_output(cmd, universal_newlines=True)
-
-
 def cleos():
-    return ["/usr/local/bin/docker", "exec", "docker_nodeosd_1",
-            "/opt/eosio/bin/cleos"]
+    return ["/usr/local/bin/docker", "exec", "docker_keosd_1",
+            "/opt/eosio/bin/cleos", "--url", "http://nodeosd:8888",
+            "--wallet-url", "http://localhost:8889"]
+
+
+def delete_wallet_files():
+    log.info('Deleting wallets on the keos node')
+    cmd = ["/usr/local/bin/docker", "exec", "docker_keosd_1", "/bin/bash",
+           '-c', 'rm -f /opt/eosio/bin/data-dir/*.wallet']
+    subprocess.check_output(cmd, universal_newlines=True)
 
 
 def create_key():
