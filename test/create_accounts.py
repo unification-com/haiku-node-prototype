@@ -1,38 +1,39 @@
 import json
-import subprocess
 import logging
+import subprocess
 
 import requests
 
 from pathlib import Path
 
-from eosapi import Client
-from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.blockchain.mother import UnificationMother
 
 log = logging.getLogger(__name__)
-
 
 d = {
     "eos_rpc_ip": "127.0.0.1",
     "eos_rpc_port": "8888"
 }
 
-eosClient = Client(
-    nodes=['http://' + d['eos_rpc_ip'] + ':' + d['eos_rpc_port']])
-
 
 appnames = ['app1', 'app2', 'app3']
 usernames = ['user1', 'user2', 'user3', 'unif.mother']
-app_config = json.loads(Path('test/data/test_apps.json').read_text())
+app_config = json.loads(Path('data/test_apps.json').read_text())
 
 
 def base_url():
     return f"http://{d['eos_rpc_ip']}:{d['eos_rpc_port']}"
 
 
+def keos_url():
+    keos_ip = '127.0.0.1'
+    keos_port = 8889
+    return f"http://{keos_ip}:{keos_port}"
+
+
 def create_user(username):
-    url = f"{base_url()}/v1/wallet/create"
+    url = f"{keos_url()}/v1/wallet/create"
     r = requests.post(url, data=f""" "{username}" """)
     if r.status_code != 201:
         raise Exception(r.content)
