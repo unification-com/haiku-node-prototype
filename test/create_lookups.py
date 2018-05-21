@@ -1,12 +1,20 @@
 import os, inspect
+import json
 import sqlite3
 from pathlib import Path
 import logging
 
 log = logging.getLogger(__name__)
+currentdir = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+app_config = json.loads(Path(parentdir + '/test/data/test_apps.json').read_text())
 
 
 def create_app1():
+    global app_config
+    app_conf = app_config['app1']
+
     log.info('Create App1 Lookup')
     currentdir = os.path.dirname(
         os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -25,11 +33,17 @@ def create_app1():
     c.execute('''CREATE TABLE lookup_meta
                                  (native_table text, native_field text, field_type text)''')
 
+    c.execute('''CREATE TABLE schema_map
+                                     (sc_schema_name text, native_db text, native_db_platform text)''')
+
     c.execute("INSERT INTO lookup_meta VALUES ('Users','ID','int')")
 
     c.execute("INSERT INTO lookup VALUES ('1', 'user1')")
     c.execute("INSERT INTO lookup VALUES ('2', 'user2')")
     c.execute("INSERT INTO lookup VALUES ('3', 'user3')")
+
+    for i in app_conf['db_schemas']:
+        c.execute(f"INSERT INTO schema_map VALUES ('{i['schema_name']}', '{i['database']}', '{i['db_platform']}')")
 
     conn.commit()
     conn.close()
@@ -47,6 +61,9 @@ def create_app1():
 
 
 def create_app2():
+    global app_config
+    app_conf = app_config['app2']
+
     log.info('Create App2 Lookup')
     currentdir = os.path.dirname(
         os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -65,11 +82,17 @@ def create_app2():
     c.execute('''CREATE TABLE lookup_meta
                                  (native_table text, native_field text, field_type text)''')
 
+    c.execute('''CREATE TABLE schema_map
+                                     (sc_schema_name text, native_db text, native_db_platform text)''')
+
     c.execute("INSERT INTO lookup_meta VALUES ('People','PeopleID','int')")
 
     c.execute("INSERT INTO lookup VALUES ('1', 'user1')")
     c.execute("INSERT INTO lookup VALUES ('2', 'user2')")
     c.execute("INSERT INTO lookup VALUES ('3', 'user3')")
+
+    for i in app_conf['db_schemas']:
+        c.execute(f"INSERT INTO schema_map VALUES ('{i['schema_name']}', '{i['database']}', '{i['db_platform']}')")
 
     conn.commit()
     conn.close()
@@ -87,6 +110,9 @@ def create_app2():
 
 
 def create_app3():
+    global app_config
+    app_conf = app_config['app2']
+
     log.info('Create App3 Lookup')
     currentdir = os.path.dirname(
         os.path.abspath(inspect.getfile(inspect.currentframe())))
@@ -105,11 +131,17 @@ def create_app3():
     c.execute('''CREATE TABLE lookup_meta
                                  (native_table text, native_field text, field_type text)''')
 
+    c.execute('''CREATE TABLE schema_map
+                                     (sc_schema_name text, native_db text, native_db_platform text)''')
+
     c.execute("INSERT INTO lookup_meta VALUES ('ImageOwners','OwnerID','int')")
 
     c.execute("INSERT INTO lookup VALUES ('1', 'user1')")
     c.execute("INSERT INTO lookup VALUES ('2', 'user2')")
     c.execute("INSERT INTO lookup VALUES ('3', 'user3')")
+
+    for i in app_conf['db_schemas']:
+        c.execute(f"INSERT INTO schema_map VALUES ('{i['schema_name']}', '{i['database']}', '{i['db_platform']}')")
 
     conn.commit()
     conn.close()

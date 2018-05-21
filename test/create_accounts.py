@@ -19,7 +19,10 @@ d = {
 
 appnames = ['app1', 'app2', 'app3']
 usernames = ['user1', 'user2', 'user3', 'unif.mother']
-app_config = json.loads(Path('data/test_apps.json').read_text())
+currentdir = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+app_config = json.loads(Path(parentdir + '/test/data/test_apps.json').read_text())
 
 
 def base_url():

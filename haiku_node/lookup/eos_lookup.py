@@ -12,25 +12,6 @@ class UnificationLookup:
         db_path = Path(parentdir + '/lookup/unification_lookup.db')
         self.__db_name = str(db_path.resolve())
 
-    def create_db(self):
-        # TODO: Migrate to create_accounts.py or similar init script
-        # save locally in each app's container, with app specific data
-        self.__open_con()
-        self.__c.execute('''CREATE TABLE lookup
-                     (native_id text, eos_account text)''')
-
-        self.__c.execute('''CREATE TABLE lookup_meta
-                             (native_table text, native_field text, field_type text)''')
-
-        self.__c.execute("INSERT INTO lookup_meta VALUES ('Users','ID','int')")
-
-        self.__c.execute("INSERT INTO lookup VALUES ('1', 'user1')")
-        self.__c.execute("INSERT INTO lookup VALUES ('2', 'user2')")
-        self.__c.execute("INSERT INTO lookup VALUES ('3', 'user3')")
-
-        self.__conn.commit()
-        self.__close_con()
-
     def get_native_user_id(self, account_name):
         self.__open_con()
         t = (account_name,)
@@ -52,6 +33,36 @@ class UnificationLookup:
         self.__close_con()
 
         return res
+
+    def get_native_meta(self):
+        self.__open_con()
+        self.__c.execute('SELECT * FROM lookup_meta WHERE 1')
+        res = self.__c.fetchone()
+
+        dt = {}
+        dt['table'] = res[0]
+        dt['field'] = res[1]
+        dt['type'] = res[2]
+
+        self.__close_con()
+
+        return dt
+
+    def get_schema_map(self,account_name):
+        self.__open_con()
+        t = (account_name,)
+        self.__c.execute('SELECT * FROM schema_map WHERE sc_schema_name=?', t)
+
+        res = self.__c.fetchone()
+
+        dt = {}
+        dt['sc_schema_name'] = res[0]
+        dt['db_name'] = res[1]
+        dt['db_platform'] = res[2]
+
+        self.__close_con()
+
+        return dt
 
     def __open_con(self):
         self.__conn = sqlite3.connect(self.__db_name)
