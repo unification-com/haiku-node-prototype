@@ -116,7 +116,7 @@ def mother_contract(username):
     cmd = cleos() + ["set", "contract", username,
                      "/eos/contracts/unification_mother",
                      "/eos/contracts/unification_mother/unification_mother.wast",
-                     "/eos/contracts/unification_acl/unification_mother.abi",
+                     "/eos/contracts/unification_mother/unification_mother.abi",
                      "-p", username]
     ret = subprocess.check_output(cmd, universal_newlines=True)
     print(ret)
