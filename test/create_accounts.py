@@ -114,6 +114,7 @@ def mother_contract(username):
 
 
 def set_schema(appname):
+    log.info('Set Schemas')
     app_conf = app_config[appname]
     for i in app_conf['db_schemas']:
         d = {
@@ -126,6 +127,7 @@ def set_schema(appname):
 
 
 def set_data_sources(appname):
+    log.info('Set Data sources')
     app_conf = app_config[appname]
     for i in app_conf['data_sources']:
         d = {
@@ -148,6 +150,7 @@ def get_code_hash(appname):
 def validate_with_mother(appname):
     # TODO: Fix the names
 
+    log.info('Validate with MOTHER')
     contract_hash = get_code_hash(appname)
 
     app_conf = app_config[appname]
