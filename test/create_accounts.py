@@ -1,38 +1,48 @@
+import os, inspect
 import json
-import subprocess
 import logging
+import subprocess
+import sqlite3
 
 import requests
 
 from pathlib import Path
 
-from eosapi import Client
-from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.blockchain.mother import UnificationMother
 
 log = logging.getLogger(__name__)
-
 
 d = {
     "eos_rpc_ip": "127.0.0.1",
     "eos_rpc_port": "8888"
 }
 
-eosClient = Client(
-    nodes=['http://' + d['eos_rpc_ip'] + ':' + d['eos_rpc_port']])
-
 
 appnames = ['app1', 'app2', 'app3']
 usernames = ['user1', 'user2', 'user3', 'unif.mother']
-app_config = json.loads(Path('test/data/test_apps.json').read_text())
+currentdir = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+parentdir = os.path.dirname(currentdir)
+
+demo_config = json.loads(Path(parentdir + '/test/data/demo_config.json').read_text())
+
+demo_apps = demo_config['demo_apps']
+demo_permissions = demo_config['demo_permissions']
 
 
 def base_url():
     return f"http://{d['eos_rpc_ip']}:{d['eos_rpc_port']}"
 
 
+def keos_url():
+    keos_ip = '127.0.0.1'
+    keos_port = 8889
+    return f"http://{keos_ip}:{keos_port}"
+
+
 def create_user(username):
-    url = f"{base_url()}/v1/wallet/create"
+    url = f"{keos_url()}/v1/wallet/create"
     r = requests.post(url, data=f""" "{username}" """)
     if r.status_code != 201:
         raise Exception(r.content)
@@ -47,22 +57,21 @@ def serialise(xs):
 
 
 def unlock_wallet(username, password):
-    url = f"{base_url()}/v1/wallet/unlock"
+    url = f"{keos_url()}/v1/wallet/unlock"
     r = requests.post(url, data=serialise([username, password]))
 
 
-def delete_users():
-    print('Deleting users')
-
-    cmd = ["/usr/local/bin/docker", "exec", "docker_nodeosd_1", "/bin/bash",
-           '-c',
-           'rm -f /root/.local/share/eosio/nodeos/data/*.wallet']
-    ret = subprocess.check_output(cmd, universal_newlines=True)
-
-
 def cleos():
-    return ["/usr/local/bin/docker", "exec", "docker_nodeosd_1",
-            "/opt/eosio/bin/cleos"]
+    return ["/usr/local/bin/docker", "exec", "docker_keosd_1",
+            "/opt/eosio/bin/cleos", "--url", "http://nodeosd:8888",
+            "--wallet-url", "http://localhost:8889"]
+
+
+def delete_wallet_files():
+    log.info('Deleting wallets on the keos node')
+    cmd = ["/usr/local/bin/docker", "exec", "docker_keosd_1", "/bin/bash",
+           '-c', 'rm -f /opt/eosio/bin/data-dir/*.wallet']
+    subprocess.check_output(cmd, universal_newlines=True)
 
 
 def create_key():
@@ -80,17 +89,7 @@ def wallet_import_key(username, private_key):
     print(f"Importing account for {username}")
 
     cmd = cleos() + ["wallet", "import", "-n", username, private_key]
-    ret = subprocess.check_output(cmd, universal_newlines=True)
-    print(ret)
-
-
-def create_users(names):
-    for username in names:
-        password = create_user(username)
-        print(f"User {username} with password {password}")
-
-        unlock_wallet(username, password)
-        print(f"Wallet unlocked")
+    subprocess.check_output(cmd, universal_newlines=True)
 
 
 def create_account(username, public_key):
@@ -118,24 +117,35 @@ def mother_contract(username):
                      "/eos/contracts/unification_mother/unification_mother.wast",
                      "/eos/contracts/unification_mother/unification_mother.abi",
                      "-p", username]
+
     ret = subprocess.check_output(cmd, universal_newlines=True)
     print(ret)
 
 
 def set_schema(appname):
-    app_conf = app_config[appname]
+    log.info('Set Schemas')
+    app_conf = demo_apps[appname]
     for i in app_conf['db_schemas']:
+        d = {
+            'schema_name': i['schema_name'],
+            'schema': i['schema'],
+        }
         cmd = cleos() + ['push', 'action', appname, 'setschema',
-                     f'{"schema_name":"{i["schema_name"]},"schema":"{i["schema"]}" }', '-p', appname]
-        ret = subprocess.check_output(cmd, universal_newlines=True)
-        print(ret)
+                         json.dumps(d), '-p', appname]
+        subprocess.check_output(cmd, universal_newlines=True)
 
 
 def set_data_sources(appname):
-    app_conf = app_config[appname]
+    log.info('Set Data sources')
+    app_conf = demo_apps[appname]
     for i in app_conf['data_sources']:
-        cmd = cleos() + ['push', 'action', appname, 'setsource',
-                         f'{"source_name":"{i["source_name"]},"source_type":"{i["source_type"]}" }', '-p', appname]
+        d = {
+            'source_name': i['source_name'],
+            'source_type': i['source_type'],
+        }
+
+        cmd = cleos() + ['push', 'action', appname, 'setsource', json.dumps(d),
+               '-p', appname]
         ret = subprocess.check_output(cmd, universal_newlines=True)
         print(ret)
 
@@ -149,9 +159,10 @@ def get_code_hash(appname):
 def validate_with_mother(appname):
     # TODO: Fix the names
 
+    log.info('Validate with MOTHER')
     contract_hash = get_code_hash(appname)
 
-    app_conf = app_config[appname]
+    app_conf = demo_apps[appname]
     schema_vers = ""
     for i in app_conf['db_schemas']:
         schema_vers = schema_vers + i['schema_name'] + ":1,"
@@ -172,25 +183,29 @@ def validate_with_mother(appname):
 
 def set_permissions():
     print('Setting permissions')
-    with open('data/test_permissions.json') as f:
-        test_permissions = json.load(f)
-        for user_perms in test_permissions['permissions']:
-            user = user_perms['user']
-            for haiku in user_perms['haiku_nodes']:
-                app = haiku['app']
-                for req_app in haiku['req_apps']:
-                    d = {
-                        'user_account': user,
-                        'requesting_app': req_app['account']
-                    }
-                    if req_app['granted']:
-                        cmd = cleos() + ['push', 'action', app, 'grant', json.dumps(d), '-p', user]
-                        ret = subprocess.check_output(cmd, universal_newlines=True)
-                        print(ret)
-                    else:
-                        cmd = cleos() + ['push', 'action', app, 'revoke', json.dumps(d), '-p', user]
-                        ret = subprocess.check_output(cmd, universal_newlines=True)
-                        print(ret)
+    global demo_permissions
+
+    for user_perms in demo_permissions['permissions']:
+        user = user_perms['user']
+        for haiku in user_perms['haiku_nodes']:
+            app = haiku['app']
+            for req_app in haiku['req_apps']:
+                d = {
+                    'user_account': user,
+                    'requesting_app': req_app['account']
+                }
+                if req_app['granted']:
+                    cmd = cleos() + ['push', 'action', app, 'grant',
+                                     json.dumps(d), '-p', user]
+                    ret = subprocess.check_output(cmd,
+                                                  universal_newlines=True)
+                    print(ret)
+                else:
+                    cmd = cleos() + ['push', 'action', app, 'revoke',
+                                     json.dumps(d), '-p', user]
+                    ret = subprocess.check_output(cmd,
+                                                  universal_newlines=True)
+                    print(ret)
 
 
 def get_table():
@@ -206,7 +221,6 @@ def get_table():
 
 
 def run_test_mother(app):
-
     print("Contacting MOTHER FOR: ", app)
 
     um = UnificationMother(d['eos_rpc_ip'], d['eos_rpc_port'], app)
@@ -221,10 +235,11 @@ def run_test_mother(app):
     assert um.valid_code() is True
 
     print("RPC IP: ", um.get_haiku_rpc_ip())
-    assert um.get_haiku_rpc_ip() == app_config[app]['rpc_server']
+    assert um.get_haiku_rpc_ip() == demo_apps[app]['rpc_server']
 
     print("RPC Port: ", um.get_haiku_rpc_port())
-    assert int(um.get_haiku_rpc_port()) == int(app_config[app]['rpc_server_port'])
+    assert int(um.get_haiku_rpc_port()) == int(
+        demo_apps[app]['rpc_server_port'])
 
     print("RPC Server: ", um.get_haiku_rpc_server())
     print("Valid DB Schemas: ")
@@ -233,7 +248,6 @@ def run_test_mother(app):
 
 
 def run_test_acl(app):
-
     print("Loading ACL/Meta Contract for: ", app)
 
     u_acl = UnificationACL(d['eos_rpc_ip'], d['eos_rpc_port'], app)
@@ -255,8 +269,65 @@ def run_test_acl(app):
     print("-----------------------------------")
 
 
+def create_lookup_db(app):
+    global demo_apps
+    app_conf = demo_apps[app]
+
+    log.info(f'Create {app} Lookup database')
+    currentdir = os.path.dirname(
+        os.path.abspath(inspect.getfile(inspect.currentframe())))
+    parentdir = os.path.dirname(currentdir)
+    db_path = Path(f'{parentdir}/test/data/{app}_unification_lookup.db')
+    db_name = str(db_path.resolve())
+
+    log.info(db_name)
+
+    conn = sqlite3.connect(db_name)
+    c = conn.cursor()
+
+    c.execute('''CREATE TABLE lookup
+                             (native_id text, eos_account text)''')
+
+    c.execute('''CREATE TABLE lookup_meta
+                                     (native_table text, native_field text, field_type text)''')
+
+    c.execute('''CREATE TABLE schema_map
+                                         (sc_schema_name text, native_db text, native_db_platform text)''')
+
+    c.execute(f"INSERT INTO lookup_meta VALUES ('{app_conf['lookup']['lookup_meta']['native_table']}', "
+              f"'{app_conf['lookup']['lookup_meta']['native_field']}', "
+              f"'{app_conf['lookup']['lookup_meta']['field_type']}')")
+
+    for u in app_conf['lookup']['lookup_users']:
+        c.execute(f"INSERT INTO lookup VALUES ('{u['native_id']}', '{u['eos_account']}')")
+
+    for sc in app_conf['db_schemas']:
+        c.execute(f"INSERT INTO schema_map VALUES ('{sc['schema_name']}', '{sc['database']}', '{sc['db_platform']}')")
+
+    conn.commit()
+    conn.close()
+
+    conn = sqlite3.connect(db_name)
+    c = conn.cursor()
+
+    log.info('check user2 == 2')
+    t = ('user2',)
+    c.execute('SELECT native_id FROM lookup WHERE eos_account=?', t)
+    res = c.fetchone()[0]
+    print("user2 native ID:", res)
+
+    conn.close()
+
+
 def process():
-    create_users(usernames + appnames)
+    delete_wallet_files()
+
+    for username in usernames + appnames:
+        password = create_user(username)
+        print(f"User {username} with password {password}")
+
+        unlock_wallet(username, password)
+        print(f"Wallet unlocked")
 
     keys = [create_key() for x in range(len(usernames + appnames))]
 
@@ -271,6 +342,7 @@ def process():
         set_schema(appname)
         set_data_sources(appname)
         validate_with_mother(appname)
+        create_lookup_db(appname)
 
     set_permissions()
     #get_table()

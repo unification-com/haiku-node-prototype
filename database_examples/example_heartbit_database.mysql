@@ -24,9 +24,9 @@ CREATE TABLE UserData (
 INSERT INTO Users
     (ID,LastName,FirstName,Email)
 VALUES
-    (1,'McLean','Shawn','syonara@hotmail.com'),
-	(2,'Hodge','Paul','paul@hotmail.com'),
-	(3,'Ney','Ma','neyma@hotmail.com');
+    (1,'McLean','Shawn','syonara@unification.com'),
+	(2,'Hodge','Paul','paul@unification.com'),
+	(3,'Ney','Ma','neyma@unification.com');
 	
 INSERT INTO UserData
     (DataID,Heartrate,GeoLocation,Pulse,UserID)
