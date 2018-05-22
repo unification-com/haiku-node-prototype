@@ -1,0 +1,14 @@
+{	
+	"binaryblobDatabase":{
+		"BlobCreator":{
+			"CreatorID":{"type":"int","size":32},
+			"Name":{"type":"varchar","size":255}
+		},
+		"BlobData":{
+			"BlobID":{"type":"int","size":32},
+			"DataBlob":{"type":"binarydata","size":"????"},
+			"BlobSize":{"type":"int","size":32},
+			"CreatorID":{"type":"int","size":32}
+		}
+	}	
+}

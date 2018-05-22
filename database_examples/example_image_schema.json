@@ -1,0 +1,13 @@
+{	
+	"binaryfileDatabase":{
+		"ImageOwners":{
+			"OwnerID":{"type":"int","size":32},
+			"FacebookID":{"type":"int","size":32}
+		},
+		"ImageData":{
+			"ImageID":{"type":"int","size":32},
+			"ImageLocation":{"type":"binarydata","size":"????"},
+			"OwnerID":{"type":"int","size":32}
+		}
+	}
+}
