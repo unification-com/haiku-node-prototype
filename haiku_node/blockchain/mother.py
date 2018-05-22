@@ -46,7 +46,7 @@ class UnificationMother:
         return self.__valid_db_schemas
 
     def get_haiku_rpc_server(self):
-        return f'https://{self.__rpc_server_ip}:{self.__rpc_server_port}'
+        return f'https://{self.__haiku_rpc_server_ip}:{self.__haiku_rpc_server_port}'
 
     def get_haiku_rpc_ip(self):
         return self.__haiku_rpc_server_ip
