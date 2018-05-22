@@ -16,7 +16,7 @@ password_config = Path('data/system.json')
 contents = password_config.read_text()
 password_d = json.loads(contents)
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('haiku_node')
 
 
 def init_logging():
@@ -104,6 +104,21 @@ def systest_ingest(base):
     verify_account('app1', d['body'], d['signature'])
 
 
+def systest_accounts():
+    log.info('Running systest accounts')
+
+    from haiku_node.eosio_helpers.accounts import AccountManager, \
+        make_default_accounts
+
+    app_config = json.loads(Path('data/test_apps.json').read_text())
+    demo_config = json.loads(Path('data/demo_config.json').read_text())
+    appnames = ['app1', 'app2', 'app3']
+    usernames = ['user1', 'user2', 'user3', 'unif.mother']
+
+    manager = AccountManager(host=False)
+    make_default_accounts(manager, app_config, demo_config, appnames, usernames)
+
+
 @main.command()
 def probe():
     """
@@ -133,7 +148,7 @@ def wait():
 
     # TODO: Implementing sleeping for now
     print("Sleeping")
-    time.sleep(10)
+    time.sleep(5)
 
     url_base = base_url('https', 'haiku-app1', 8050)
     systest_auth(url_base)
@@ -142,6 +157,8 @@ def wait():
     url_base = base_url('https', 'haiku-app2', 8050)
     systest_auth(url_base)
     systest_ingest(url_base)
+
+    systest_accounts()
 
     time.sleep(6000)
 
