@@ -1,16 +1,22 @@
 from eosapi import Client
-from haiku_node.eosio_helpers import eosio_account
 
 
 class UnificationACL:
     """
-    Loads data from ACL/Meta Smart Contract for THIS Haiku node's app
+    Loads data from ACL/Meta Smart Contract for a Haiku node's app
     """
 
     def __init__(self,
                  eos_rpc_ip,
                  eos_rpc_port,
                  acl_contract_acc):
+
+        """
+            :param eos_rpc_ip: IP for EOS Client to communicate with the blockchain
+            :param eos_rpc_port: Port for EOS Client to communicate with the blockchain
+            :param acl_contract_acc: the eos account name of the app for which the class will retrieve
+                           data from the ACL/Meta Data smart contract
+        """
 
         self.__permission_rec_table = "permrecords"
         self.__db_schema_table = "dataschemas"
