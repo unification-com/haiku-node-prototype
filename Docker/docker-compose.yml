@@ -1,6 +1,7 @@
 version: '3'
 
 services:
+
   nodeosd:
     image: unification-node
     command: /opt/eosio/bin/nodeosd.sh --resync
@@ -8,6 +9,7 @@ services:
     ports:
     - "8888:8888"
     - "9876:9876"
+
   keosd:
     image: unification-keosd
     command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir --http-server-address 0.0.0.0:8889
@@ -16,18 +18,21 @@ services:
     - "8889:8889"
     volumes:
       - keosd-data-volume:/opt/eosio/bin/data-dir
+
   haiku-app1:
     image: haiku
     environment:
     - app_name=app1
     ports:
     - "8851:8050"
+
   haiku-app2:
     image: haiku
     environment:
     - app_name=app2
     ports:
     - "8852:8050"
+
   systemtest:
     image: systemtest
     command: python /haiku/test/systemtest.py wait
