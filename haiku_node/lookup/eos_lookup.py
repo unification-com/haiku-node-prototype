@@ -1,6 +1,7 @@
 import os, inspect
 import sqlite3
 from pathlib import Path
+from haiku_node.eosio_helpers import eosio_account
 
 
 class UnificationLookup:
@@ -13,6 +14,12 @@ class UnificationLookup:
         self.__db_name = str(db_path.resolve())
 
     def get_native_user_id(self, account_name):
+
+        if isinstance(account_name, int):
+            account_name = eosio_account.name_to_string(account_name)
+        elif isinstance(account_name, str) and account_name.isdigit():
+            account_name = eosio_account.name_to_string(account_name)
+
         self.__open_con()
         t = (account_name,)
         self.__c.execute('SELECT native_id FROM lookup WHERE eos_account=?', t)
