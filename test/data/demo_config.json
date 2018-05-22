@@ -272,5 +272,28 @@
                 ]
             }
         ]
+    },
+    "wallet_passwords": {
+        "app1": {
+          "wallet_password": "PW5KJb4QW78rwKvqSDpt2of5RjieAECUvAYDYYvbL74U4mJtbGJJZ"
+        },
+        "app2": {
+          "wallet_password": "PW5JhTgUc1A8CXJXi6UFwWBte4tTnpuSJkiwa1MjCkDvsVs3qiNqF"
+        },
+        "app3": {
+          "wallet_password": "PW5JZCZRNKtN7cknyADGzEGTzv6eXaU2cMpSPi49F4Mme5gwrQc7U"
+        },
+        "user1": {
+          "wallet_password": "PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx"
+        },
+        "user2": {
+          "wallet_password": "PW5JRx3hihCz33R9Tm9uTQGPJj7UFA54nUjcgGkq3PYBy5iQXTsCG"
+        },
+        "user3": {
+          "wallet_password": "PW5KfhcoCs5yV7wLTWWh97fZbf9jshHZL7vD9tQARfpCGVnDyA95t"
+        },
+        "unif.mother": {
+          "wallet_password": "PW5JN14rVAQ4oL19PREuJbDjbde6QfrRmWCXsoBq8866KdxvWYJSH"
+        }
     }
 }

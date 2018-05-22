@@ -41,6 +41,9 @@ def name_to_string(n):
     Converts EOS uint64 account name to readable base32 string
     :param n: account name as string
     """
+    # make sure it's an int
+    n = int(n)
+
     charmap = ".12345abcdefghijklmnopqrstuvwxyz"
     tmp = n
     n_str = ""
