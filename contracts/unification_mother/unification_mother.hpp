@@ -49,6 +49,21 @@ namespace UnificationFoundation {
 
         //https://github.com/EOSIO/eos/wiki/Persistence-API#multi-index-constructor
         typedef eosio::multi_index<N(validapps), validapps> valapps;
+
+        //@abi table binhashes i64
+        struct binhashes {
+            uint64_t pkey;
+            uint64_t vnum;
+            std::string vcode;
+            uint64_t arch_id;
+            std::string bin_hash;
+
+            uint64_t primary_key() const { return pkey; }
+
+            EOSLIB_SERIALIZE(binhashes, (pkey)(vnum)(vcode)(arch_id)(bin_hash))
+        };
+
+        typedef eosio::multi_index<N(binhashes), binhashes> bin_hashes;
     };
 
     EOSIO_ABI(unification_mother, (validate)(invalidate)(isvalid)(getapp))

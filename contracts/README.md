@@ -87,11 +87,11 @@ cleos set contract app3 unification_acl unification_acl/unification_acl.wast uni
 cleos set contract unif.mother unification_mother unification_mother/unification_mother.wast unification_mother/unification_mother.abi -p unif.mother
 ```
 
-15) Set the (currently dummy) schema for each app:
+15) Set the schema for each app:
 ```
-cleos push action app1 setschema '{"schema_name":"test1", "schema":"test1" }' -p app1
-cleos push action app2 setschema '{"schema_name":"test2", "schema":"test2" }' -p app2
-cleos push action app3 setschema '{"schema_name":"test3", "schema":"test3" }' -p app3
+cleos push action app1 setschema '{"schema_name":"app1.db1", "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>heartrate</name><type>int</type><is-null>true</is-null><table>UserData</table></field><field><name>Pulse</name><type>int</type><is-null>true</is-null><table>UserData</table></field></fields></schema-template>" }' -p app1
+cleos push action app2 setschema '{"schema_name":"app2.db1", "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>GeoLocation</name><type>int</type><is-null>true</is-null><table>PeopleData</table></field><field><name>TimeStamp</name><type>int</type><is-null>true</is-null><table>PeopleData</table></field></fields></schema-template>" }' -p app2
+cleos push action app3 setschema '{"schema_name":"app3.db1", "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Image</name><type>base65_mime_image</type><is-null>true</is-null><table>ImageData</table></field></fields></schema-template>" }' -p app3
 ```
 
 Schema tables can be retrieved:
@@ -104,10 +104,11 @@ cleos get table app3 app3 dataschemas
 
 16) Set some sources. Note, for source_type = database, source_name must match an existing schema for the app
 ```
-cleos push action app1 setsource '{"source_name":"test1", "source_type":"database"}' -p app1
-cleos push action app2 setsource '{"source_name":"test2", "source_type":"database"}' -p app2
-cleos push action app2 setsource '{"source_name":"app1", "source_type":"contract"}' -p app2
-cleos push action app3 setsource '{"source_name":"test3", "source_type":"database"}' -p app3
+cleos push action app1 setsource '{"source_name":"app1.db1", "source_type":"database"}' -p app1
+cleos push action app2 setsource '{"source_name":"app2.db2", "source_type":"database"}' -p app2
+cleos push action app3 setsource '{"source_name":"app3.db3", "source_type":"database"}' -p app2
+cleos push action app3 setsource '{"source_name":"app1", "source_type":"contract"}' -p app3
+cleos push action app3 setsource '{"source_name":"app2", "source_type":"contract"}' -p app3
 ```
 
 Sources tables can be retrieved:
