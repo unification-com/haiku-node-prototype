@@ -8,23 +8,18 @@ class UnificationMother:
     """
 
     def __init__(self, eos_rpc_ip, eos_rpc_port, acl_contract_acc):
-        """
-                :param conf: config json object
-                :param requesting_app: the eos account name of the requesting app
-                """
         self.__mother = "unif.mother"
         self.__valid_apps_table = "validapps"
         self.__acl_contract_acc = acl_contract_acc
         self.__eosClient = Client(
-            nodes=[f"http://{eos_rpc_ip}"
-                   f":{eos_rpc_port}"])
+            nodes=[f"http://{eos_rpc_ip}:{eos_rpc_port}"])
         self.__is_valid_app = False
         self.__is_valid_code = False
         self.__deployed_code_hash = ""  # the actual deployed contract
         self.__valid_db_schemas = {}
         self.__acl_contract_hash_in_mother = ""  # hash held in MOTHER
-        self.__rpc_server_ip = ""
-        self.__rpc_server_port = 0
+        self.__rpc_server_ip = eos_rpc_ip
+        self.__rpc_server_port = eos_rpc_port
 
         self.__run()
 
