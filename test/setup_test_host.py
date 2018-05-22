@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from test.create_lookups import create_lookup_db
 
 from pathlib import Path
 
@@ -22,3 +23,9 @@ os.unlink('/haiku/haiku_node/keystore/keys.store')
 shutil.copy(
     f"/haiku/haiku_node/keystore/keys-{app_name}.store",
     "/haiku/haiku_node/keystore/keys.store")
+
+# Create lookup database
+create_lookup_db(app_name)
+shutil.copy(
+    f"/haiku/test/data/{app_name}_unification_lookup.db",
+    "/haiku/haiku_node/lookup/unification_lookup.db")
