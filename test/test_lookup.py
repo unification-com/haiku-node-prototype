@@ -1,21 +1,29 @@
+import pytest
+
 from haiku_node.lookup.eos_lookup import UnificationLookup
 
-ul = UnificationLookup()
 
-id = ul.get_native_user_id('user2')
-eos_acc = ul.get_eos_account(3)
-meta_data = ul.get_native_user_meta()
-schema_map = ul.get_schema_map('app1.db1')
+@pytest.mark.skipif(True, reason="Test needs setup")
+def test_user_lookup():
+    ul = UnificationLookup()
 
-print("user2 native ID:", id)
+    id = ul.get_native_user_id('user2')
+    eos_acc = ul.get_eos_account(3)
+    meta_data = ul.get_native_user_meta()
+    schema_map = ul.get_schema_map('app1.db1')
 
-print("native UID 3 EOS Account:", eos_acc)
+    print("user2 native ID:", id)
 
-print("Meta data:")
+    print("native UID 3 EOS Account:", eos_acc)
 
-print(meta_data)
+    print("Meta data:")
+
+    print(meta_data)
+
+    print("Schema map for app1.db1:")
+
+    print(schema_map)
 
 
-print("Schema map for app1.db1:")
-
-print(schema_map)
+if __name__ == "__main__":
+    test_user_lookup()
