@@ -6,9 +6,9 @@ from haiku_node.config.config import UnificationConfig
 apps_to_test = ['app1', 'app2', 'app3']
 config = UnificationConfig()
 conf = config.get_conf()
-demo_apps = {}
+app_config = {}
 
-demo_apps = json.loads(Path('test/data/test_apps.json').read_text())
+app_config = json.loads(Path('test/data/test_apps.json').read_text())
 
 
 def run_test(app):
@@ -28,10 +28,10 @@ def run_test(app):
     assert um.valid_code() is True
 
     print("RPC IP: ", um.get_haiku_rpc_ip())
-    assert um.get_haiku_rpc_ip() == demo_apps[app]['rpc_server']
+    assert um.get_haiku_rpc_ip() == app_config[app]['rpc_server']
 
     print("RPC Port: ", um.get_haiku_rpc_port())
-    assert int(um.get_haiku_rpc_port()) == int(demo_apps[app]['rpc_server_port'])
+    assert int(um.get_haiku_rpc_port()) == int(app_config[app]['rpc_server_port'])
 
     print("RPC Server: ", um.get_haiku_rpc_server())
     print("Valid DB Schemas: ")

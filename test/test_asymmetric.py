@@ -1,5 +1,3 @@
-import pytest
-
 from haiku_node.config.keys import get_public_key, get_private_key
 from haiku_node.validation.encryption import sign_request, verify_request
 
@@ -16,11 +14,8 @@ def test_sign_and_verify():
 
     broken_signature = 'unlucky' + signature[7:]
 
-    from cryptography.exceptions import InvalidSignature
-    with pytest.raises(InvalidSignature):
-        verify_request(public_key, message, broken_signature)
-
-    verify_request(public_key, message, signature)
+    assert verify_request(public_key, message, broken_signature) is False
+    assert verify_request(public_key, message, signature) is True
 
 
 def test_get_public_key():
