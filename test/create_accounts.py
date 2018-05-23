@@ -13,7 +13,6 @@ from haiku_node.eosio_helpers.accounts import (
 log = logging.getLogger('haiku_node')
 
 
-app_config = json.loads(Path('data/test_apps.json').read_text())
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 
 
@@ -82,7 +81,7 @@ def process():
     appnames = ['app1', 'app2', 'app3']
     usernames = ['user1', 'user2', 'user3', 'unif.mother']
 
-    make_default_accounts(manager, app_config, demo_config, appnames, usernames)
+    make_default_accounts(manager, demo_config, appnames, usernames)
 
     for appname in appnames:
         create_lookup_db(appname, demo_apps=demo_config['demo_apps'])

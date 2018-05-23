@@ -244,13 +244,13 @@ class AccountManager:
 
 
 def make_default_accounts(
-        manager: AccountManager, app_config, demo_config, appnames, usernames):
+        manager: AccountManager, demo_config, appnames, usernames):
     demo_apps = demo_config['demo_apps']
     demo_permissions = demo_config['demo_permissions']
 
     for username in usernames + appnames:
         manager.open_wallet(username)
-        password = app_config[username]['wallet_password']
+        password = demo_config['wallet_passwords'][username]['wallet_password']
         manager.unlock_wallet(username, password)
 
     keys = [manager.create_key() for x in range(len(usernames + appnames))]

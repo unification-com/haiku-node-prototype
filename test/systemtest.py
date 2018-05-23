@@ -106,16 +106,15 @@ def systest_ingest(base):
 def systest_accounts():
     log.info('Running systest accounts')
 
-    from haiku_node.eosio_helpers.accounts import AccountManager, \
-        make_default_accounts
+    from haiku_node.eosio_helpers.accounts import (
+        AccountManager, make_default_accounts)
 
-    app_config = json.loads(Path('data/test_apps.json').read_text())
     demo_config = json.loads(Path('data/demo_config.json').read_text())
     appnames = ['app1', 'app2', 'app3']
     usernames = ['user1', 'user2', 'user3', 'unif.mother']
 
     manager = AccountManager(host=False)
-    make_default_accounts(manager, app_config, demo_config, appnames, usernames)
+    make_default_accounts(manager, demo_config, appnames, usernames)
 
 
 @main.command()
