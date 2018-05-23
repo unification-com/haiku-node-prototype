@@ -4,6 +4,9 @@ import shutil
 
 from pathlib import Path
 
+from create_lookups import create_lookup_db
+from haiku_node.config.config import UnificationConfig
+
 config = Path('data/system.json')
 
 contents = config.read_text()
@@ -14,6 +17,7 @@ password = d[app_name]['password']
 
 print(f"Setting up host for {app_name}")
 
+print(f"Create keystore for {app_name}")
 with open('/etc/haiku-password', 'w') as f:
     f.write(password)
 
@@ -22,3 +26,19 @@ os.unlink('/haiku/haiku_node/keystore/keys.store')
 shutil.copy(
     f"/haiku/haiku_node/keystore/keys-{app_name}.store",
     "/haiku/haiku_node/keystore/keys.store")
+
+# Create lookup database
+print(f"Create lookup db for {app_name}")
+create_lookup_db(app_name)
+shutil.copy(
+    f"/haiku/test/data/{app_name}_unification_lookup.db",
+    "/haiku/haiku_node/lookup/unification_lookup.db")
+
+os.unlink(f"/haiku/test/data/{app_name}_unification_lookup.db")
+
+print(f"set config/config.json values for host {app_name}")
+uc = UnificationConfig()
+uc.set_conf("acl_contract", app_name)
+
+print("config.json:")
+print(uc.get_conf())

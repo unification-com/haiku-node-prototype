@@ -30,6 +30,7 @@ def create_lookup_db(app):
     db_path = Path(f'{parentdir}/test/data/{app}_unification_lookup.db')
     db_name = str(db_path.resolve())
 
+    print("create db: ", db_name)
     log.info(db_name)
 
     conn = sqlite3.connect(db_name)
@@ -72,7 +73,6 @@ def create_lookup_db(app):
 def process():
     for app in appnames:
         create_lookup_db(app)
-    # TODO: have Docker composer copy respective lookup DBs to haiku_node/lookup/unification_lookup.db
 
 
 def configure_logging():

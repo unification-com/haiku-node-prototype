@@ -52,6 +52,8 @@ class AccountManager:
 
         cmd = pre + subcommands
 
+        print("cleos command: ", cmd)
+
         result = subprocess.run(
             cmd, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, universal_newlines=True)
@@ -96,17 +98,21 @@ class AccountManager:
 
     def create_account(self, username, public_key):
         log.info(f"Creating account for {username}")
-        self.cleos(
+        ret = self.cleos(
             ["create", "account", "eosio", username, public_key, public_key])
+
+        print(ret.stdout)
 
     def mother_contract(self, username):
         log.info('Associating mother contracts')
-        self.cleos(
+        ret = self.cleos(
             ["set", "contract", username,
              "/eos/contracts/unification_mother",
              "/eos/contracts/unification_mother/unification_mother.wast",
              "/eos/contracts/unification_mother/unification_mother.abi",
              "-p", username])
+
+        print(ret.stdout)
 
     def associate_contracts(self, username):
         log.info('Associating acl contracts')
@@ -124,9 +130,10 @@ class AccountManager:
                 'schema_name': i['schema_name'],
                 'schema': i['schema'],
             }
-            self.cleos(
+            ret = self.cleos(
                 ['push', 'action', appname, 'setschema', json.dumps(d), '-p',
                  appname])
+            print(ret.stdout)
 
     def set_data_sources(self, app_config, appname):
         app_conf = app_config[appname]
@@ -135,9 +142,10 @@ class AccountManager:
                 'source_name': i['source_name'],
                 'source_type': i['source_type'],
             }
-            self.cleos(
+            ret = self.cleos(
                 ['push', 'action', appname, 'setsource', json.dumps(d), '-p',
                  appname])
+            print(ret.stdout)
 
     def get_code_hash(self, appname):
         ret = self.cleos(['get', 'code', appname])
@@ -151,20 +159,22 @@ class AccountManager:
         for i in app_conf['db_schemas']:
             schema_vers = schema_vers + i['schema_name'] + ":1,"
 
-        schema_vers = schema_vers.rstrip(",")
+            schema_vers = schema_vers.rstrip(",")
 
-        d = {
-            'acl_contract_acc': appname,
-            'schema_vers': schema_vers,
-            'acl_contract_hash': contract_hash,
-            'rpc_server_ip': app_conf['rpc_server'],
-            'rpc_server_port': app_conf['rpc_server_port']
-        }
-        self.cleos(
+            d = {
+                'acl_contract_acc': appname,
+                'schema_vers': schema_vers,
+                'acl_contract_hash': contract_hash,
+                'rpc_server_ip': app_conf['rpc_server'],
+                'rpc_server_port': app_conf['rpc_server_port']
+            }
+            ret = self.cleos(
             ['push', 'action', 'unif.mother', 'validate', json.dumps(d),
              '-p', 'unif.mother'])
+            print(ret.stdout)
 
     def set_permissions(self, demo_permissions):
+        print("set_permissions")
         for user_perms in demo_permissions['permissions']:
             user = user_perms['user']
             for haiku in user_perms['haiku_nodes']:
@@ -175,13 +185,15 @@ class AccountManager:
                         'requesting_app': req_app['account']
                     }
                     if req_app['granted']:
-                        self.cleos(
+                        ret = self.cleos(
                             ['push', 'action', app, 'grant', json.dumps(d),
                              '-p', user])
+                        print(ret.stdout)
                     else:
-                        self.cleos(
+                        ret = self.cleos(
                             ['push', 'action', app, 'revoke', json.dumps(d),
                              '-p', user])
+                        print(ret.stdout)
 
     def run_test_mother(self, app, demo_apps):
         print("Contacting MOTHER FOR: ", app)
