@@ -31,10 +31,16 @@ def test_get_public_key():
     assert get_private_key('app2') is not None
 
 
-def test_encryption():
-    message = b"encrypted data"
+def test_encryption_over_json():
+    import json
+
+    data_body = "this is the original text"
 
     public_key = get_public_key('app2')
     private_key = get_private_key('app2')
 
-    assert decrypt(private_key, encrypt(public_key, message)) == message
+    data = json.dumps({'body': encrypt(public_key, data_body)})
+    reload = json.loads(data)
+    plain_text_body = decrypt(private_key, reload['body'])
+
+    assert plain_text_body == data_body
