@@ -12,10 +12,9 @@ from haiku_node.rpc import verify_account
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.validation.encryption import sign_request, decrypt, encrypt
 
-password_config = Path('data/system.json')
+demo_config = json.loads(Path('data/demo_config.json').read_text())
+password_d = demo_config["system"]
 
-contents = password_config.read_text()
-password_d = json.loads(contents)
 
 log = logging.getLogger('haiku_node')
 
@@ -113,16 +112,15 @@ def systest_ingest(base):
 def systest_accounts():
     log.info('Running systest accounts')
 
-    from haiku_node.eosio_helpers.accounts import AccountManager, \
-        make_default_accounts
+    from haiku_node.eosio_helpers.accounts import (
+        AccountManager, make_default_accounts)
 
-    app_config = json.loads(Path('data/test_apps.json').read_text())
     demo_config = json.loads(Path('data/demo_config.json').read_text())
     appnames = ['app1', 'app2', 'app3']
     usernames = ['user1', 'user2', 'user3', 'unif.mother']
 
     manager = AccountManager(host=False)
-    make_default_accounts(manager, app_config, demo_config, appnames, usernames)
+    make_default_accounts(manager, demo_config, appnames, usernames)
 
 
 @main.command()

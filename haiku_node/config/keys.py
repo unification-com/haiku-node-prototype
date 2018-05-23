@@ -12,10 +12,10 @@ def password_for_app(app_name):
     """
     current_directory = Path(os.path.abspath(__file__))
     par = current_directory.parent.parent.parent
-    config = par / Path('test/data/system.json')
+    config = par / Path('test/data/demo_config.json')
 
     contents = config.read_text()
-    d = json.loads(contents)
+    d = json.loads(contents)["system"]
 
     return d[app_name]['password']
 

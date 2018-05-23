@@ -8,11 +8,11 @@ log = logging.getLogger(__name__)
 currentdir = os.path.dirname(
             os.path.abspath(inspect.getfile(inspect.currentframe())))
 parentdir = os.path.dirname(currentdir)
-demo_config = json.loads(Path(parentdir + '/test/data/demo_config.json').read_text())
+demo_config = json.loads(
+    Path(parentdir + '/test/data/demo_config.json').read_text())
 demo_apps = demo_config['demo_apps']
 appnames = ['app1', 'app2', 'app3']
 
-demo_apps = demo_config['demo_apps']
 demo_permissions = demo_config['demo_permissions']
 
 print(demo_apps)

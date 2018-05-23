@@ -1,14 +1,15 @@
 import json
 from pathlib import Path
+
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.config.config import UnificationConfig
 
 apps_to_test = ['app1', 'app2', 'app3']
 config = UnificationConfig()
 conf = config.get_conf()
-demo_apps = {}
 
-demo_apps = json.loads(Path('test/data/test_apps.json').read_text())
+demo_config = json.loads(Path('test/data/demo_config.json').read_text())
+demo_apps = demo_config["demo_apps"]
 
 
 def run_test(app):
