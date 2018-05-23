@@ -39,7 +39,10 @@ class UnificationACL:
         return self.__data_sources
 
     def get_current_valid_schema(self, schema_name, schema_vers):
-        return self.__db_schemas[f'{schema_name}.{schema_vers}']
+        if f'{schema_name}.{schema_vers}' in self.__db_schemas:
+            return self.__db_schemas[f'{schema_name}.{schema_vers}']
+        else:
+            return False
 
     def get_perms_for_req_app(self, requesting_app):
         # TODO: run in loop and check JSON result for "more" value
@@ -64,7 +67,7 @@ class UnificationACL:
             self.__acl_contract_acc, self.__db_schema_table, True, 0, -1, -1)
 
         for i in table_data['rows']:
-            key = f'{i["schema_name"]}.{i["schema_vers"]}'
+            key = f'{i["schema_name_str"]}.{i["schema_vers"]}'
             d = {}
             d['schema_id'] = i['pkey']
             d['schema_name'] = i['schema_name']
