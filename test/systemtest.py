@@ -7,6 +7,7 @@ from pathlib import Path
 import click
 import requests
 
+from haiku_node.client import HaikuDataClient
 from haiku_node.config.keys import get_public_key
 from haiku_node.rpc import verify_account
 from haiku_node.keystore.keystore import UnificationKeystore
@@ -17,7 +18,6 @@ from haiku_node.eosio_helpers import eosio_account
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
-
 
 log = logging.getLogger('haiku_node')
 
@@ -85,7 +85,7 @@ def systest_auth(base):
 
 def systest_ingest(base):
     """
-    App2 provides data for App1 to ingest.
+    App2 requests data from App1.
     """
     body = 'ingestion body'
     requesting_app = 'app2'
@@ -247,6 +247,9 @@ def host():
     systest_auth(url_base)
     systest_ingest(url_base)
 
+    client = HaikuDataClient(protocol='http', local=True)
+    client.make_data_request('app2', 'app1', "data-request-1")
+
 
 @main.command()
 def wait():
@@ -279,6 +282,9 @@ def wait():
     url_base = base_url('https', 'haiku-app2', 8050)
     systest_auth(url_base)
     systest_ingest(url_base)
+
+    client = HaikuDataClient()
+    client.make_data_request('app2', 'app1', "data-request-1")
 
     time.sleep(6000)
 
