@@ -5,7 +5,14 @@ from haiku_node.blockchain.acl import UnificationACL
 
 """
 Validation class for a single REQUESTING app.
+1) Loads ACL/Meta Data Smart Contract for THIS Haiku/App
+2) Loads data from MOTHER for REQUESTING APP
+3) Checks REQUESTING APP is valid according to MOTHER
+4) If REQUESTING APP is Valid, load permissions from THIS Haiku's ACL/Meta Data Smart Contract
+   for the REQUESTING APP
 """
+
+
 class UnificationAppScValidation:
 
     def __init__(self, conf, requesting_app, get_perms=True):
@@ -55,8 +62,8 @@ class UnificationAppScValidation:
 
     def __get_app_permissions(self):
         """
-        App checks it's own smart contract to see which users are granted
-        permission to access it's data.
+        App checks it's own smart contract to see which users have granted
+        permission to the REQUESTING APP to access it's data.
         """
 
         u_acl = UnificationACL(self.__conf['eos_rpc_ip'], self.__conf['eos_rpc_port'], self.__conf['acl_contract'])
@@ -64,7 +71,7 @@ class UnificationAppScValidation:
 
     def __check_req_app_valid(self):
         """
-        Call the Mother Smart Contract, and check if the requesting_app is both
+        Call the MOTHER Smart Contract, and check if the requesting_app is both
         a verified app, and that it's smart contract code is valid (by checking
         the code's hash).
         """
