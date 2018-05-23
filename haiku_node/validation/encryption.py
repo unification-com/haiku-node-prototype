@@ -34,6 +34,28 @@ def verify_request(public_key, body, signature):
     verifier.verify()
 
 
+def encrypt(public_key, body):
+    return public_key.encrypt(
+        body,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+
+def decrypt(private_key, ciphertext):
+    return private_key.decrypt(
+        ciphertext,
+        padding.OAEP(
+            mgf=padding.MGF1(algorithm=hashes.SHA256()),
+            algorithm=hashes.SHA256(),
+            label=None
+        )
+    )
+
+
 def generate_keys():
     private_key = rsa.generate_private_key(
         public_exponent=65537,
