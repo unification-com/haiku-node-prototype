@@ -157,6 +157,7 @@ class AccountManager:
         app_conf = app_config[appname]
         schema_vers = ""
         for i in app_conf['db_schemas']:
+            # hard-code version num to 1 for demo
             schema_vers = schema_vers + i['schema_name'] + ":1,"
 
             schema_vers = schema_vers.rstrip(",")
@@ -270,7 +271,7 @@ def make_default_accounts(
     manager.set_permissions(demo_permissions)
 
     for appname in appnames:
-        log.info(f'==========RUN CONTRACT TESTS FOR {appname}==========')
+        log.info(f'==========RUN CONTRACT DUMPS FOR {appname}==========')
         manager.run_test_mother(appname, demo_apps)
         manager.run_test_acl(appname, demo_apps, appnames)
-        log.info(f'==========END CONTRACT TESTS FOR {appname}==========')
+        log.info(f'==========END CONTRACT DUMPS FOR {appname}==========')
