@@ -255,10 +255,23 @@ def wait():
     """
     log.info('Waiting for the system to come up')
 
+    print("Sleeping")
+    time.sleep(5)
+
+    # create EOS accounts
+    systest_accounts()
+
+    # Deploy and populate Smart Contracts
+    log.info('Ensure accounts are created, and contracts populated')
+    systest_smart_contract_mother()
+    systest_smart_contract_acl()
+    systest_user_permissions()
+
     # TODO: Implementing sleeping for now
     print("Sleeping")
     time.sleep(5)
 
+    # Run RPC tests
     url_base = base_url('https', 'haiku-app1', 8050)
     systest_auth(url_base)
     systest_ingest(url_base)
@@ -266,13 +279,6 @@ def wait():
     url_base = base_url('https', 'haiku-app2', 8050)
     systest_auth(url_base)
     systest_ingest(url_base)
-
-    systest_accounts()
-
-    log.info('Ensure accounts are created, and contracts populated')
-    systest_smart_contract_mother()
-    systest_smart_contract_acl()
-    systest_user_permissions()
 
     time.sleep(6000)
 
