@@ -7,13 +7,11 @@ from pathlib import Path
 from create_lookups import create_lookup_db
 from haiku_node.config.config import UnificationConfig
 
-config = Path('data/system.json')
-
-contents = config.read_text()
-d = json.loads(contents)
+demo_config = json.loads(Path('data/demo_config.json').read_text())
+password_d = demo_config["system"]
 
 app_name = os.environ['app_name']
-password = d[app_name]['password']
+password = password_d[app_name]['password']
 
 print(f"Setting up host for {app_name}")
 

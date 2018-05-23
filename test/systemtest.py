@@ -11,10 +11,9 @@ from haiku_node.rpc import verify_account
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.validation.encryption import sign_request
 
-password_config = Path('data/system.json')
+demo_config = json.loads(Path('data/demo_config.json').read_text())
+password_d = demo_config["system"]
 
-contents = password_config.read_text()
-password_d = json.loads(contents)
 
 log = logging.getLogger('haiku_node')
 
