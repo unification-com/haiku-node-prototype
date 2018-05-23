@@ -6,6 +6,9 @@ from haiku_node.config.keys import get_public_key
 from haiku_node.validation.encryption import (
     verify_request, sign_request, encrypt, decrypt)
 
+from haiku_node.validation.validation import UnificationAppScValidation
+from haiku_node.config.config import UnificationConfig
+
 app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
 
@@ -46,6 +49,15 @@ def generic_error():
     }), 500
 
 
+def invalid_app():
+    return flask.jsonify({
+        'success': False,
+        'message': 'Invalid App',
+        'signature': None,
+        'body': None
+    }), 401
+
+
 def obtain_data(body, eos_account_name):
     """
     :param body: A request for a particular set of data.
@@ -79,7 +91,27 @@ def data_request():
     try:
         d = flask.request.get_json()
         verify_account(d['eos_account_name'], d['body'], d['signature'])
-        return obtain_data(d['body'], d['eos_account_name'])
+
+        # Validate requesting app against smart contracts
+        # config is this Haiku Node's config fle, containing its ACL/Meta Data Smart Contract account/address
+        # and the EOS RPC server/port used for communicating with the blockchain.
+        # probably need to load this at a higher level?
+        config = UnificationConfig()
+        conf = config.get_conf()
+
+        # Init the validation class for THIS Haiku, and validate the REQUESTING APP
+        # Since we only need to validate the app at this point, set get_perms=False
+        v = UnificationAppScValidation(conf, d['eos_account_name'], False)
+
+        # If the REQUESTING APP is valid according to MOTHER, then we can
+        # generate the data. If not, return an invalid_app response
+        # Whatever obtain_data eventually uses to grab the data will also need to
+        # load the UnificationAppScValidation class, so it knows which users have
+        # granted permissiosn to the REQUESTING APP, and get the correct data
+        if v.valid_code():
+            return obtain_data(d['body'], d['eos_account_name'])
+        else:
+            return invalid_app()
 
     except InvalidSignature:
         return invalid_response()
