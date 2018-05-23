@@ -17,23 +17,23 @@ joined = session.query(UserData) \
 if False:
 	print('\n### All users:')
 	for user in users:
-		print user.FirstName, "has lastname", user.LastName, "with Email:",user.Email
+		print(user.FirstName, "has lastname", user.LastName, "with Email:",user.Email)
 	print('')
 
 # Show userdata (debug)
 if False:
 	print('\n### All data:')
 	for datablock in data:
-		print "DataID:", datablock.DataID, "Heartrate:", datablock.Heartrate, "Loc:", datablock.GeoLocation, "Time:", datablock.TimeStamp, "Pulse:", datablock.Pulse
+		print("DataID:", datablock.DataID, "Heartrate:", datablock.Heartrate, "Loc:", datablock.GeoLocation, "Time:", datablock.TimeStamp, "Pulse:", datablock.Pulse)
 	print('')
 
 # Show joined data
 if True:
 	for joinedbloc in joined:
 		#pprint(vars(joinedbloc))
-		print "DataID:", joinedbloc.DataID, "Heartrate:", joinedbloc.Heartrate, "Loc:", \
+		print("DataID:", joinedbloc.DataID, "Heartrate:", joinedbloc.Heartrate, "Loc:", \
 			joinedbloc.GeoLocation, "Time:", joinedbloc.TimeStamp, "Pulse:", joinedbloc.Pulse, \
-			"UserID:", joinedbloc.UserID
+			"UserID:", joinedbloc.UserID)
 		# NOTE: This join did not include joined column object fields from the Users table. 
 		# Maybe we need a different join call? Like, a full join? Or something?
 	print('')
