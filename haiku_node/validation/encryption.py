@@ -44,12 +44,30 @@ def verify_request(public_key, body, signature):
     verifier.verify()
 
 
-def encrypt(public_key, body):
-    return public_key.encrypt(body, padding_encryption())
+def encrypt(public_key, plaintext):
+    """
+    JSON transmittable encryption.
+
+    :param public_key:
+    :param plaintext: unicode body
+    :return: base64encoded encrypted text
+    """
+    encrypted_body = public_key.encrypt(
+        plaintext.encode('utf-8'), padding_encryption())
+    return base64.encodebytes(encrypted_body).decode('utf-8')
 
 
 def decrypt(private_key, ciphertext):
-    return private_key.decrypt(ciphertext, padding_encryption())
+    """
+    Decryption base64encoded ciphertext from JSON response.
+
+    :param private_key:
+    :param ciphertext: base64encoded ciphertext
+    :return:
+    """
+    base64decoded = base64.decodebytes(ciphertext.encode('utf-8'))
+    return private_key.decrypt(
+        base64decoded, padding_encryption()).decode('utf-8')
 
 
 def generate_keys():
