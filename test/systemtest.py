@@ -7,9 +7,10 @@ from pathlib import Path
 import click
 import requests
 
+from haiku_node.config.keys import get_public_key
 from haiku_node.rpc import verify_account
 from haiku_node.keystore.keystore import UnificationKeystore
-from haiku_node.validation.encryption import sign_request
+from haiku_node.validation.encryption import sign_request, decrypt, encrypt
 
 password_config = Path('data/system.json')
 
@@ -41,6 +42,8 @@ def base_url(protocol, host, port):
 def systest_auth(base):
     """
     Testing signing and verifying a data request.
+
+    App2 is requesting data from App1.
     """
     body = 'request body'
     requesting_app = 'app2'
@@ -74,15 +77,17 @@ def systest_auth(base):
     assert d['success'] is True
 
     # Now verify the response
-    verify_account('app1', d['body'], d['signature'])
+    decrypted_body = decrypt(private_key, d['body'])
+    verify_account('app1', decrypted_body, d['signature'])
 
 
 def systest_ingest(base):
     """
-    Test the ingestion endpoint.
+    App2 provides data for App1 to ingest.
     """
     body = 'ingestion body'
     requesting_app = 'app2'
+    ingesting_app = 'app1'
 
     password = password_d[requesting_app]['password']
     encoded_password = str.encode(password)
@@ -90,10 +95,11 @@ def systest_ingest(base):
     private_key = ks.get_rpc_auth_private_key()
 
     signature = sign_request(private_key, body)
+    encrypted_body = encrypt(get_public_key(ingesting_app), body)
 
     payload = {"eos_account_name": requesting_app,
                "signature": signature,
-               "body": body}
+               "body": encrypted_body}
 
     r = requests.post(f"{base}/data_ingest", json=payload, verify=False)
     assert r.status_code == 200

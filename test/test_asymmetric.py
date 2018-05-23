@@ -1,7 +1,8 @@
 import pytest
 
 from haiku_node.config.keys import get_public_key, get_private_key
-from haiku_node.validation.encryption import sign_request, verify_request
+from haiku_node.validation.encryption import (
+    sign_request, verify_request, encrypt, decrypt)
 
 
 def test_sign_and_verify():
@@ -28,3 +29,18 @@ def test_get_public_key():
 
     assert get_public_key('app2') is not None
     assert get_private_key('app2') is not None
+
+
+def test_encryption_over_json():
+    import json
+
+    data_body = "this is the original text"
+
+    public_key = get_public_key('app2')
+    private_key = get_private_key('app2')
+
+    data = json.dumps({'body': encrypt(public_key, data_body)})
+    reload = json.loads(data)
+    plain_text_body = decrypt(private_key, reload['body'])
+
+    assert plain_text_body == data_body
