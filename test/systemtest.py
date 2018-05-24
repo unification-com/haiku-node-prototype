@@ -7,13 +7,13 @@ from pathlib import Path
 import click
 import requests
 
-from haiku_node.client import HaikuDataClient
-from haiku_node.rpc import verify_account
-from haiku_node.keystore.keystore import UnificationKeystore
-from haiku_node.validation.encryption import sign_request, decrypt
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.client import HaikuDataClient
 from haiku_node.eosio_helpers import eosio_account
+from haiku_node.keystore.keystore import UnificationKeystore
+from haiku_node.rpc import verify_account
+from haiku_node.validation.encryption import sign_request, decrypt
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
