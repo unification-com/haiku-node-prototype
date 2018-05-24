@@ -14,9 +14,9 @@ HAIKU_PASSWORD_FILE = Path('/etc/haiku-password')
 PORT = 8050
 
 
-def spawn_haiku_node(pw, conf):
+def spawn_haiku_node(pw, config):
     print(pw)
-    print(conf)
+    print(config.get_conf())
 
     encoded_password = str.encode(pw)
     ks = UnificationKeystore(encoded_password)
@@ -39,6 +39,7 @@ def spawn_haiku_node(pw, conf):
     print("Public auth key: ", ks.get_rpc_auth_public_key())
 
     setattr(app, 'keystore', ks)
+    setattr(app, 'unification_config', config)
     app.run(debug=False, host="0.0.0.0", port=PORT, ssl_context='adhoc')
 
 
@@ -48,7 +49,7 @@ if __name__ == '__main__':
 
     if HAIKU_PASSWORD_FILE.exists():
         password = HAIKU_PASSWORD_FILE.read_text()
-        spawn_haiku_node(password, conf)
+        spawn_haiku_node(password, config)
 
     else:
         if 'server_initialised' in conf:

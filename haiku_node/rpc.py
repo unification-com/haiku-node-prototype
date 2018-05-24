@@ -7,7 +7,7 @@ from haiku_node.validation.encryption import (
     verify_request, sign_request, encrypt, decrypt)
 
 from haiku_node.validation.validation import UnificationAppScValidation
-from haiku_node.config.config import UnificationConfig
+
 
 app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
@@ -93,10 +93,10 @@ def data_request():
         verify_account(d['eos_account_name'], d['body'], d['signature'])
 
         # Validate requesting app against smart contracts
-        # config is this Haiku Node's config fle, containing its ACL/Meta Data Smart Contract account/address
-        # and the EOS RPC server/port used for communicating with the blockchain.
-        # probably need to load this at a higher level?
-        config = UnificationConfig()
+        # config is this Haiku Node's config fle, containing its ACL/Meta Data
+        # Smart Contract account/address and the EOS RPC server/port used for
+        # communicating with the blockchain.
+        config = getattr(app, 'unification_config')
         conf = config.get_conf()
 
         # Init the validation class for THIS Haiku, and validate the REQUESTING APP
