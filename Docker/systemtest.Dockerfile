@@ -1,10 +1,5 @@
 FROM haiku
 
-RUN apt-get update && \
-    apt-get -y install \
-        vim \
-        telnet
-
 COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
 COPY --from=unification-contracts /eos/contracts/unification_acl /eos/contracts/unification_acl
 COPY --from=unification-contracts /eos/contracts/unification_mother /eos/contracts/unification_mother
