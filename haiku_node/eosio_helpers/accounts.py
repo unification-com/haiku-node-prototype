@@ -196,6 +196,8 @@ class AccountManager:
                             ['push', 'action', app, 'revoke', json.dumps(d),
                              '-p', user])
                         print(ret.stdout)
+            print("Wait for transactions to process")
+            time.sleep(1)
 
     def run_test_mother(self, app, demo_apps):
         print("Contacting MOTHER FOR: ", app)
