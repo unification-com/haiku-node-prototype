@@ -10,4 +10,7 @@ RUN echo "cd /haiku/test; python systemtest.py probe" >> /root/.bash_history && 
 COPY haiku_node /haiku/haiku_node
 COPY test /haiku/test
 
+RUN cd /haiku; find . -name "*.pyc" -exec rm -rf {} \; && \
+    cd /haiku; export PYTHONPATH="."; pytest .
+
 WORKDIR /haiku/test
