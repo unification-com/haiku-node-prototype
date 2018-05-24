@@ -7,7 +7,7 @@ from haiku_node.validation.encryption import (
     verify_request, sign_request, encrypt, decrypt)
 
 from haiku_node.validation.validation import UnificationAppScValidation
-from haiku_node.config.config import UnificationConfig
+
 
 app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
@@ -20,14 +20,12 @@ def verify_account(eos_account_name, body, signature):
 
 
 def sign_data(body):
-    keystore = getattr(app, 'keystore')
-    private_key = keystore.get_rpc_auth_private_key()
+    private_key = app.keystore.get_rpc_auth_private_key()
     return sign_request(private_key, body)
 
 
 def decrypt_data(body):
-    keystore = getattr(app, 'keystore')
-    private_key = keystore.get_rpc_auth_private_key()
+    private_key = app.keystore.get_rpc_auth_private_key()
     return decrypt(private_key, body)
 
 
@@ -93,21 +91,22 @@ def data_request():
         verify_account(d['eos_account_name'], d['body'], d['signature'])
 
         # Validate requesting app against smart contracts
-        # config is this Haiku Node's config fle, containing its ACL/Meta Data Smart Contract account/address
-        # and the EOS RPC server/port used for communicating with the blockchain.
-        # probably need to load this at a higher level?
-        config = UnificationConfig()
-        conf = config.get_conf()
+        # config is this Haiku Node's config fle, containing its ACL/Meta Data
+        # Smart Contract account/address and the EOS RPC server/port used for
+        # communicating with the blockchain.
+        conf = app.unification_config.get_conf()
 
-        # Init the validation class for THIS Haiku, and validate the REQUESTING APP
-        # Since we only need to validate the app at this point, set get_perms=False
+        # Init the validation class for THIS Haiku, and validate the
+        # REQUESTING APP. Since we only need to validate the app at this point,
+        # set get_perms=False
         v = UnificationAppScValidation(conf, d['eos_account_name'], False)
 
         # If the REQUESTING APP is valid according to MOTHER, then we can
         # generate the data. If not, return an invalid_app response
-        # Whatever obtain_data eventually uses to grab the data will also need to
-        # load the UnificationAppScValidation class, so it knows which users have
-        # granted permissiosn to the REQUESTING APP, and get the correct data
+        # Whatever obtain_data eventually uses to grab the data will also need
+        # to load the UnificationAppScValidation class, so it knows which users
+        # have granted permissions to the REQUESTING APP, and get the correct
+        # data
         if v.valid_code():
             return obtain_data(d['body'], d['eos_account_name'])
         else:
@@ -131,8 +130,3 @@ def data_ingest():
     except Exception as e:
         logger.exception(e)
         return generic_error()
-
-
-if __name__ == '__main__':
-    logger.info('Haiku RPC client started')
-    app.run(debug=False, host="0.0.0.0", port=8050)
