@@ -150,7 +150,8 @@ def systest_smart_contract_mother():
         assert mother.valid_app() is True
 
         log.info("Code Hash")
-        log.info(f"Expecting - config.json: {mother.get_deployed_contract_hash()}")
+        log.info(
+            f"Expecting - config.json: {mother.get_deployed_contract_hash()}")
         log.info(f"Actual - MOTHER: {mother.get_hash_in_mother()}")
         assert (mother.get_deployed_contract_hash() == mother.get_hash_in_mother()) is True
 
@@ -162,7 +163,8 @@ def systest_smart_contract_mother():
         log.info("RPC Port")
         log.info(f"Expecting - config.json: {app_data['rpc_server_port']}")
         log.info(f"Actual - MOTHER: {mother.get_haiku_rpc_port()}")
-        assert (int(app_data['rpc_server_port']) == int(mother.get_haiku_rpc_port())) is True
+        assert (int(app_data['rpc_server_port']) == int(
+            mother.get_haiku_rpc_port())) is True
 
         log.info("Valid DB Schemas exist in ACL/Meta Smart Contract")
         valid_schemas = mother.get_valid_db_schemas()
@@ -193,8 +195,10 @@ def systest_smart_contract_acl():
             conf_schema = schema_obj['schema']
             log.info(f"Expecting - config.json: {conf_schema}")
 
-            # version set to 1, since that's the hard coded version used in accounts.validate_with_mother
-            acl_contract_schema = acl.get_current_valid_schema(schema_obj['schema_name'], 1)
+            # version set to 1, since that's the hard coded version used in
+            # accounts.validate_with_mother
+            acl_contract_schema = acl.get_current_valid_schema(
+                schema_obj['schema_name'], 1)
             log.info(f"Actual - ACL/Meta Data Smart Contract: "
                      f"{acl_contract_schema['schema']}")
             assert (conf_schema == acl_contract_schema['schema']) is True
@@ -213,9 +217,11 @@ def systest_user_permissions():
             app = haiku['app']
             acl = UnificationACL('nodeosd', 8888, app)
             for req_app in haiku['req_apps']:
-                log.info(f"Check {user} permissions granted for {req_app} in {app}")
+                log.info(
+                    f"Check {user} permissions granted for {req_app} in {app}")
                 config_granted = req_app['granted']
-                acl_granted, acl_revoked = acl.get_perms_for_req_app(req_app['account'])
+                acl_granted, acl_revoked = acl.get_perms_for_req_app(
+                    req_app['account'])
                 acl_perm = False
                 if user_acc_uint64 in acl_granted:
                     acl_perm = True
