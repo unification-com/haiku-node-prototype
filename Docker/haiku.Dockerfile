@@ -15,8 +15,6 @@ RUN curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/py
 
 RUN mkdir /haiku
 COPY requirements.txt /haiku
-COPY haiku_node /haiku/haiku_node
-COPY test /haiku/test
 
 WORKDIR /haiku
 
@@ -28,5 +26,8 @@ EXPOSE 8050
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 ENV PYTHONPATH /haiku
+
+COPY haiku_node /haiku/haiku_node
+COPY test /haiku/test
 
 CMD ["/haiku/test/bootstrap.sh"]
