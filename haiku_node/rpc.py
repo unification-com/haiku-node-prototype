@@ -133,8 +133,3 @@ def data_ingest():
     except Exception as e:
         logger.exception(e)
         return generic_error()
-
-
-if __name__ == '__main__':
-    logger.info('Haiku RPC client started')
-    app.run(debug=False, host="0.0.0.0", port=8050)
