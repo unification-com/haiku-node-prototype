@@ -1,6 +1,7 @@
 import json
 import logging
 import subprocess
+import time
 
 import requests
 
@@ -260,15 +261,31 @@ def make_default_accounts(
         manager.wallet_import_key(username, keys[1])
         manager.create_account(username, keys[0])
 
+    print("Wait for transactions to process")
+    time.sleep(1)
     manager.mother_contract('unif.mother')
+
+    print("Wait for transactions to process")
+    time.sleep(1)
 
     for appname in appnames:
         manager.associate_contracts(appname)
+        print("Wait for transactions to process")
+        time.sleep(1)
         manager.set_schema(demo_apps, appname)
+        print("Wait for transactions to process")
+        time.sleep(1)
         manager.set_data_sources(demo_apps, appname)
+        print("Wait for transactions to process")
+        time.sleep(1)
         manager.validate_with_mother(demo_apps, appname)
 
+    print("Wait for transactions to process")
+    time.sleep(1)
     manager.set_permissions(demo_permissions)
+
+    print("Wait for transactions to process")
+    time.sleep(1)
 
     for appname in appnames:
         log.info(f'==========RUN CONTRACT DUMPS FOR {appname}==========')
