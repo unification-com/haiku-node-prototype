@@ -4,7 +4,7 @@ services:
 
   nodeosd:
     image: unification-node
-    command: /opt/eosio/bin/nodeosd.sh --resync
+    command: /opt/eosio/bin/nodeosd.sh
     hostname: nodeosd
     ports:
     - "8888:8888"
