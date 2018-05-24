@@ -7,14 +7,13 @@ from pathlib import Path
 import click
 import requests
 
-from haiku_node.client import HaikuDataClient
-from haiku_node.config.keys import get_public_key
-from haiku_node.rpc import verify_account
-from haiku_node.keystore.keystore import UnificationKeystore
-from haiku_node.validation.encryption import sign_request, decrypt, encrypt
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.client import HaikuDataClient
 from haiku_node.eosio_helpers import eosio_account
+from haiku_node.keystore.keystore import UnificationKeystore
+from haiku_node.rpc import verify_account
+from haiku_node.validation.encryption import sign_request, decrypt
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
@@ -83,33 +82,18 @@ def systest_auth(base):
     verify_account('app1', decrypted_body, d['signature'])
 
 
-def systest_ingest(base):
-    """
-    App2 requests data from App1.
-    """
-    body = 'ingestion body'
+def systest_ingest(local=False):
     requesting_app = 'app2'
-    ingesting_app = 'app1'
-
-    password = password_d[requesting_app]['password']
+    password = demo_config['system'][requesting_app]['password']
     encoded_password = str.encode(password)
-    ks = UnificationKeystore(encoded_password, app_name=requesting_app)
-    private_key = ks.get_rpc_auth_private_key()
+    keystore = UnificationKeystore(encoded_password, app_name=requesting_app)
 
-    signature = sign_request(private_key, body)
-    encrypted_body = encrypt(get_public_key(ingesting_app), body)
-
-    payload = {"eos_account_name": requesting_app,
-               "signature": signature,
-               "body": encrypted_body}
-
-    r = requests.post(f"{base}/data_ingest", json=payload, verify=False)
-    assert r.status_code == 200
-    d = r.json()
-    assert d['success'] is True
-
-    # Now verify the response
-    verify_account('app1', d['body'], d['signature'])
+    if local:
+        client = HaikuDataClient(keystore, protocol='http', local=True)
+    else:
+        client = HaikuDataClient(keystore)
+    client.make_data_request(requesting_app, 'app1', "data-request-1")
+    client.read_data_from_store('app1', "data-request-1")
 
 
 def systest_accounts():
@@ -150,7 +134,8 @@ def systest_smart_contract_mother():
         assert mother.valid_app() is True
 
         log.info("Code Hash")
-        log.info(f"Expecting - config.json: {mother.get_deployed_contract_hash()}")
+        log.info(
+            f"Expecting - config.json: {mother.get_deployed_contract_hash()}")
         log.info(f"Actual - MOTHER: {mother.get_hash_in_mother()}")
         assert (mother.get_deployed_contract_hash() == mother.get_hash_in_mother()) is True
 
@@ -162,7 +147,8 @@ def systest_smart_contract_mother():
         log.info("RPC Port")
         log.info(f"Expecting - config.json: {app_data['rpc_server_port']}")
         log.info(f"Actual - MOTHER: {mother.get_haiku_rpc_port()}")
-        assert (int(app_data['rpc_server_port']) == int(mother.get_haiku_rpc_port())) is True
+        assert (int(app_data['rpc_server_port']) == int(
+            mother.get_haiku_rpc_port())) is True
 
         log.info("Valid DB Schemas exist in ACL/Meta Smart Contract")
         valid_schemas = mother.get_valid_db_schemas()
@@ -193,8 +179,10 @@ def systest_smart_contract_acl():
             conf_schema = schema_obj['schema']
             log.info(f"Expecting - config.json: {conf_schema}")
 
-            # version set to 1, since that's the hard coded version used in accounts.validate_with_mother
-            acl_contract_schema = acl.get_current_valid_schema(schema_obj['schema_name'], 1)
+            # version set to 1, since that's the hard coded version used in
+            # accounts.validate_with_mother
+            acl_contract_schema = acl.get_current_valid_schema(
+                schema_obj['schema_name'], 1)
             log.info(f"Actual - ACL/Meta Data Smart Contract: "
                      f"{acl_contract_schema['schema']}")
             assert (conf_schema == acl_contract_schema['schema']) is True
@@ -213,9 +201,11 @@ def systest_user_permissions():
             app = haiku['app']
             acl = UnificationACL('nodeosd', 8888, app)
             for req_app in haiku['req_apps']:
-                log.info(f"Check {user} permissions granted for {req_app} in {app}")
+                log.info(
+                    f"Check {user} permissions granted for {req_app} in {app}")
                 config_granted = req_app['granted']
-                acl_granted, acl_revoked = acl.get_perms_for_req_app(req_app['account'])
+                acl_granted, acl_revoked = acl.get_perms_for_req_app(
+                    req_app['account'])
                 acl_perm = False
                 if user_acc_uint64 in acl_granted:
                     acl_perm = True
@@ -235,7 +225,7 @@ def probe():
     """
     url_base = base_url('https', 'haiku-app1', 8050)
     systest_auth(url_base)
-    systest_ingest(url_base)
+    systest_ingest()
 
 
 @main.command()
@@ -245,10 +235,7 @@ def host():
     """
     url_base = base_url('http', 'localhost', 8050)
     systest_auth(url_base)
-    systest_ingest(url_base)
-
-    client = HaikuDataClient(protocol='http', local=True)
-    client.make_data_request('app2', 'app1', "data-request-1")
+    systest_ingest(local=True)
 
 
 @main.command()
@@ -277,14 +264,11 @@ def wait():
     # Run RPC tests
     url_base = base_url('https', 'haiku-app1', 8050)
     systest_auth(url_base)
-    systest_ingest(url_base)
 
     url_base = base_url('https', 'haiku-app2', 8050)
     systest_auth(url_base)
-    systest_ingest(url_base)
 
-    client = HaikuDataClient()
-    client.make_data_request('app2', 'app1', "data-request-1")
+    systest_ingest()
 
     time.sleep(6000)
 
