@@ -108,7 +108,7 @@ def data_request():
         # generate the data. If not, return an invalid_app response
         # Whatever obtain_data eventually uses to grab the data will also need
         # to load the UnificationAppScValidation class, so it knows which users
-        # have granted permissiosn to the REQUESTING APP, and get the correct
+        # have granted permissions to the REQUESTING APP, and get the correct
         # data
         if v.valid_code():
             return obtain_data(d['body'], d['eos_account_name'])
