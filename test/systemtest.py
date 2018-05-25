@@ -80,7 +80,7 @@ def systest_auth(requesting_app, providing_app):
 
     # Now verify the response
     decrypted_body = decrypt(private_key, d['body'])
-    verify_account('app1', decrypted_body, d['signature'])
+    verify_account(providing_app, decrypted_body, d['signature'])
 
 
 def systest_ingest(local=False):
