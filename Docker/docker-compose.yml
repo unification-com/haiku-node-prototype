@@ -33,6 +33,13 @@ services:
     ports:
     - "8852:8050"
 
+  haiku-app3:
+    image: haiku
+    environment:
+    - app_name=app3
+    ports:
+    - "8853:8050"
+
   systemtest:
     image: systemtest
     command: python /haiku/test/systemtest.py wait
