@@ -15,6 +15,8 @@ KEOS_PORT = 8889
 NODEOS_IP = 'nodeosd'
 NODEOS_PORT = 8888
 
+BLOCK_SLEEP = 1
+
 log = logging.getLogger(__name__)
 
 
@@ -197,7 +199,7 @@ class AccountManager:
                              '-p', user])
                         print(ret.stdout)
             print("Wait for transactions to process")
-            time.sleep(1)
+            time.sleep(BLOCK_SLEEP)
 
     def run_test_mother(self, app, demo_apps):
         print("Contacting MOTHER FOR: ", app)
@@ -264,30 +266,30 @@ def make_default_accounts(
         manager.create_account(username, keys[0])
 
     print("Wait for transactions to process")
-    time.sleep(1)
+    time.sleep(BLOCK_SLEEP)
     manager.mother_contract('unif.mother')
 
     print("Wait for transactions to process")
-    time.sleep(1)
+    time.sleep(BLOCK_SLEEP)
 
     for appname in appnames:
         manager.associate_contracts(appname)
         print("Wait for transactions to process")
-        time.sleep(1)
+        time.sleep(BLOCK_SLEEP)
         manager.set_schema(demo_apps, appname)
         print("Wait for transactions to process")
-        time.sleep(1)
+        time.sleep(BLOCK_SLEEP)
         manager.set_data_sources(demo_apps, appname)
         print("Wait for transactions to process")
-        time.sleep(1)
+        time.sleep(BLOCK_SLEEP)
         manager.validate_with_mother(demo_apps, appname)
 
     print("Wait for transactions to process")
-    time.sleep(1)
+    time.sleep(BLOCK_SLEEP)
     manager.set_permissions(demo_permissions)
 
     print("Wait for transactions to process")
-    time.sleep(1)
+    time.sleep(BLOCK_SLEEP)
 
     for appname in appnames:
         log.info(f'==========RUN CONTRACT DUMPS FOR {appname}==========')
