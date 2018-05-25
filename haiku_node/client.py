@@ -1,4 +1,3 @@
-import json
 import tempfile
 from pathlib import Path
 
@@ -41,6 +40,7 @@ class HaikuDataClient:
         tp = temp_dir / Path(f"{providing_app_name}-{request_hash}")
         log.info(f'Writing to {tp}')
         tp.write_text(data, encoding='utf-8')
+        return tp
 
     def make_data_request(
             self, requesting_app, providing_app: Provider, request_hash):
@@ -68,7 +68,8 @@ class HaikuDataClient:
 
         log.info(f'"In the air" decrypted content is: {decrypted_body}')
 
-        self.persist_data(providing_app.name, request_hash, encrypted_body)
+        return self.persist_data(
+            providing_app.name, request_hash, encrypted_body)
 
     def read_data_from_store(self, providing_app: Provider, request_hash):
         temp_dir = Path(tempfile.gettempdir())
