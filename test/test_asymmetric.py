@@ -44,3 +44,9 @@ def test_encryption_over_json():
     plain_text_body = decrypt(private_key, reload['body'])
 
     assert plain_text_body == data_body
+
+
+def test_generate_keys():
+    from haiku_node.validation.encryption import generate_keys
+    private_pem, public_pem = generate_keys()
+    print(private_pem, public_pem)
