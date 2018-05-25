@@ -28,7 +28,6 @@ class HaikuDataClient:
         self.keystore = keystore
         self.local = local
         self.protocol = protocol
-        self.config = json.loads(Path('data/demo_config.json').read_text())
 
     def transform_request_id(self, request_hash):
         """
