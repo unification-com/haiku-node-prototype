@@ -9,7 +9,7 @@ import requests
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
-from haiku_node.client import HaikuDataClient
+from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import verify_account
@@ -83,18 +83,26 @@ def systest_auth(requesting_app, providing_app):
     verify_account(providing_app, decrypted_body, d['signature'])
 
 
-def systest_ingest(local=False):
-    requesting_app = 'app2'
+def systest_ingest(requesting_app, providing_app, local=False):
+    log.info(f'Testing ingestion: {requesting_app} is requesting data from '
+             f'{providing_app}')
+    request_hash = f'data-request-{providing_app}-{requesting_app}'
+
+    app_config = demo_config['demo_apps'][providing_app]
+    port = app_config['rpc_server_port']
+    if not local:
+        provider = Provider(
+            providing_app, 'https', app_config['rpc_server'], port)
+    else:
+        provider = Provider(providing_app, 'http', '127.0.0.1', port)
+
     password = demo_config['system'][requesting_app]['password']
     encoded_password = str.encode(password)
     keystore = UnificationKeystore(encoded_password, app_name=requesting_app)
 
-    if local:
-        client = HaikuDataClient(keystore, protocol='http', local=True)
-    else:
-        client = HaikuDataClient(keystore)
-    client.make_data_request(requesting_app, 'app1', "data-request-1")
-    client.read_data_from_store('app1', "data-request-1")
+    client = HaikuDataClient(keystore)
+    client.make_data_request(requesting_app, provider, request_hash)
+    client.read_data_from_store(provider, request_hash)
 
 
 def systest_accounts():
@@ -230,7 +238,15 @@ def probe():
     systest_auth('app2', 'app3')
     systest_auth('app3', 'app1')
     systest_auth('app3', 'app2')
-    systest_ingest()
+
+    systest_ingest('app1', 'app2')
+    systest_ingest('app1', 'app3')
+    systest_ingest('app2', 'app1')
+    systest_ingest('app2', 'app3')
+    systest_ingest('app3', 'app1')
+
+    #TODO: The following should fail
+    systest_ingest('app3', 'app2')
 
 
 @main.command()
@@ -238,7 +254,7 @@ def host():
     """
     Test from the host machine.
     """
-    systest_ingest(local=True)
+    systest_ingest('app1', 'app2', local=True)
 
 
 @main.command()
@@ -272,7 +288,14 @@ def wait():
     systest_auth('app3', 'app1')
     systest_auth('app3', 'app2')
 
-    systest_ingest()
+    systest_ingest('app1', 'app2')
+    systest_ingest('app1', 'app3')
+    systest_ingest('app2', 'app1')
+    systest_ingest('app2', 'app3')
+    systest_ingest('app3', 'app1')
+
+    #TODO: The following should fail
+    systest_ingest('app3', 'app2')
 
     # Run forever
     while True:
