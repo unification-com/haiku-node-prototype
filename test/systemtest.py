@@ -268,9 +268,14 @@ def wait():
     url_base = base_url('https', 'haiku-app2', 8050)
     systest_auth(url_base)
 
+    url_base = base_url('https', 'haiku-app3', 8050)
+    systest_auth(url_base)
+
     systest_ingest()
 
-    time.sleep(6000)
+    # Run forever
+    while True:
+        time.sleep(6000)
 
 
 if __name__ == "__main__":
