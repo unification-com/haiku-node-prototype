@@ -6,7 +6,6 @@ from haiku_node.config.config import UnificationConfig
 
 apps_to_test = ['app1', 'app2', 'app3']
 config = UnificationConfig()
-conf = config.get_conf()
 
 demo_config = json.loads(Path('test/data/demo_config.json').read_text())
 demo_apps = demo_config["demo_apps"]
@@ -17,7 +16,7 @@ def run_test(app):
 
     print("Contacting MOTHER FOR: ", app)
 
-    um = UnificationMother(conf['eos_rpc_ip'], conf['eos_rpc_port'], app)
+    um = UnificationMother(config['eos_rpc_ip'], config['eos_rpc_port'], app)
     print("Valid app: ", um.valid_app())
     assert um.valid_app() is True
 

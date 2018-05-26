@@ -93,7 +93,7 @@ def data_request():
         # config is this Haiku Node's config fle, containing its ACL/Meta Data
         # Smart Contract account/address and the EOS RPC server/port used for
         # communicating with the blockchain.
-        conf = app.unification_config.get_conf()
+        conf = app.unification_config
 
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP. Since we only need to validate the app at this point,

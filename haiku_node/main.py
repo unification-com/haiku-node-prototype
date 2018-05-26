@@ -11,9 +11,6 @@ PORT = 8050
 
 
 def spawn_haiku_node(pw, config):
-    print(pw)
-    print(config.get_conf())
-
     encoded_password = str.encode(pw)
     ks = UnificationKeystore(encoded_password)
 
@@ -23,12 +20,11 @@ def spawn_haiku_node(pw, config):
 
 
 if __name__ == '__main__':
-    config = UnificationConfig()
-    conf = config.get_conf()
+    conf = UnificationConfig()
 
     password = os.environ.get('keystore')
     if password:
-        spawn_haiku_node(password, config)
+        spawn_haiku_node(password, conf)
 
     else:
         if 'server_initialised' in conf:
@@ -46,4 +42,4 @@ if __name__ == '__main__':
                   "YOU WILL NEED IT TO RUN THE SERVER")
             print("Run again with pw")
 
-            config.set_conf("server_initialised", True)
+            conf["server_initialised"] = True
