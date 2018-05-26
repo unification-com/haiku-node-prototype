@@ -15,7 +15,7 @@ KEOS_PORT = 8889
 NODEOS_IP = 'nodeosd'
 NODEOS_PORT = 8888
 
-BLOCK_SLEEP = 1
+BLOCK_SLEEP = 0.5
 
 log = logging.getLogger(__name__)
 
