@@ -1,6 +1,6 @@
-from haiku_node.eosio_helpers import eosio_account
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.eosio_helpers import eosio_account
 
 
 """
@@ -8,8 +8,8 @@ Validation class for a single REQUESTING app.
 1) Loads ACL/Meta Data Smart Contract for THIS Haiku/App
 2) Loads data from MOTHER for REQUESTING APP
 3) Checks REQUESTING APP is valid according to MOTHER
-4) If REQUESTING APP is Valid, load permissions from THIS Haiku's ACL/Meta Data Smart Contract
-   for the REQUESTING APP
+4) If REQUESTING APP is Valid, load permissions from THIS Haiku's ACL/Meta Data
+    Smart Contract for the REQUESTING APP
 """
 
 
@@ -66,8 +66,11 @@ class UnificationAppScValidation:
         permission to the REQUESTING APP to access it's data.
         """
 
-        u_acl = UnificationACL(self.__conf['eos_rpc_ip'], self.__conf['eos_rpc_port'], self.__conf['acl_contract'])
-        self.__granted, self.__revoked = u_acl.get_perms_for_req_app(self.__requesting_app)
+        u_acl = UnificationACL(
+            self.__conf['eos_rpc_ip'], self.__conf['eos_rpc_port'],
+            self.__conf['acl_contract'])
+        self.__granted, self.__revoked = u_acl.get_perms_for_req_app(
+            self.__requesting_app)
 
     def __check_req_app_valid(self):
         """
@@ -76,7 +79,9 @@ class UnificationAppScValidation:
         the code's hash).
         """
 
-        um = UnificationMother(self.__conf['eos_rpc_ip'], self.__conf['eos_rpc_port'], self.__requesting_app)
+        um = UnificationMother(
+            self.__conf['eos_rpc_ip'], self.__conf['eos_rpc_port'],
+            self.__requesting_app)
         self.__is_valid_app = um.valid_app()
         self.__is_valid_code = um.valid_code()
 
