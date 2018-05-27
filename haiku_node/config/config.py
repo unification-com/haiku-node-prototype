@@ -9,20 +9,22 @@ log = logging.getLogger(__name__)
 
 class UnificationConfig:
 
+    config_path = '/config/config.json'
+
     def __init__(self):
-        with open(self.parent_directory() + '/config/config.json') as f:
-            self._conf = json.load(f)
+        with open(self.parent_directory() + self.config_path) as f:
+            self.__conf = json.load(f)
 
     def __getitem__(self, item):
-        return self._conf[item]
+        return self.__conf[item]
 
     def __setitem__(self, key, value):
-        self._conf[key] = value
-        with open(self.parent_directory() + '/config/config.json', 'w') as f:
-            json.dump(self._conf, f, indent=4)
+        self.__conf[key] = value
+        with open(self.parent_directory() + self.config_path, 'w') as f:
+            json.dump(self.__conf, f, indent=4)
 
     def __repr__(self):
-        return str(self._conf)
+        return str(self.__conf)
 
     def parent_directory(self):
         currentdir = os.path.dirname(
