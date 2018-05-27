@@ -12,8 +12,7 @@ def run_test(requesting_app):
     #list of users to test - EOS account names.
     users_to_test = ["user1", "user2", "user3"]
 
-    config = UnificationConfig()
-    conf = config.get_conf()
+    conf = UnificationConfig()
 
     print("THIS app is", conf['acl_contract'])
 
