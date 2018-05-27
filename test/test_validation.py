@@ -61,8 +61,8 @@ if __name__ == '__main__':
 
         u = "user.1"
         n = eosio_account.string_to_name(u)
-        str = eosio_account.name_to_string(n)
-        print("str", str)
+        account_name = eosio_account.name_to_string(n)
+        print("str", account_name)
 
     else:
         print("run with requesting app account as arg1, e.g.:")
