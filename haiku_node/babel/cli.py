@@ -16,8 +16,9 @@ def main():
 
 @main.command()
 @click.argument('app_name')
+@click.argument('user')
 @click.argument('request_hash')
-def fetch(app_name, request_hash):
+def fetch(app_name, user, request_hash):
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
@@ -30,14 +31,16 @@ def fetch(app_name, request_hash):
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    data_path = client.make_data_request(requesting_app, provider, req_hash)
+    data_path = client.make_data_request(
+        requesting_app, provider, user, req_hash)
     click.echo(f'Data written to {data_path}')
 
 
 @main.command()
 @click.argument('app_name')
+@click.argument('user')
 @click.argument('request_hash')
-def read(app_name, request_hash):
+def read(app_name, user, request_hash):
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
