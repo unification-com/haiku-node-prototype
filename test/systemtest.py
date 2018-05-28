@@ -4,12 +4,15 @@ import time
 
 from pathlib import Path
 
+from eosapi import Client
+
 import click
 import requests
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.client import HaikuDataClient, Provider
+from haiku_node.config.config import UnificationConfig
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import verify_account
@@ -127,13 +130,17 @@ def systest_smart_contract_mother():
     d_conf = json.loads(Path('data/demo_config.json').read_text())
     appnames = ['app1', 'app2', 'app3']
     d_apps = d_conf['demo_apps']
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
     for appname in appnames:
         log.info("------------------------------------------")
         app_data = d_apps[appname]
         log.info(f"Contacting MOTHER for {app_data['eos_sc_account']}")
-        mother = UnificationMother('nodeosd', 8888, app_data['eos_sc_account'])
-        acl = UnificationACL('nodeosd', 8888, app_data['eos_sc_account'])
+        mother = UnificationMother(eos_client, app_data['eos_sc_account'])
+
+        acl = UnificationACL(eos_client, app_data['eos_sc_account'])
 
         log.info("App is Valid")
         log.info("Expecting: True")
@@ -179,11 +186,15 @@ def systest_smart_contract_acl():
     appnames = ['app1', 'app2', 'app3']
     d_apps = d_conf['demo_apps']
 
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+
     for appname in appnames:
         log.info("------------------------------------------")
         app_data = d_apps[appname]
         conf_db_schemas = app_data['db_schemas']
-        acl = UnificationACL('nodeosd', 8888, app_data['eos_sc_account'])
+        acl = UnificationACL(eos_client, app_data['eos_sc_account'])
         log.info("Check DB Schemas are correctly configured")
 
         for schema_obj in conf_db_schemas:
@@ -204,6 +215,9 @@ def systest_user_permissions():
     log.info('Running systest user permissions')
     d_conf = json.loads(Path('data/demo_config.json').read_text())
     demo_permissions = d_conf['demo_permissions']
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
     for user_perms in demo_permissions['permissions']:
         user = user_perms['user']
@@ -211,7 +225,7 @@ def systest_user_permissions():
 
         for haiku in user_perms['haiku_nodes']:
             app = haiku['app']
-            acl = UnificationACL('nodeosd', 8888, app)
+            acl = UnificationACL(eos_client, app)
             for req_app in haiku['req_apps']:
                 log.info(
                     f"Check {user} permissions granted for {req_app} in {app}")

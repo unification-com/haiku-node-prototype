@@ -1,3 +1,5 @@
+from eosapi import Client
+
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.config.config import UnificationConfig
@@ -9,7 +11,9 @@ config = UnificationConfig()
 def run_test(app):
     print("Loading ACL/Meta Contract for: ", app)
 
-    u_acl = UnificationACL(config['eos_rpc_ip'], config['eos_rpc_port'], app)
+    eos_client = Client(
+        nodes=[f"http://{config['eos_rpc_ip']}:{config['eos_rpc_port']}"])
+    u_acl = UnificationACL(eos_client, app)
 
     print("Data Schemas in Contract:")
     print(u_acl.get_db_schemas())
@@ -17,7 +21,7 @@ def run_test(app):
     print(u_acl.get_data_sources())
 
     print("Current VALID Schema(s), as per MOTHER:")
-    um = UnificationMother(config['eos_rpc_ip'], config['eos_rpc_port'], app)
+    um = UnificationMother(eos_client, app)
     for sn, sv in um.get_valid_db_schemas().items():
         print(u_acl.get_current_valid_schema(sn, sv))
 
