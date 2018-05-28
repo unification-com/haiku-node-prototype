@@ -179,6 +179,22 @@ class AccountManager:
              '-p', 'unif.mother'])
             print(ret.stdout)
 
+    def grant(self, provider, requester, user):
+        d = {
+            'user_account': user,
+            'requesting_app': requester,
+        }
+        return self.cleos(
+            ['push', 'action', provider, 'grant', json.dumps(d), '-p', user])
+
+    def revoke(self, provider, requester, user):
+        d = {
+            'user_account': user,
+            'requesting_app': requester,
+        }
+        return self.cleos(
+            ['push', 'action', provider, 'revoke', json.dumps(d), '-p', user])
+
     def set_permissions(self, demo_permissions):
         print("set_permissions")
         for user_perms in demo_permissions['permissions']:
@@ -186,20 +202,10 @@ class AccountManager:
             for haiku in user_perms['haiku_nodes']:
                 app = haiku['app']
                 for req_app in haiku['req_apps']:
-                    d = {
-                        'user_account': user,
-                        'requesting_app': req_app['account']
-                    }
                     if req_app['granted']:
-                        ret = self.cleos(
-                            ['push', 'action', app, 'grant', json.dumps(d),
-                             '-p', user])
-                        print(ret.stdout)
+                        self.grant(app, req_app['account'], user)
                     else:
-                        ret = self.cleos(
-                            ['push', 'action', app, 'revoke', json.dumps(d),
-                             '-p', user])
-                        print(ret.stdout)
+                        self.revoke(app, req_app['account'], user)
             print("Wait for transactions to process")
             time.sleep(BLOCK_SLEEP)
 
