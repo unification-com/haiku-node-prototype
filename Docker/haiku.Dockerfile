@@ -29,6 +29,9 @@ ENV PYTHONPATH /haiku
 
 RUN echo "python -m haiku_node.babel.cli read app2 user1 data-1" >> /root/.bash_history && \
     echo "python -m haiku_node.babel.cli fetch app2 user1 data-1" >> /root/.bash_history && \
+    echo "python -m haiku_node.babel.cli permissions app1 app2 user3" >> /root/.bash_history && \
+    echo "python -m haiku_node.babel.cli grant app1 app2 user3 PW5KfhcoCs5yV7wLTWWh97fZbf9jshHZL7vD9tQARfpCGVnDyA95t" >> /root/.bash_history && \
+    echo "python -m haiku_node.babel.cli revoke app1 app2 user3 PW5KfhcoCs5yV7wLTWWh97fZbf9jshHZL7vD9tQARfpCGVnDyA95t" >> /root/.bash_history && \
     echo "alias ll='ls -la'" >> /root/.bashrc
 
 COPY haiku_node /haiku/haiku_node
