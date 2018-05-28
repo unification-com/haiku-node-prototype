@@ -7,6 +7,7 @@ from eosapi import Client
 
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
+from haiku_node.eosio_helpers.accounts import AccountManager
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.validation.validation import UnificationAppScValidation
 
@@ -100,6 +101,46 @@ def permissions(provider, requester, user):
             grant = bold('NOT GRANTED')
         click.echo(f"{user} {grant} permission for {requester} to access data "
                    f"in {provider}")
+
+
+@main.command()
+@click.argument('provider')
+@click.argument('requester')
+@click.argument('user')
+@click.argument('password')
+def grant(provider, requester, user, password):
+    """
+    User grants a provider to a requester.
+
+    \b
+    :param provider: The app name of the data provider.
+    :param requester: The app name of the data requester.
+    :param user: User providing or denying access.
+    :param password: User's EOS Account password
+    """
+    accounts = AccountManager()
+    accounts.unlock_wallet(user, password)
+    accounts.grant(provider, requester, user)
+
+
+@main.command()
+@click.argument('provider')
+@click.argument('requester')
+@click.argument('user')
+@click.argument('password')
+def revoke(provider, requester, user, password):
+    """
+    User grants a provider to a requester.
+
+    \b
+    :param provider: The app name of the data provider.
+    :param requester: The app name of the data requester.
+    :param user: User providing or denying access.
+    :param password: User's EOS Account password
+    """
+    accounts = AccountManager()
+    accounts.unlock_wallet(user, password)
+    accounts.revoke(provider, requester, user)
 
 
 if __name__ == "__main__":
