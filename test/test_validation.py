@@ -2,9 +2,9 @@ import sys
 
 from eosapi import Client
 
-from haiku_node.validation.validation import UnificationAppScValidation
 from haiku_node.config.config import UnificationConfig
 from haiku_node.eosio_helpers import eosio_account
+from haiku_node.validation.validation import UnificationAppScValidation
 
 
 def run_test(requesting_app):
