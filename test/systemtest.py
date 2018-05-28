@@ -40,22 +40,25 @@ def base_url(protocol, host, port):
     return f"{protocol}://{host}:{port}"
 
 
-def systest_auth(requesting_app, providing_app):
+def systest_auth(requesting_app, providing_app, user):
     """
     Testing signing and verifying a data request.
 
     """
     log.info(f'{requesting_app} is requesting data from {providing_app}')
-    body = 'request body'
 
     base = base_url('https', f"haiku-{providing_app}", 8050)
+    body = {
+        'user': user,
+        'data_id': 'data-request'
+    }
 
     password = password_d[requesting_app]['password']
     encoded_password = str.encode(password)
     ks = UnificationKeystore(encoded_password, app_name=requesting_app)
     private_key = ks.get_rpc_auth_private_key()
 
-    signature = sign_request(private_key, body)
+    signature = sign_request(private_key, json.dumps(body))
 
     # An unsuccessfully query
     broken_signature = 'unlucky' + signature[7:]
@@ -83,7 +86,7 @@ def systest_auth(requesting_app, providing_app):
     verify_account(providing_app, decrypted_body, d['signature'])
 
 
-def systest_ingest(requesting_app, providing_app, local=False):
+def systest_ingest(requesting_app, providing_app, user, local=False):
     log.info(f'Testing ingestion: {requesting_app} is requesting data from '
              f'{providing_app}')
     request_hash = f'data-request-{providing_app}-{requesting_app}'
@@ -101,7 +104,7 @@ def systest_ingest(requesting_app, providing_app, local=False):
     keystore = UnificationKeystore(encoded_password, app_name=requesting_app)
 
     client = HaikuDataClient(keystore)
-    client.make_data_request(requesting_app, provider, request_hash)
+    client.make_data_request(requesting_app, provider, user, request_hash)
     client.read_data_from_store(provider, request_hash)
 
 
@@ -228,33 +231,11 @@ def systest_user_permissions():
 
 
 @main.command()
-def probe():
-    """
-    Run a few tests on a system that is already up.
-    """
-    systest_auth('app1', 'app2')
-    systest_auth('app1', 'app3')
-    systest_auth('app2', 'app1')
-    systest_auth('app2', 'app3')
-    systest_auth('app3', 'app1')
-    systest_auth('app3', 'app2')
-
-    systest_ingest('app1', 'app2')
-    systest_ingest('app1', 'app3')
-    systest_ingest('app2', 'app1')
-    systest_ingest('app2', 'app3')
-    systest_ingest('app3', 'app1')
-
-    #TODO: The following should fail
-    systest_ingest('app3', 'app2')
-
-
-@main.command()
 def host():
     """
     Test from the host machine.
     """
-    systest_ingest('app1', 'app2', local=True)
+    systest_ingest('app2', 'app1', 'user3', local=True)
 
 
 @main.command()
@@ -281,21 +262,26 @@ def wait():
     time.sleep(5)
 
     # Run RPC tests
-    systest_auth('app1', 'app2')
-    systest_auth('app1', 'app3')
-    systest_auth('app2', 'app1')
-    systest_auth('app2', 'app3')
-    systest_auth('app3', 'app1')
-    systest_auth('app3', 'app2')
+    systest_auth('app1', 'app2', 'user1')
+    systest_auth('app1', 'app3', 'user1')
+    systest_auth('app2', 'app1', 'user1')
+    systest_auth('app2', 'app3', 'user2')
+    systest_auth('app3', 'app1', 'user1')
+    systest_auth('app3', 'app2', 'user2')
 
-    systest_ingest('app1', 'app2')
-    systest_ingest('app1', 'app3')
-    systest_ingest('app2', 'app1')
-    systest_ingest('app2', 'app3')
-    systest_ingest('app3', 'app1')
+    systest_ingest('app1', 'app2', 'user1')
+    systest_ingest('app1', 'app3', 'user1')
+    systest_ingest('app2', 'app1', 'user1')
+    systest_ingest('app2', 'app3', 'user2')
+    systest_ingest('app3', 'app1', 'user1')
+    systest_ingest('app3', 'app2', 'user2')
 
-    #TODO: The following should fail
-    systest_ingest('app3', 'app2')
+    # The User3 has denied access to for app2 to access data on app 1
+    try:
+        systest_ingest('app2', 'app1', 'user3')
+        assert False
+    except Exception as e:
+        assert True
 
     # Run forever
     while True:
