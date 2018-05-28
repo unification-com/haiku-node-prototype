@@ -15,7 +15,8 @@ Validation class for a single REQUESTING app.
 
 class UnificationAppScValidation:
 
-    def __init__(self, conf, requesting_app, get_perms=True):
+    def __init__(self, eos_client, acl_contract, requesting_app,
+                 get_perms=True):
         """
         :param conf: config json object
         :param requesting_app: the eos account name of the requesting app
@@ -23,7 +24,8 @@ class UnificationAppScValidation:
         self.__permission_rec_table = "permrecords"
 
         self.__requesting_app = requesting_app
-        self.__conf = conf
+        self.__eosClient = eos_client
+        self.__acl_contract = acl_contract
         self.__get_perms = get_perms
         self.__is_valid_app = False
         self.__is_valid_code = False
@@ -66,9 +68,7 @@ class UnificationAppScValidation:
         permission to the REQUESTING APP to access it's data.
         """
 
-        u_acl = UnificationACL(
-            self.__conf['eos_rpc_ip'], self.__conf['eos_rpc_port'],
-            self.__conf['acl_contract'])
+        u_acl = UnificationACL(self.__eosClient, self.__acl_contract)
         self.__granted, self.__revoked = u_acl.get_perms_for_req_app(
             self.__requesting_app)
 
@@ -79,9 +79,7 @@ class UnificationAppScValidation:
         the code's hash).
         """
 
-        um = UnificationMother(
-            self.__conf['eos_rpc_ip'], self.__conf['eos_rpc_port'],
-            self.__requesting_app)
+        um = UnificationMother(self.__eosClient, self.__requesting_app)
         self.__is_valid_app = um.valid_app()
         self.__is_valid_code = um.valid_code()
 

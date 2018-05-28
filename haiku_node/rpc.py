@@ -2,6 +2,7 @@ import flask
 import json
 
 from cryptography.exceptions import InvalidSignature
+from eosapi import Client
 
 from haiku_node.config.keys import get_public_key
 from haiku_node.validation.encryption import (
@@ -109,8 +110,12 @@ def data_request():
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP. Since we only need to validate the app at this point,
         # set get_perms=False
+
+        eos_client = Client(
+            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
         v = UnificationAppScValidation(
-            conf, d['eos_account_name'], get_perms=True)
+            eos_client, conf['acl_contract'], d['eos_account_name'],
+            get_perms=True)
 
         # If the REQUESTING APP is valid according to MOTHER, then we can
         # generate the data. If not, return an invalid_app response

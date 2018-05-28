@@ -1,4 +1,3 @@
-from eosapi import Client
 from haiku_node.eosio_helpers import eosio_account
 
 
@@ -7,19 +6,15 @@ class UnificationMother:
     Loads data from MOTHER Smart Contract for a Haiku node's app
     """
 
-    def __init__(self, eos_rpc_ip, eos_rpc_port, acl_contract_acc):
+    def __init__(self, eos_client, acl_contract_acc):
         """
-            :param eos_rpc_ip: IP for EOS Client to communicate with the blockchain
-            :param eos_rpc_port: Port for EOS Client to communicate with the blockchain
-            :param acl_contract_acc: the eos account name of the app for which the class will retrieve
-                   data from the MOTHER smart contract
+        :param acl_contract_acc: the eos account name of the app for which the
+            class will retrieve data from the ACL/Meta Data smart contract
         """
         self.__mother = "unif.mother"
         self.__valid_apps_table = "validapps"
         self.__acl_contract_acc = acl_contract_acc
-        self.__eosClient = Client(
-            nodes=[f"http://{eos_rpc_ip}"
-                   f":{eos_rpc_port}"])
+        self.__eosClient = eos_client
         self.__is_valid_app = False
         self.__is_valid_code = False
         self.__deployed_contract_hash = ""  # the actual deployed contract
@@ -46,7 +41,8 @@ class UnificationMother:
         return self.__valid_db_schemas
 
     def get_haiku_rpc_server(self):
-        return f'https://{self.__haiku_rpc_server_ip}:{self.__haiku_rpc_server_port}'
+        return f'https://{self.__haiku_rpc_server_ip}:' \
+               f'{self.__haiku_rpc_server_port}'
 
     def get_haiku_rpc_ip(self):
         return self.__haiku_rpc_server_ip
@@ -64,7 +60,8 @@ class UnificationMother:
         self.__deployed_contract_hash = json_data['code_hash']
 
         table_data = self.__eosClient.get_table_rows(
-            self.__mother, self.__mother, self.__valid_apps_table, True, 0, -1, -1)
+            self.__mother, self.__mother, self.__valid_apps_table, True, 0, -1,
+            -1)
 
         req_app_uint64 = eosio_account.string_to_name(self.__acl_contract_acc)
 

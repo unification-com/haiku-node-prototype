@@ -5,6 +5,8 @@ import time
 
 import requests
 
+from eosapi import Client
+
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.blockchain.mother import UnificationMother
 
@@ -204,7 +206,8 @@ class AccountManager:
     def run_test_mother(self, app, demo_apps):
         print("Contacting MOTHER FOR: ", app)
 
-        um = UnificationMother(self.nodeos_ip, NODEOS_PORT, app)
+        eos_client = Client(nodes=[f"http://{self.nodeos_ip}:{NODEOS_PORT}"])
+        um = UnificationMother(eos_client, app)
         print("Valid app: ", um.valid_app())
         assert um.valid_app() is True
 
@@ -230,7 +233,8 @@ class AccountManager:
     def run_test_acl(self, app, demo_apps, appnames):
         print("Loading ACL/Meta Contract for: ", app)
 
-        u_acl = UnificationACL(self.nodeos_ip, NODEOS_PORT, app)
+        eosClient = Client(nodes=[f"http://{self.nodeos_ip}:{NODEOS_PORT}"])
+        u_acl = UnificationACL(eosClient, app)
 
         print("Data Schemas:")
         print(u_acl.get_db_schemas())
