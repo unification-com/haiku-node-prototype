@@ -25,23 +25,15 @@ def padding_signing():
 
 
 def sign_request(private_key, message):
-    signer = private_key.signer(padding_signing(), hashes.SHA256())
-    signer.update(bytes(message, encoding='utf8'))
-    signature = str(
-        base64.b64encode(signer.finalize()),
-        encoding='utf8'
-    )
-    return signature
+    signature = private_key.sign(
+        bytes(message, encoding='utf8'), padding_signing(), hashes.SHA256())
+    return str(base64.b64encode(signature), encoding='utf-8')
 
 
 def verify_request(public_key, body, signature):
-    verifier = public_key.verifier(
-        base64.b64decode(signature),
-        padding_signing(),
-        hashes.SHA256()
-    )
-    verifier.update(bytes(body, encoding='utf8'))
-    verifier.verify()
+    public_key.verify(
+        base64.b64decode(signature), bytes(body, encoding='utf-8'),
+        padding_signing(), hashes.SHA256())
 
 
 def encrypt(public_key, plaintext):
