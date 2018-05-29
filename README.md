@@ -49,10 +49,6 @@ From the root of the repository, build the containers with:
 
     make
 
-create a volume to persist accounts:
-
-    docker volume create --name keosd-data-volume
-
 and finally bring the composition up:
 
     docker-compose --file Docker/docker-compose.yml up

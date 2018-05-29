@@ -16,8 +16,6 @@ services:
     hostname: keosd
     ports:
     - "8889:8889"
-    volumes:
-      - keosd-data-volume:/opt/eosio/bin/data-dir
 
   haiku-app1:
     image: haiku
@@ -46,7 +44,3 @@ services:
   systemtest:
     image: systemtest
     command: python /haiku/test/systemtest.py wait
-
-volumes:
- keosd-data-volume:
-   external: true
