@@ -5,25 +5,14 @@ Setup with Docker
 -----------------
 
 Docker with Docker Compose is the simplest way to bring up this
-software. On OSX and Linux, both are available from Docker CE. This software has
-been tested against `Docker 18.03.1-ce` and `Docker Compose 1.21.1`.
+software. On OSX and Linux, both are available from Docker CE. This
+software has been tested against `Docker 18.03.1-ce` and
+`Docker Compose 1.21.1`.
 
-From the root of the repository, build the containers with:
+### Installing Docker on Ubuntu based systems
 
-    make
-
-create a volume to persist accounts:
-
-    docker volume create --name keosd-data-volume
-
-and finally bring the composition up:
-
-    docker-compose --file Docker/docker-compose.yml up
-
-Install Docker (Ubuntu based systems)
--------------------------------------
-
-For full instructions on how to install Docker CE, see https://docs.docker.com/install/linux/docker-ce/ubuntu/
+For full instructions on how to install Docker CE, see
+<https://docs.docker.com/install/linux/docker-ce/ubuntu/>
 
 Update apt
 
@@ -48,3 +37,23 @@ Update apt
 Install
 
     sudo apt-get install docker-ce
+
+### Installing on Docker OSX
+
+Docker for Mac can be obtained from here:
+<https://docs.docker.com/docker-for-mac/>
+
+### Bringing up the composition
+
+From the root of the repository, build the containers with:
+
+    make
+
+create a volume to persist accounts:
+
+    docker volume create --name keosd-data-volume
+
+and finally bring the composition up:
+
+    docker-compose --file Docker/docker-compose.yml up
+
