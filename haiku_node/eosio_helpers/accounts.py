@@ -48,7 +48,7 @@ class AccountManager:
 
     def cleos(self, subcommands):
         if self.host:
-            pre = ["/usr/local/bin/docker", "exec", "docker_keosd_1",
+            pre = ["/usr/local/bin/docker", "exec", "keosd",
                    "/opt/eosio/bin/cleos", "--url", self.nodeos,
                    "--wallet-url", self.keosd]
         else:
