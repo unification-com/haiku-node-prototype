@@ -57,7 +57,7 @@ class AccountManager:
 
         cmd = pre + subcommands
 
-        print("cleos command: ", cmd)
+        log.debug(f"cleos command: {cmd}")
 
         result = subprocess.run(
             cmd, stdout=subprocess.PIPE,
@@ -66,8 +66,9 @@ class AccountManager:
         log.debug(result.stdout)
         if result.returncode != 0:
             log.warning(result.stdout)
-            print(result.stdout, result.stderr)
-            print(' '.join(cmd))
+            log.debug(result.stdout)
+            log.debug(result.stderr)
+            log.debug(' '.join(cmd))
 
         return result
 
