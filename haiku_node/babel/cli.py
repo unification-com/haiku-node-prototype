@@ -76,7 +76,7 @@ def permissions(provider, requester, user):
     \b
     :param provider: The app name of the data provider.
     :param requester: The app name of the data requester.
-    :param user: User providing or denying access.
+    :param user: The EOS user account name to query.
     """
     conf = UnificationConfig()
     eos_client = Client(
@@ -115,12 +115,17 @@ def grant(provider, requester, user, password):
     \b
     :param provider: The app name of the data provider.
     :param requester: The app name of the data requester.
-    :param user: User providing or denying access.
-    :param password: User's EOS Account password
+    :param user: The EOS user account name that is granting access.
+    :param password: The EOS user account's password.
     """
     accounts = AccountManager()
     accounts.unlock_wallet(user, password)
-    accounts.grant(provider, requester, user)
+    result = accounts.grant(provider, requester, user)
+    accounts.lock_wallet(user)
+    if result.returncode == 0:
+        click.echo(bold('Grant succeeded'))
+    else:
+        click.echo(bold('Grant failed'))
 
 
 @main.command()
@@ -135,12 +140,17 @@ def revoke(provider, requester, user, password):
     \b
     :param provider: The app name of the data provider.
     :param requester: The app name of the data requester.
-    :param user: User providing or denying access.
-    :param password: User's EOS Account password
+    :param user: The EOS user account name that is revoking access.
+    :param password: The EOS user account's password.
     """
     accounts = AccountManager()
     accounts.unlock_wallet(user, password)
-    accounts.revoke(provider, requester, user)
+    result = accounts.revoke(provider, requester, user)
+    accounts.lock_wallet(user)
+    if result.returncode == 0:
+        click.echo(bold('Revoke succeeded'))
+    else:
+        click.echo(bold('Revoke failed'))
 
 
 if __name__ == "__main__":
