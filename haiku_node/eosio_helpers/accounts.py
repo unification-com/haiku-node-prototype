@@ -93,8 +93,11 @@ class AccountManager:
 
         return public_key, private_key
 
+    def lock_wallet(self, username):
+        return self.cleos(["wallet", "lock", "--name", username])
+
     def unlock_wallet(self, username, password):
-        self.cleos(
+        return self.cleos(
             ["wallet", "unlock", "--name", username, "--password", password])
 
     def wallet_import_key(self, username, private_key):
