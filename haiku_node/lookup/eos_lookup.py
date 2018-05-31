@@ -46,10 +46,11 @@ class UnificationLookup:
         self.__c.execute('SELECT * FROM lookup_meta WHERE 1')
         res = self.__c.fetchone()
 
-        dt = {}
-        dt['table'] = res[0]
-        dt['field'] = res[1]
-        dt['type'] = res[2]
+        dt = {
+            'table': res[0],
+            'field': res[1],
+            'type': res[2]
+        }
 
         self.__close_con()
 
@@ -62,10 +63,11 @@ class UnificationLookup:
 
         res = self.__c.fetchone()
 
-        dt = {}
-        dt['sc_schema_name'] = res[0]
-        dt['db_name'] = res[1]
-        dt['db_platform'] = res[2]
+        dt = {
+            'sc_schema_name': res[0],
+            'db_name': res[1],
+            'db_platform': res[2]
+        }
 
         self.__close_con()
 
