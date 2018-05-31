@@ -7,6 +7,7 @@ from eosapi import Client
 
 from itertools import product
 
+from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.client import HaikuDataClient, Provider, Unauthorized
 from haiku_node.config.config import registered_apps, UnificationConfig
 from haiku_node.eosio_helpers.accounts import AccountManager
@@ -111,6 +112,37 @@ def permissions(user):
         else:
             grant = bold('NOT GRANTED')
         click.echo(f"{requester} {grant} to read from {provider}")
+
+
+@main.command()
+@click.argument('app_name')
+def sources(app_name):
+    """
+    Obtain data source information about an App.
+
+    \b
+    :param app_name: The EOS app account name to query.
+    """
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+
+    acl = UnificationACL(eos_client, app_name)
+    datasources = acl.get_data_sources()
+
+    click.echo(f"{app_name} has the following datasources:\n")
+
+    schemas = {}
+    for k, d in acl.get_db_schemas().items():
+        schemas[d['schema_name_str']] = d['schema']
+
+    for k, d in datasources.items():
+        click.echo(f"A {bold(d['source_type'])} source from "
+                   f"{d['source_name_str']}")
+        if d['source_type'] == 'database':
+            click.echo(
+                f"The schema for {d['source_name_str']} is "
+                f"{schemas[d['source_name_str']]}")
 
 
 @main.command()
