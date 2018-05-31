@@ -1,3 +1,4 @@
+import json
 import tempfile
 from pathlib import Path
 
@@ -28,11 +29,14 @@ class HaikuDataClient:
         self.local = local
         self.protocol = protocol
 
-    def transform_request_id(self, request_hash):
+    def transform_request_id(self, user, request_hash):
         """
         # TODO: Convert to a particular request body
         """
-        return request_hash
+        return {
+            'user': user,
+            'data_id': request_hash
+        }
 
     def persist_data(self, providing_app_name: str, request_hash, data):
         temp_dir = Path(tempfile.gettempdir())
@@ -43,15 +47,15 @@ class HaikuDataClient:
         return tp
 
     def make_data_request(
-            self, requesting_app, providing_app: Provider, request_hash):
+            self, requesting_app, providing_app: Provider, user, request_hash):
         """
         Make a data request from one App to another.
         """
 
-        body = self.transform_request_id(request_hash)
+        body = self.transform_request_id(user, request_hash)
         private_key = self.keystore.get_rpc_auth_private_key()
 
-        signature = sign_request(private_key, body)
+        signature = sign_request(private_key, json.dumps(body))
 
         payload = {"eos_account_name": requesting_app,
                    "signature": signature,
@@ -60,6 +64,9 @@ class HaikuDataClient:
         base = providing_app.base_url()
         r = requests.post(f"{base}/data_request", json=payload, verify=False)
         d = r.json()
+
+        if r.status_code != 200:
+            raise Exception(d['message'])
 
         # Now verify the response
         encrypted_body = d['body']

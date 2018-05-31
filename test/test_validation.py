@@ -1,8 +1,10 @@
 import sys
 
-from haiku_node.validation.validation import UnificationAppScValidation
+from eosapi import Client
+
 from haiku_node.config.config import UnificationConfig
 from haiku_node.eosio_helpers import eosio_account
+from haiku_node.validation.validation import UnificationAppScValidation
 
 
 def run_test(requesting_app):
@@ -10,10 +12,13 @@ def run_test(requesting_app):
     users_to_test = ["user1", "user2", "user3"]
 
     conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
     print("THIS app is", conf['acl_contract'])
 
-    v = UnificationAppScValidation(conf, requesting_app)
+    v = UnificationAppScValidation(
+        eos_client, conf['acl_contract'], requesting_app)
 
     app_valid = v.valid_app()
     print(f"Requesting App {requesting_app} Valid according to MOTHER: "

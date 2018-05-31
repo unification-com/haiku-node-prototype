@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
 
+from eosapi import Client
+
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.config.config import UnificationConfig
 
@@ -15,8 +17,9 @@ def run_test(app):
     global conf
 
     print("Contacting MOTHER FOR: ", app)
-
-    um = UnificationMother(config['eos_rpc_ip'], config['eos_rpc_port'], app)
+    eos_client = Client(
+        nodes=[f"http://{config['eos_rpc_ip']}:{config['eos_rpc_port']}"])
+    um = UnificationMother(eos_client, app)
     print("Valid app: ", um.valid_app())
     assert um.valid_app() is True
 

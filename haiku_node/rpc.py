@@ -1,6 +1,8 @@
 import flask
+import json
 
 from cryptography.exceptions import InvalidSignature
+from eosapi import Client
 
 from haiku_node.config.keys import get_public_key
 from haiku_node.validation.encryption import (
@@ -32,6 +34,15 @@ def invalid_response():
     return flask.jsonify({
         'success': False,
         'message': 'Unauthorized',
+        'signature': None,
+        'body': None
+    }), 401
+
+
+def unauthorized_for_user():
+    return flask.jsonify({
+        'success': False,
+        'message': 'Unauthorized For User',
         'signature': None,
         'body': None
     }), 401
@@ -87,7 +98,8 @@ def ingest_data(body):
 def data_request():
     try:
         d = flask.request.get_json()
-        verify_account(d['eos_account_name'], d['body'], d['signature'])
+        verify_account(
+            d['eos_account_name'], json.dumps(d['body']), d['signature'])
 
         # Validate requesting app against smart contracts
         # config is this Haiku Node's config fle, containing its ACL/Meta Data
@@ -98,7 +110,12 @@ def data_request():
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP. Since we only need to validate the app at this point,
         # set get_perms=False
-        v = UnificationAppScValidation(conf, d['eos_account_name'], False)
+
+        eos_client = Client(
+            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+        v = UnificationAppScValidation(
+            eos_client, conf['acl_contract'], d['eos_account_name'],
+            get_perms=True)
 
         # If the REQUESTING APP is valid according to MOTHER, then we can
         # generate the data. If not, return an invalid_app response
@@ -107,7 +124,12 @@ def data_request():
         # have granted permissions to the REQUESTING APP, and get the correct
         # data
         if v.valid_code():
-            return obtain_data(d['body'], d['eos_account_name'])
+            data_for_user = d['body']['user']
+            has_perm = v.app_has_user_permission(data_for_user)
+            if has_perm:
+                return obtain_data(d['body'], d['eos_account_name'])
+            else:
+                return unauthorized_for_user()
         else:
             return invalid_app()
 
