@@ -5,8 +5,11 @@ import click
 
 from eosapi import Client
 
-from haiku_node.client import HaikuDataClient, Provider
-from haiku_node.config.config import UnificationConfig
+from itertools import product
+
+from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.client import HaikuDataClient, Provider, Unauthorized
+from haiku_node.config.config import registered_apps, UnificationConfig
 from haiku_node.eosio_helpers.accounts import AccountManager
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.validation.validation import UnificationAppScValidation
@@ -47,16 +50,19 @@ def fetch(provider, user, request_hash):
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    data_path = client.make_data_request(
-        requesting_app, provider, user, req_hash)
-    click.echo(f'Data written to {data_path}')
+    try:
+        data_path = client.make_data_request(
+            requesting_app, provider, user, req_hash)
+        click.echo(f'Data written to {data_path}')
+    except Unauthorized:
+        click.echo(f'{user} has {bold("not authorized")} this request')
 
 
 @main.command()
 @click.argument('provider')
 @click.argument('user')
 @click.argument('request_hash')
-def read(provider, user, request_hash):
+def view(provider, user, request_hash):
     """
     Read data stored locally from an Data Provider for a particular user.
 
@@ -84,41 +90,59 @@ def read(provider, user, request_hash):
 
 
 @main.command()
-@click.argument('provider')
-@click.argument('requester')
 @click.argument('user')
-def permissions(provider, requester, user):
+def permissions(user):
     """
     Display user permissions.
 
     \b
-    :param provider: The app name of the data provider.
-    :param requester: The app name of the data requester.
     :param user: The EOS user account name to query.
     """
     conf = UnificationConfig()
     eos_client = Client(
         nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
-    v = UnificationAppScValidation(
-        eos_client, provider, requester, get_perms=True)
 
-    app_valid = v.valid_app()
-    code_valid = v.valid_code()
-    both_valid = v.valid()
-
-    click.echo(f"Requesting App {requester} Valid according to MOTHER: "
-               f"{bold(app_valid)}")
-
-    click.echo(f"{requester} contract code hash valid: {bold(code_valid)}")
-    click.echo(f"{requester} is considered valid: {bold(both_valid)}")
-
-    if both_valid:
+    for requester, provider in product(registered_apps, registered_apps):
+        if requester == provider:
+            continue
+        v = UnificationAppScValidation(
+            eos_client, provider, requester, get_perms=True)
         if v.app_has_user_permission(user):
             grant = bold('GRANTED')
         else:
             grant = bold('NOT GRANTED')
-        click.echo(f"{user} {grant} permission for {requester} to access data "
-                   f"in {provider}")
+        click.echo(f"{requester} {grant} to read from {provider}")
+
+
+@main.command()
+@click.argument('app_name')
+def sources(app_name):
+    """
+    Obtain data source information about an App.
+
+    \b
+    :param app_name: The EOS app account name to query.
+    """
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+
+    acl = UnificationACL(eos_client, app_name)
+    datasources = acl.get_data_sources()
+
+    click.echo(f"{app_name} has the following datasources:\n")
+
+    schemas = {}
+    for k, d in acl.get_db_schemas().items():
+        schemas[d['schema_name_str']] = d['schema']
+
+    for k, d in datasources.items():
+        click.echo(f"A {bold(d['source_type'])} source from "
+                   f"{d['source_name_str']}")
+        if d['source_type'] == 'database':
+            click.echo(
+                f"The schema for {d['source_name_str']} is "
+                f"{schemas[d['source_name_str']]}")
 
 
 @main.command()

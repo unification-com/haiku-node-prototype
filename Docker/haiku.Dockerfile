@@ -29,10 +29,10 @@ ENV PYTHONPATH /haiku
 
 COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
 
-RUN echo "babel read app2 user1 data-1" >> /root/.bash_history && \
+RUN echo "babel view app2 user1 data-1" >> /root/.bash_history && \
     echo "babel fetch app2 user1 data-1" >> /root/.bash_history && \
-    echo "babel permissions app1 app2 user3" >> /root/.bash_history && \
-    echo "babel grant app1 app2 user3 PW5KfhcoCs5yV7wLTWWh97fZbf9jshHZL7vD9tQARfpCGVnDyA95t" >> /root/.bash_history && \
+    echo "babel permissions user1" >> /root/.bash_history && \
+    echo "babel grant app2 app3 user1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx" >> /root/.bash_history && \
     echo "babel revoke app1 app2 user3 PW5KfhcoCs5yV7wLTWWh97fZbf9jshHZL7vD9tQARfpCGVnDyA95t" >> /root/.bash_history && \
     echo "alias ll='ls -la'" >> /root/.bashrc
 
