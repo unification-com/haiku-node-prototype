@@ -69,5 +69,3 @@ VALUES
 	(30,298,224352,191,3),
 	(31,219,229852,107,3),
 	(32,217,224353,191,3);
-	
-GRANT ALL PRIVILEGES ON Heartbit.* TO 'Heartbit'@'localhost' IDENTIFIED BY 'Heartbit';
