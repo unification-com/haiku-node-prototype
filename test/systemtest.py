@@ -40,14 +40,15 @@ def base_url(protocol, host, port):
     return f"{protocol}://{host}:{port}"
 
 
-def systest_auth(base):
+def systest_auth(requesting_app, providing_app):
     """
     Testing signing and verifying a data request.
 
-    App2 is requesting data from App1.
     """
+    log.info(f'{requesting_app} is requesting data from {providing_app}')
     body = 'request body'
-    requesting_app = 'app2'
+
+    base = base_url('https', f"haiku-{providing_app}", 8050)
 
     password = password_d[requesting_app]['password']
     encoded_password = str.encode(password)
@@ -79,7 +80,7 @@ def systest_auth(base):
 
     # Now verify the response
     decrypted_body = decrypt(private_key, d['body'])
-    verify_account('app1', decrypted_body, d['signature'])
+    verify_account(providing_app, decrypted_body, d['signature'])
 
 
 def systest_ingest(local=False):
@@ -223,8 +224,12 @@ def probe():
     """
     Run a few tests on a system that is already up.
     """
-    url_base = base_url('https', 'haiku-app1', 8050)
-    systest_auth(url_base)
+    systest_auth('app1', 'app2')
+    systest_auth('app1', 'app3')
+    systest_auth('app2', 'app1')
+    systest_auth('app2', 'app3')
+    systest_auth('app3', 'app1')
+    systest_auth('app3', 'app2')
     systest_ingest()
 
 
@@ -233,8 +238,6 @@ def host():
     """
     Test from the host machine.
     """
-    url_base = base_url('http', 'localhost', 8050)
-    systest_auth(url_base)
     systest_ingest(local=True)
 
 
@@ -262,15 +265,18 @@ def wait():
     time.sleep(5)
 
     # Run RPC tests
-    url_base = base_url('https', 'haiku-app1', 8050)
-    systest_auth(url_base)
-
-    url_base = base_url('https', 'haiku-app2', 8050)
-    systest_auth(url_base)
+    systest_auth('app1', 'app2')
+    systest_auth('app1', 'app3')
+    systest_auth('app2', 'app1')
+    systest_auth('app2', 'app3')
+    systest_auth('app3', 'app1')
+    systest_auth('app3', 'app2')
 
     systest_ingest()
 
-    time.sleep(6000)
+    # Run forever
+    while True:
+        time.sleep(6000)
 
 
 if __name__ == "__main__":
