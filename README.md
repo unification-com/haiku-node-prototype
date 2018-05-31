@@ -53,3 +53,47 @@ and finally bring the composition up:
 
     docker-compose --file Docker/docker-compose.yml up
 
+Babel CLI
+---------
+
+Babel CLI is a means of interacting with Unification via the command
+line.
+
+We are going to demonstrate App3 consuming data from App1 and App2.
+Firstly, open a bash process in the third Haiku app:
+
+    docker exec -it haiku-app1 /bin/bash
+
+### Observing Permissions
+
+Currently there are three users in the ecosystem. We can observe the
+permissions a user has granted to the apps to access data.
+
+    babel permissions user1
+
+### Fetching Data
+
+Despite this particular user not having granted access to the data, we
+attempt to access the data from App3:
+
+    babel fetch app2 user1 data-1
+
+The request should be denied.
+
+### Changing Permissions
+
+`user1` can grant App3 permission to access it's data on App1 via Babel,
+with it's EOS account password:
+
+    babel grant app2 app3 user1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx
+
+Now, fetching the data should be permitted:
+
+    babel fetch app2 user1 data-1
+
+Currently, the data is stored locally, and cannot be viewed directly
+because it is encrypted using App3's public RSA key. Via Babel, we can
+decrypt the data using App3's private RSA key and view it:
+
+    babel view app2 user1 data-1
+
