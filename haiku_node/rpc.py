@@ -123,7 +123,7 @@ def data_request():
         # to load the UnificationAppScValidation class, so it knows which users
         # have granted permissions to the REQUESTING APP, and get the correct
         # data
-        if v.valid_code():
+        if v.valid():
             data_for_user = d['body']['user']
             has_perm = v.app_has_user_permission(data_for_user)
             if has_perm:
