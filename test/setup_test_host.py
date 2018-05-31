@@ -15,10 +15,6 @@ password = password_d[app_name]['password']
 
 print(f"Setting up host for {app_name}")
 
-print(f"Create keystore for {app_name}")
-with open('/etc/haiku-password', 'w') as f:
-    f.write(password)
-
 os.unlink('/haiku/haiku_node/keystore/keys.store')
 
 shutil.copy(

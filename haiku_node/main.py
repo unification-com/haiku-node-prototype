@@ -1,15 +1,11 @@
+import os
 import sys
-
-from pathlib import Path
 
 from cryptography.fernet import Fernet
 
 from haiku_node.config.config import UnificationConfig
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import app
-
-# A plain text on the file-system password to ease automated systems
-HAIKU_PASSWORD_FILE = Path('/etc/haiku-password')
 
 PORT = 8050
 
@@ -30,8 +26,8 @@ if __name__ == '__main__':
     config = UnificationConfig()
     conf = config.get_conf()
 
-    if HAIKU_PASSWORD_FILE.exists():
-        password = HAIKU_PASSWORD_FILE.read_text()
+    password = os.environ.get('keystore')
+    if password:
         spawn_haiku_node(password, config)
 
     else:

@@ -8,14 +8,13 @@ from haiku_node.validation.encryption import (
 
 from haiku_node.validation.validation import UnificationAppScValidation
 
-
 app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
 
 logger = app.logger
 
 
-def verify_account(eos_account_name, body, signature):
+def verify_account(eos_account_name: str, body, signature):
     verify_request(get_public_key(eos_account_name), body, signature)
 
 

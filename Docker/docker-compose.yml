@@ -23,6 +23,7 @@ services:
     image: haiku
     environment:
     - app_name=app1
+    - keystore=rIeT7sz1P31ijrs9lNZiQGmOKlUVqf1WBg8ZSW-3JR8=
     ports:
     - "8851:8050"
 
@@ -30,6 +31,7 @@ services:
     image: haiku
     environment:
     - app_name=app2
+    - keystore=I0CtE8uvYOj9bOaQjlymmZT8621iidsInry0Nqepaak=
     ports:
     - "8852:8050"
 
@@ -37,6 +39,7 @@ services:
     image: haiku
     environment:
     - app_name=app3
+    - keystore=Lah5Kwt9mziZh9A_Xi6RQ_quqwII5Bhvw5MZ8xE03IA=
     ports:
     - "8853:8050"
 
