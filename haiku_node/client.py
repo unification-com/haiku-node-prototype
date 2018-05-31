@@ -23,6 +23,10 @@ class Provider:
         return f"{self.protocol}://{self.host}:{self.port}"
 
 
+class Unauthorized(Exception):
+    pass
+
+
 class HaikuDataClient:
     def __init__(self, keystore, protocol='https', local=False):
         self.keystore = keystore
@@ -66,7 +70,7 @@ class HaikuDataClient:
         d = r.json()
 
         if r.status_code != 200:
-            raise Exception(d['message'])
+            raise Unauthorized(d['message'])
 
         # Now verify the response
         encrypted_body = d['body']

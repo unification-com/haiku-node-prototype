@@ -5,7 +5,7 @@ import click
 
 from eosapi import Client
 
-from haiku_node.client import HaikuDataClient, Provider
+from haiku_node.client import HaikuDataClient, Provider, Unauthorized
 from haiku_node.config.config import UnificationConfig
 from haiku_node.eosio_helpers.accounts import AccountManager
 from haiku_node.keystore.keystore import UnificationKeystore
@@ -47,16 +47,19 @@ def fetch(provider, user, request_hash):
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    data_path = client.make_data_request(
-        requesting_app, provider, user, req_hash)
-    click.echo(f'Data written to {data_path}')
+    try:
+        data_path = client.make_data_request(
+            requesting_app, provider, user, req_hash)
+        click.echo(f'Data written to {data_path}')
+    except Unauthorized:
+        click.echo(f'{user} has {bold("not authorized")} this request')
 
 
 @main.command()
 @click.argument('provider')
 @click.argument('user')
 @click.argument('request_hash')
-def read(provider, user, request_hash):
+def view(provider, user, request_hash):
     """
     Read data stored locally from an Data Provider for a particular user.
 
@@ -106,11 +109,10 @@ def permissions(provider, requester, user):
     code_valid = v.valid_code()
     both_valid = v.valid()
 
-    click.echo(f"Requesting App {requester} Valid according to MOTHER: "
+    click.echo(f"The App {requester} Valid according to Unification: "
                f"{bold(app_valid)}")
-
-    click.echo(f"{requester} contract code hash valid: {bold(code_valid)}")
-    click.echo(f"{requester} is considered valid: {bold(both_valid)}")
+    click.echo(f"The contract code of this app has a valid hash: "
+               f"{bold(code_valid)}\n")
 
     if both_valid:
         if v.app_has_user_permission(user):
