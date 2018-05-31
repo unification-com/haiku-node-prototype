@@ -38,6 +38,29 @@ Install
 
     sudo apt-get install docker-ce
 
+Additional step - you may need to add your user to the docker group, then log out/in:
+
+    sudo adduser [username] docker
+
+Install the latest Docker Compose. For full instructions,
+see https://docs.docker.com/compose/install/
+
+Download the latest version
+
+    sudo curl -L https://github.com/docker/compose/releases/download/1.21.2/docker-compose-$(uname -s)-$(uname -m) -o /usr/local/bin/docker-compose
+
+Make executable
+
+    sudo chmod +x /usr/local/bin/docker-compose
+
+Test
+
+    docker-compose --version
+
+should output 
+
+    docker-compose version 1.21.2, build 1719ceb
+
 ### Installing on Docker OSX
 
 Docker for Mac can be obtained from here:
