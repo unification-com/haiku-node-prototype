@@ -64,6 +64,14 @@ Firstly, open a bash process in the third Haiku app:
 
     docker exec -it haiku-app1 /bin/bash
 
+### Observing App Info
+
+We can observe the datasources that App3 has configured:
+
+    babel sources app3
+
+We can see one database source, and two contract sources.
+
 ### Observing Permissions
 
 Currently there are three users in the ecosystem. We can observe the
