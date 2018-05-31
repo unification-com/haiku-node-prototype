@@ -1,26 +1,23 @@
-import os,sys,inspect
+import sys
+
 from haiku_node.validation.validation import UnificationAppScValidation
 from haiku_node.config.config import UnificationConfig
 from haiku_node.eosio_helpers import eosio_account
-
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0,parentdir)
 
 
 def run_test(requesting_app):
     #list of users to test - EOS account names.
     users_to_test = ["user1", "user2", "user3"]
 
-    config = UnificationConfig()
-    conf = config.get_conf()
+    conf = UnificationConfig()
 
     print("THIS app is", conf['acl_contract'])
 
     v = UnificationAppScValidation(conf, requesting_app)
 
     app_valid = v.valid_app()
-    print("Requesting App", requesting_app, "Valid according to MOTHER: ", app_valid)
+    print(f"Requesting App {requesting_app} Valid according to MOTHER: "
+          f"{app_valid}")
 
     code_valid = v.valid_code()
     print(requesting_app, "contract code hash valid:", code_valid)
@@ -30,7 +27,8 @@ def run_test(requesting_app):
 
     if both_valid:
 
-        print("App valid according to MOTHER. App code hash valid. Check user permissions.")
+        print("App valid according to MOTHER. App code hash valid. "
+              "Check user permissions.")
 
         users_granted = v.users_granted()
         print("Users who granted permission for:", requesting_app)
@@ -41,11 +39,13 @@ def run_test(requesting_app):
         print(users_revoked)
 
         for user in users_to_test:
-            perm = v.app_has_user_permission(user)
-            if (perm):
-                print(user, "GRANTED permission for", requesting_app, "to access data in", conf['acl_contract'])
+            if v.app_has_user_permission(user):
+                print(f"{user} GRANTED permission for {requesting_app} to "
+                      f"access data in {conf['acl_contract']}")
             else:
-                print(user, "NOT GRANTED permission for", requesting_app, "to access data in", conf['acl_contract'])
+                print(
+                    f"{user} NOT GRANTED permission for {requesting_app} to "
+                    f"access data in {conf['acl_contract']}")
 
     else:
         if app_valid is False:
@@ -62,8 +62,8 @@ if __name__ == '__main__':
 
         u = "user.1"
         n = eosio_account.string_to_name(u)
-        str = eosio_account.name_to_string(n)
-        print("str", str)
+        account_name = eosio_account.name_to_string(n)
+        print("str", account_name)
 
     else:
         print("run with requesting app account as arg1, e.g.:")

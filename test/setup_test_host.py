@@ -32,7 +32,7 @@ os.unlink(f"/haiku/test/data/{app_name}_unification_lookup.db")
 
 print(f"set config/config.json values for host {app_name}")
 uc = UnificationConfig()
-uc.set_conf("acl_contract", app_name)
+uc["acl_contract"] = app_name
 
 print("config.json:")
-print(uc.get_conf())
+print(uc)

@@ -4,15 +4,12 @@ from haiku_node.config.config import UnificationConfig
 
 apps_to_test = ['app1', 'app2', 'app3']
 config = UnificationConfig()
-conf = config.get_conf()
 
 
 def run_test(app):
-    global conf
-
     print("Loading ACL/Meta Contract for: ", app)
 
-    u_acl = UnificationACL(conf['eos_rpc_ip'], conf['eos_rpc_port'], app)
+    u_acl = UnificationACL(config['eos_rpc_ip'], config['eos_rpc_port'], app)
 
     print("Data Schemas in Contract:")
     print(u_acl.get_db_schemas())
@@ -20,7 +17,7 @@ def run_test(app):
     print(u_acl.get_data_sources())
 
     print("Current VALID Schema(s), as per MOTHER:")
-    um = UnificationMother(conf['eos_rpc_ip'], conf['eos_rpc_port'], app)
+    um = UnificationMother(config['eos_rpc_ip'], config['eos_rpc_port'], app)
     for sn, sv in um.get_valid_db_schemas().items():
         print(u_acl.get_current_valid_schema(sn, sv))
 

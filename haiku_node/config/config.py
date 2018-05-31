@@ -1,21 +1,32 @@
 import json
-import os, sys, inspect
+import os
+import inspect
 
-currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-sys.path.insert(0, parentdir)
+import logging
+
+log = logging.getLogger(__name__)
 
 
 class UnificationConfig:
 
+    config_path = '/config/config.json'
+
     def __init__(self):
-        with open(parentdir + '/config/config.json') as f:
-            self.conf = json.load(f)
+        with open(self.parent_directory() + self.config_path) as f:
+            self.__conf = json.load(f)
 
-    def get_conf(self):
-        return self.conf
+    def __getitem__(self, item):
+        return self.__conf[item]
 
-    def set_conf(self, key, val):
-        self.conf[key] = val
-        with open(parentdir + '/config/config.json', 'w') as f:
-            json.dump(self.conf, f, indent=4)
+    def __setitem__(self, key, value):
+        self.__conf[key] = value
+        with open(self.parent_directory() + self.config_path, 'w') as f:
+            json.dump(self.__conf, f, indent=4)
+
+    def __repr__(self):
+        return str(self.__conf)
+
+    def parent_directory(self):
+        currentdir = os.path.dirname(
+            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        return os.path.dirname(currentdir)
