@@ -136,6 +136,10 @@ def data_request():
     except InvalidSignature:
         return invalid_response()
 
+    except Exception as e:
+        logger.exception(e)
+        return generic_error()
+
 
 @app.route('/data_ingest', methods=['POST'])
 def data_ingest():

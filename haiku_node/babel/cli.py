@@ -22,14 +22,23 @@ def main():
 
 
 @main.command()
-@click.argument('app_name')
+@click.argument('provider')
 @click.argument('user')
 @click.argument('request_hash')
-def fetch(app_name, user, request_hash):
+def fetch(provider, user, request_hash):
+    """
+    Fetch data from an App to this App for a particular user.
+
+    \b
+    :param provider: The app name of the data provider.
+    :param user: The EOS user account name to query.
+    :param request_hash: The particular piece of data in concern.
+    :return:
+    """
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
-    provider = Provider(app_name, 'https', f'haiku-{app_name}', 8050)
+    provider = Provider(provider, 'https', f'haiku-{provider}', 8050)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is requesting data from {provider.name}')
@@ -44,14 +53,23 @@ def fetch(app_name, user, request_hash):
 
 
 @main.command()
-@click.argument('app_name')
+@click.argument('provider')
 @click.argument('user')
 @click.argument('request_hash')
-def read(app_name, user, request_hash):
+def read(provider, user, request_hash):
+    """
+    Read data stored locally from an Data Provider for a particular user.
+
+    \b
+    :param provider: The app name of the data provider.
+    :param user: The EOS user account name to query.
+    :param request_hash: The particular piece of data in concern.
+    :return:
+    """
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
-    provider = Provider(app_name, 'https', f'haiku-{app_name}', 8050)
+    provider = Provider(provider, 'https', f'haiku-{provider}', 8050)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is reading ingested data from '
@@ -76,7 +94,7 @@ def permissions(provider, requester, user):
     \b
     :param provider: The app name of the data provider.
     :param requester: The app name of the data requester.
-    :param user: User providing or denying access.
+    :param user: The EOS user account name to query.
     """
     conf = UnificationConfig()
     eos_client = Client(
@@ -110,17 +128,22 @@ def permissions(provider, requester, user):
 @click.argument('password')
 def grant(provider, requester, user, password):
     """
-    User grants a provider to a requester.
+    User grants data access between a provider and a requester.
 
     \b
     :param provider: The app name of the data provider.
     :param requester: The app name of the data requester.
-    :param user: User providing or denying access.
-    :param password: User's EOS Account password
+    :param user: The EOS user account name that is granting access.
+    :param password: The EOS user account's password.
     """
     accounts = AccountManager()
     accounts.unlock_wallet(user, password)
-    accounts.grant(provider, requester, user)
+    result = accounts.grant(provider, requester, user)
+    accounts.lock_wallet(user)
+    if result.returncode == 0:
+        click.echo(bold('Grant succeeded'))
+    else:
+        click.echo(bold('Grant failed'))
 
 
 @main.command()
@@ -130,17 +153,22 @@ def grant(provider, requester, user, password):
 @click.argument('password')
 def revoke(provider, requester, user, password):
     """
-    User grants a provider to a requester.
+    User revokes data access between a provider and a requester.
 
     \b
     :param provider: The app name of the data provider.
     :param requester: The app name of the data requester.
-    :param user: User providing or denying access.
-    :param password: User's EOS Account password
+    :param user: The EOS user account name that is revoking access.
+    :param password: The EOS user account's password.
     """
     accounts = AccountManager()
     accounts.unlock_wallet(user, password)
-    accounts.revoke(provider, requester, user)
+    result = accounts.revoke(provider, requester, user)
+    accounts.lock_wallet(user)
+    if result.returncode == 0:
+        click.echo(bold('Revoke succeeded'))
+    else:
+        click.echo(bold('Revoke failed'))
 
 
 if __name__ == "__main__":

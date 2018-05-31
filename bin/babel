@@ -1,0 +1,4 @@
+#!/usr/bin/env python
+
+from haiku_node.babel.cli import main
+main()
