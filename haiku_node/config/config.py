@@ -7,6 +7,10 @@ import logging
 log = logging.getLogger(__name__)
 
 
+# The registered apps should exist in a database, or come from the demo config
+registered_apps = ['app1', 'app2', 'app3']
+
+
 class UnificationConfig:
 
     config_path = '/config/config.json'

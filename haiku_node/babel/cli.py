@@ -5,8 +5,10 @@ import click
 
 from eosapi import Client
 
+from itertools import product
+
 from haiku_node.client import HaikuDataClient, Provider, Unauthorized
-from haiku_node.config.config import UnificationConfig
+from haiku_node.config.config import registered_apps, UnificationConfig
 from haiku_node.eosio_helpers.accounts import AccountManager
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.validation.validation import UnificationAppScValidation
@@ -87,40 +89,28 @@ def view(provider, user, request_hash):
 
 
 @main.command()
-@click.argument('provider')
-@click.argument('requester')
 @click.argument('user')
-def permissions(provider, requester, user):
+def permissions(user):
     """
     Display user permissions.
 
     \b
-    :param provider: The app name of the data provider.
-    :param requester: The app name of the data requester.
     :param user: The EOS user account name to query.
     """
     conf = UnificationConfig()
     eos_client = Client(
         nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
-    v = UnificationAppScValidation(
-        eos_client, provider, requester, get_perms=True)
 
-    app_valid = v.valid_app()
-    code_valid = v.valid_code()
-    both_valid = v.valid()
-
-    click.echo(f"The App {requester} Valid according to Unification: "
-               f"{bold(app_valid)}")
-    click.echo(f"The contract code of this app has a valid hash: "
-               f"{bold(code_valid)}\n")
-
-    if both_valid:
+    for requester, provider in product(registered_apps, registered_apps):
+        if requester == provider:
+            continue
+        v = UnificationAppScValidation(
+            eos_client, provider, requester, get_perms=True)
         if v.app_has_user_permission(user):
             grant = bold('GRANTED')
         else:
             grant = bold('NOT GRANTED')
-        click.echo(f"{user} {grant} permission for {requester} to access data "
-                   f"in {provider}")
+        click.echo(f"{requester} {grant} to read from {provider}")
 
 
 @main.command()
