@@ -34,5 +34,18 @@ print(f"set config/config.json values for host {app_name}")
 uc = UnificationConfig()
 uc["acl_contract"] = app_name
 
+# set up DB config values
+dbs = {}
+
+for schemas in demo_config['demo_apps'][app_name]['db_schemas']:
+    db = {
+        'host': schemas['host'],
+        'user': schemas['user'],
+        'pass': schemas['pass']
+    }
+    dbs[schemas['schema_name']] = db
+
+uc['db_conn'] = dbs
+
 print("config.json:")
 print(uc)
