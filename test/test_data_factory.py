@@ -1,8 +1,10 @@
+import pytest
+
 from haiku_node.data.factory import UnificationDataFactory
 from haiku_node.config.config import UnificationConfig
 from eosapi import Client
 
-
+@pytest.mark.skipif(True, reason="requires test setup")
 def test_data_factory():
     conf = UnificationConfig()
     eos_client = Client(
