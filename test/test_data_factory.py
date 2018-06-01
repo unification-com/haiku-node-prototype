@@ -8,7 +8,7 @@ from eosapi import Client
 def test_data_factory():
     conf = UnificationConfig()
     eos_client = Client(
-        nodes=[f"http://127.0.0.1:{conf['eos_rpc_port']}"])
+        nodes=[f"{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
     print("Bulk request")
     data_factory = UnificationDataFactory(eos_client, 'app1', 'app2')
