@@ -1,6 +1,6 @@
 {
     "acl_contract": "app1",
-    "eos_rpc_ip": "nodeosd",
+    "eos_rpc_ip": "127.0.0.1",
     "eos_rpc_port": "8888",
     "server_initialised": true
 }

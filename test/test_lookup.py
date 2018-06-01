@@ -1,7 +1,7 @@
 import pytest
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.lookup.eos_lookup import UnificationLookup
-
+from haiku_node.config.config import UnificationConfig
 
 @pytest.mark.skipif(True, reason="requires test setup")
 def test_user_lookup():
@@ -53,6 +53,10 @@ def test_user_lookup():
     print("Schema map for app1.db1:")
 
     print(schema_map)
+
+    real_table = ul.get_real_table_info('app1.db1', 'data_1')
+    print("real table data for app1.db1, data_1:")
+    print(real_table)
 
 
 if __name__ == "__main__":

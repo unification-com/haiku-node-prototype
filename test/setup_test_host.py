@@ -33,6 +33,20 @@ os.unlink(f"/haiku/test/data/{app_name}_unification_lookup.db")
 print(f"set config/config.json values for host {app_name}")
 uc = UnificationConfig()
 uc["acl_contract"] = app_name
+uc["eos_rpc_ip"] = "nodeosd"
+
+# set up DB config values
+dbs = {}
+
+for schemas in demo_config['demo_apps'][app_name]['db_schemas']:
+    db = {
+        'host': schemas['host'],
+        'user': schemas['user'],
+        'pass': schemas['pass']
+    }
+    dbs[schemas['schema_name']] = db
+
+uc['db_conn'] = dbs
 
 print("config.json:")
 print(uc)

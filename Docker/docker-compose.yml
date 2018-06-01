@@ -14,7 +14,7 @@ services:
   nodeosd:
     image: unification-node
     container_name: nodeosd
-    command: /opt/eosio/bin/nodeosd.sh --max-transaction-time=60
+    command: /opt/eosio/bin/nodeosd.sh --resync --max-transaction-time=60
     hostname: nodeosd
     ports:
     - "8888:8888"
