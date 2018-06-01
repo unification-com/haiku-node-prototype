@@ -21,9 +21,10 @@
                     "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Heartrate</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>GeoLocation</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>TimeStamp</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>Pulse</name><type>int</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>",
                     "database":"Heartbit",
                     "db_platform":"mysql",
-                    "host": "localhost",
-                    "user": "Heartbit",
-                    "pass": "Heartbit",
+                    "host": "db",
+                    "port": "3306",
+                    "user": "haiku",
+                    "pass": "password",
                     "table_maps": [
                       {
                         "schema_table_id": "users",
@@ -76,9 +77,10 @@
                     "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>DataBlob</name><type>binarydata</type><is-null>true</is-null><table>data_1</table></field><field><name>BlobSize</name><type>int</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>",
                     "database":"Datablobs",
                     "db_platform":"mysql",
-                    "host": "localhost",
-                    "user": "Datablobs",
-                    "pass": "Datablobs",
+                    "host": "db",
+                    "port": "3306",
+                    "user": "haiku",
+                    "pass": "password",
                     "table_maps": [
                       {
                         "schema_table_id": "users",
@@ -131,9 +133,10 @@
                     "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Image</name><type>base65_mime_image</type><is-null>true</is-null><table>ImageData</table></field></fields></schema-template>",
                     "database":"Datablobs",
                     "db_platform":"mysql",
-                    "host": "localhost",
-                    "user": "Datablobs",
-                    "pass": "Datablobs",
+                    "host": "db",
+                    "port": "3306",
+                    "user": "haiku",
+                    "pass": "password",
                     "table_maps": [
                       {
                         "schema_table_id": "users",

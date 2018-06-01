@@ -41,6 +41,7 @@ dbs = {}
 for schemas in demo_config['demo_apps'][app_name]['db_schemas']:
     db = {
         'host': schemas['host'],
+        'port': schemas['port'],
         'user': schemas['user'],
         'pass': schemas['pass']
     }
