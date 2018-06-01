@@ -38,12 +38,13 @@ Install
 
     sudo apt-get install docker-ce
 
-Additional step - you may need to add your user to the docker group, then log out/in:
+Additional step - you may need to add your user to the docker group,
+then log out/in:
 
     sudo adduser [username] docker
 
-Install the latest Docker Compose. For full instructions,
-see https://docs.docker.com/compose/install/
+Install the latest Docker Compose. For full instructions, see
+<https://docs.docker.com/compose/install/>
 
 Download the latest version
 
@@ -57,7 +58,7 @@ Test
 
     docker-compose --version
 
-should output 
+should output
 
     docker-compose version 1.21.2, build 1719ceb
 
@@ -76,20 +77,23 @@ and finally bring the composition up:
 
     docker-compose --file Docker/docker-compose.yml up
 
-Babel CLI
----------
+The Babel and Haiku CLI
+-----------------------
 
-Babel CLI is a means of interacting with Unification via the command
-line.
+There are two command line tools, simulating the behaivour of the end
+user, and the Haiku server. Their names are respectively, 'babel' and
+'haiku'.We are going to demonstrate App3 consuming data from App1 and
+App2.
 
-We are going to demonstrate App3 consuming data from App1 and App2.
-Firstly, open a bash process in the third Haiku app:
+Once the Docker composition is up, and the system tests have run, open a
+bash process on the `babel` container:
 
-    docker exec -it haiku-app1 /bin/bash
+    docker exec -it babel /bin/bash
 
 ### Observing App Info
 
-We can observe the datasources that App3 has configured:
+From the babel container, we can observe the data sources that App3 has
+configured:
 
     babel sources app3
 
@@ -104,27 +108,32 @@ permissions a user has granted to the apps to access data.
 
 ### Fetching Data
 
-Despite this particular user not having granted access to the data, we
-attempt to access the data from App3:
+From the third Haiku node, we can attempt to access the data (despite
+the user not having granted access). Open a bash process on the third
+Haiku node:
 
-    babel fetch app2 user1 data-1
+    docker exec -it haiku-app3 /bin/bash
+
+and attempt to fetch the data:
+
+    haiku fetch app2 user1 data-1
 
 The request should be denied.
 
 ### Changing Permissions
 
 `user1` can grant App3 permission to access it's data on App1 via Babel,
-with it's EOS account password:
+with it's EOS account password. On the `babel` container, execute:
 
     babel grant app2 app3 user1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx
 
 Now, fetching the data should be permitted:
 
-    babel fetch app2 user1 data-1
+    haiku fetch app2 user1 data-1
 
 Currently, the data is stored locally, and cannot be viewed directly
 because it is encrypted using App3's public RSA key. Via Babel, we can
 decrypt the data using App3's private RSA key and view it:
 
-    babel view app2 user1 data-1
+    haiku view app2 user1 data-1
 
