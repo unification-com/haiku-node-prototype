@@ -8,6 +8,7 @@ from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.config.config import UnificationConfig
 from haiku_node.eosio_helpers.accounts import AccountManager
 from haiku_node.validation.validation import UnificationAppScValidation
+from haiku_node.eosio_helpers import eosio_account
 
 log = logging.getLogger(__name__)
 
@@ -32,7 +33,15 @@ def permissions(user):
     eos_client = Client(
         nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
-    apps = conf.registered_apps
+    apps = []
+
+    valid_apps = eos_client.get_table_rows(
+        "unif.mother", "unif.mother", "validapps", True, 0, -1,
+        -1)
+
+    for va in valid_apps['rows']:
+        apps.append(eosio_account.name_to_string(int(va['acl_contract_acc'])))
+
     for requester, provider in product(apps, apps):
         if requester == provider:
             continue
