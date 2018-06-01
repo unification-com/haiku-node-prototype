@@ -29,15 +29,17 @@ class UnificationDataFactory:
             schema_map = self.__my_lookup.get_schema_map(schema)
             self.__db_schema_maps[schema] = schema_map
 
-    def __generate_single_user_list(self, user_acc):
+    def __generate_specific_user_list(self, users):
         native_user_ids = []
-        user_acc_uint64 = eosio_account.string_to_name(user_acc)
-        if user_acc_uint64 in self.__granted:
-            native_user_ids.append(self.__my_lookup.get_native_user_id(user_acc))
+
+        for u in users:
+            user_acc_uint64 = eosio_account.string_to_name(u)
+            if user_acc_uint64 in self.__granted:
+                native_user_ids.append(self.__my_lookup.get_native_user_id(u))
 
         return native_user_ids
 
-    def __generate_bulk_user_list(self):
+    def __generate_all_user_list(self):
         native_user_ids = []
         for i in self.__granted:
             native_user_ids.append(
@@ -47,13 +49,13 @@ class UnificationDataFactory:
 
         return native_user_ids
 
-    def get_data(self, user_acc=False):
+    def get_data(self, users=None):
         self.__granted, self.__revoked = self.__my_acl.get_perms_for_req_app(self.__requesting_app)
 
-        if user_acc is not False:
-            native_user_ids = self.__generate_single_user_list(user_acc)
+        if users is None:
+            native_user_ids = self.__generate_all_user_list()
         else:
-            native_user_ids = self.__generate_bulk_user_list()
+            native_user_ids = self.__generate_specific_user_list(users)
 
         # TODO #1 - plug in Shawn's ETL. Pass native_user_ids, self.__db_schema_maps, self.__native_user_meta
         # TODO #2 - either transform native IDs to EOS acc names here,

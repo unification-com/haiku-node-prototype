@@ -14,7 +14,7 @@ def test_data_factory():
     print(encrypted_data)
 
     print("request for user1's data")
-    encrypted_data = data_factory.get_data('user1')
+    encrypted_data = data_factory.get_data(['user1'])
 
     print(encrypted_data)
 
