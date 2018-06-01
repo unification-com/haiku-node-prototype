@@ -38,7 +38,7 @@ class HaikuDataClient:
         # TODO: Convert to a particular request body
         """
         return {
-            'user': user,
+            'users': [user],
             'data_id': request_hash
         }
 
@@ -69,8 +69,10 @@ class HaikuDataClient:
         r = requests.post(f"{base}/data_request", json=payload, verify=False)
         d = r.json()
 
-        if r.status_code != 200:
+        if r.status_code == 401:
             raise Unauthorized(d['message'])
+        if r.status_code != 200:
+            raise Exception(d['message'])
 
         # Now verify the response
         encrypted_body = d['body']

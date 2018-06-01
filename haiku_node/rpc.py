@@ -7,7 +7,6 @@ from eosapi import Client
 from haiku_node.config.keys import get_public_key
 from haiku_node.validation.encryption import (
     verify_request, sign_request, encrypt, decrypt)
-
 from haiku_node.validation.validation import UnificationAppScValidation
 
 app = flask.Flask(__name__)
@@ -66,12 +65,18 @@ def invalid_app():
     }), 401
 
 
-def obtain_data(body, eos_account_name):
+def obtain_data(body, eos_account_name, users):
     """
     :param body: A request for a particular set of data.
     :param eos_account_name: The account name of the requesting App.
+    :param users: The users to obtain data for.
     """
-    data = 'DATA'
+    d = {}
+    for user in users:
+        d[user] = 'DATA'
+
+    data = json.dumps(d)
+
     encrypted_data = encrypt(get_public_key(eos_account_name), data)
 
     return flask.jsonify({
@@ -124,12 +129,15 @@ def data_request():
         # have granted permissions to the REQUESTING APP, and get the correct
         # data
         if v.valid():
-            data_for_user = d['body']['user']
-            has_perm = v.app_has_user_permission(data_for_user)
-            if has_perm:
-                return obtain_data(d['body'], d['eos_account_name'])
+            users = d['body'].get('users')
+            if users is None:
+                users = [u for u in app.unification_config.registered_users
+                         if v.app_has_user_permission(u)]
             else:
-                return unauthorized_for_user()
+                if any([not v.app_has_user_permission(u) for u in users]):
+                    return unauthorized_for_user()
+
+            return obtain_data(d['body'], d['eos_account_name'], users)
         else:
             return invalid_app()
 

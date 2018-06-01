@@ -1,13 +1,11 @@
 import logging
-
-import click
-
-from eosapi import Client
-
 from itertools import product
 
+import click
+from eosapi import Client
+
 from haiku_node.blockchain.acl import UnificationACL
-from haiku_node.config.config import registered_apps, UnificationConfig
+from haiku_node.config.config import UnificationConfig
 from haiku_node.eosio_helpers.accounts import AccountManager
 from haiku_node.validation.validation import UnificationAppScValidation
 
@@ -34,7 +32,8 @@ def permissions(user):
     eos_client = Client(
         nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
-    for requester, provider in product(registered_apps, registered_apps):
+    apps = conf.registered_apps
+    for requester, provider in product(apps, apps):
         if requester == provider:
             continue
         v = UnificationAppScValidation(

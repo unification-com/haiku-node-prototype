@@ -52,7 +52,7 @@ def systest_auth(requesting_app, providing_app, user):
 
     base = base_url('https', f"haiku-{providing_app}", 8050)
     body = {
-        'user': user,
+        'users': [user],
         'data_id': 'data-request'
     }
 
