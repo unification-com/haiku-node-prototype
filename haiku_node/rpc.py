@@ -73,14 +73,13 @@ def obtain_data(body, eos_account_name, eos_client, acl_contract_acc, users):
     :param users: The users to obtain data for.
     """
 
-    data_factory = UnificationDataFactory(eos_client, acl_contract_acc, eos_account_name)
-    encrypted_data = data_factory.get_data(users)
+    data_factory = UnificationDataFactory(eos_client, acl_contract_acc, eos_account_name, users)
 
     return flask.jsonify({
         'success': True,
         'message': 'Success',
-        'signature': sign_data(encrypted_data),
-        'body': encrypted_data
+        'signature': sign_data(data_factory.get_raw_data()),
+        'body': data_factory.get_encrypted_data()
     }), 200
 
 
