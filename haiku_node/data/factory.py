@@ -103,9 +103,10 @@ class UnificationDataFactory:
 
         # generate db params for ETL
         data_source_parms = {
-            'odbc': 'mysql+mysqldb',  # TODO: get from db schema/conn/config
+            'odbc': 'mysql+mysqldb',  # TODO: set/get from db schema/conn/config
             'database': db_schema_map['db_name'],
             'host': db_connection['host'],
+            'port': db_connection['port'],
             'user': db_connection['user'],
             'pass': db_connection['pass'],
             'userTable': user_table_info['real_table_name'],  # temp hack
@@ -117,8 +118,8 @@ class UnificationDataFactory:
 
         print("data_source_parms")
         print(data_source_parms)
-        # TODO #1 - plug in Shawn's ETL. Pass native_user_ids, data_source_parms
-        # TODO #2 - transform native IDs to EOS acc names
+        # TODO #1 - SHAWN: plug in Shawn's ETL. Pass native_user_ids, data_source_parms
+        # TODO #2 - PAUL: transform native IDs to EOS acc names when XML is returned
 
         self.__raw_data = 'DATA'  # plug in Shawn's ETL
 
