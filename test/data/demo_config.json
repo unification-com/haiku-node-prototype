@@ -18,9 +18,24 @@
             "db_schemas":[
                 {
                     "schema_name":"app1.db1",
-                    "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>heartrate</name><type>int</type><is-null>true</is-null><table>UserData</table></field><field><name>Pulse</name><type>int</type><is-null>true</is-null><table>UserData</table></field></fields></schema-template>",
-                    "database":"heartbit",
-                    "db_platform":"mysql"
+                    "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Heartrate</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>GeoLocation</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>TimeStamp</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>Pulse</name><type>int</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>",
+                    "database":"Heartbit",
+                    "db_platform":"mysql",
+                    "host": "localhost",
+                    "user": "Heartbit",
+                    "pass": "Heartbit",
+                    "table_maps": [
+                      {
+                        "schema_table_id": "users",
+                        "db_table": "Users",
+                        "user_id_column": "ID"
+                      },
+                      {
+                        "schema_table_id": "data_1",
+                        "db_table": "UserData",
+                        "user_id_column": "UserID"
+                      }
+                    ]
                 }
             ],
             "data_sources":[
@@ -58,9 +73,24 @@
             "db_schemas":[
                 {
                     "schema_name":"app2.db1",
-                    "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>GeoLocation</name><type>int</type><is-null>true</is-null><table>PeopleData</table></field><field><name>TimeStamp</name><type>int</type><is-null>true</is-null><table>PeopleData</table></field></fields></schema-template>",
-                    "database":"geolocation",
-                    "db_platform":"mysql"
+                    "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>DataBlob</name><type>binarydata</type><is-null>true</is-null><table>data_1</table></field><field><name>BlobSize</name><type>int</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>",
+                    "database":"Datablobs",
+                    "db_platform":"mysql",
+                    "host": "localhost",
+                    "user": "Datablobs",
+                    "pass": "Datablobs",
+                    "table_maps": [
+                      {
+                        "schema_table_id": "users",
+                        "db_table": "BlobCreator",
+                        "user_id_column": "CreatorID"
+                      },
+                      {
+                        "schema_table_id": "data_1",
+                        "db_table": "BlobData",
+                        "user_id_column": "CreatorID"
+                      }
+                    ]
                 }
             ],
             "data_sources":[
@@ -71,8 +101,8 @@
             ],
             "lookup": {
               "lookup_meta": {
-                "native_table": "People",
-                "native_field": "PeopleID",
+                "native_table": "BlobCreator",
+                "native_field": "CreatorID",
                 "field_type": "int"
               },
               "lookup_users": [
@@ -99,8 +129,23 @@
                 {
                     "schema_name":"app3.db1",
                     "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Image</name><type>base65_mime_image</type><is-null>true</is-null><table>ImageData</table></field></fields></schema-template>",
-                    "database":"ImageStorage",
-                    "db_platform":"mysql"
+                    "database":"Datablobs",
+                    "db_platform":"mysql",
+                    "host": "localhost",
+                    "user": "Datablobs",
+                    "pass": "Datablobs",
+                    "table_maps": [
+                      {
+                        "schema_table_id": "users",
+                        "db_table": "BlobCreator",
+                        "user_id_column": "CreatorID"
+                      },
+                      {
+                        "schema_table_id": "data_1",
+                        "db_table": "BlobData",
+                        "user_id_column": "CreatorID"
+                      }
+                    ]
                 }
             ],
             "data_sources":[
