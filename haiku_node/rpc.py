@@ -9,7 +9,6 @@ from haiku_node.validation.encryption import (
     verify_request, sign_request, encrypt, decrypt)
 
 from haiku_node.validation.validation import UnificationAppScValidation
-from haiku_node.data.factory import UnificationDataFactory
 
 app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
@@ -67,21 +66,18 @@ def invalid_app():
     }), 401
 
 
-def obtain_data(body, eos_account_name, eos_client, acl_contract_acc):
+def obtain_data(body, eos_account_name):
     """
     :param body: A request for a particular set of data.
     :param eos_account_name: The account name of the requesting App.
     """
-    # data = 'DATA'
-    data_factory = UnificationDataFactory(eos_client, acl_contract_acc, eos_account_name)
-    encrypted_data = data_factory.get_data()
-
-    # encrypted_data = encrypt(get_public_key(eos_account_name), data)
+    data = 'DATA'
+    encrypted_data = encrypt(get_public_key(eos_account_name), data)
 
     return flask.jsonify({
         'success': True,
         'message': 'Success',
-        'signature': sign_data(encrypted_data),
+        'signature': sign_data(data),
         'body': encrypted_data
     }), 200
 
@@ -131,7 +127,7 @@ def data_request():
             data_for_user = d['body']['user']
             has_perm = v.app_has_user_permission(data_for_user)
             if has_perm:
-                return obtain_data(d['body'], d['eos_account_name'], eos_client, conf['acl_contract'])
+                return obtain_data(d['body'], d['eos_account_name'])
             else:
                 return unauthorized_for_user()
         else:
