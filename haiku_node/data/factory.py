@@ -2,6 +2,8 @@ from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.lookup.eos_lookup import UnificationLookup
+from haiku_node.config.keys import get_public_key
+from haiku_node.validation.encryption import encrypt
 
 
 class UnificationDataFactory:
@@ -55,7 +57,9 @@ class UnificationDataFactory:
         # TODO #2 - either transform native IDs to EOS acc names here,
         # or do in the XML generation in ETL
 
-        data = "DATA"
+        data = 'DATA'  # plug in Shawn's ETL
 
-        return data
+        encrypted_data = encrypt(get_public_key(self.__requesting_app), data)
+
+        return encrypted_data
 
