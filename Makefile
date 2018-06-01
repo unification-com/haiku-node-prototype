@@ -7,6 +7,7 @@ all:
 	docker build -f Docker/unification-node.Dockerfile -t unification-node .
 	docker build -f Docker/unification-keosd.Dockerfile -t unification-keosd .
 	docker build -f Docker/haiku.Dockerfile -t haiku .
+	docker build -f Docker/babel.Dockerfile -t babel .
 	docker build -f Docker/systemtest.Dockerfile -t systemtest .
 
 haiku:

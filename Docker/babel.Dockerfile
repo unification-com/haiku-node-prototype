@@ -21,18 +21,18 @@ WORKDIR /haiku
 RUN pip install -r requirements.txt && \
     ln -s /root/.pyenv/versions/3.6.0/bin/pytest /usr/bin/pytest
 
+COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
+
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 ENV PYTHONPATH /haiku
 
-EXPOSE 8050
-
-RUN echo "babel view app2 user1 data-1" >> /root/.bash_history && \
-    echo "babel fetch app2 user1 data-1" >> /root/.bash_history && \
+RUN echo "babel permissions user1" >> /root/.bash_history && \
+    echo "babel grant app2 app3 user1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx" >> /root/.bash_history && \
+    echo "babel revoke app1 app2 user3 PW5KfhcoCs5yV7wLTWWh97fZbf9jshHZL7vD9tQARfpCGVnDyA95t" >> /root/.bash_history && \
     echo "alias ll='ls -la'" >> /root/.bashrc
 
-COPY bin/haiku /usr/bin/haiku
+COPY bin/babel /usr/bin/babel
 COPY haiku_node /haiku/haiku_node
 COPY test /haiku/test
 
-CMD ["/haiku/test/bootstrap.sh"]

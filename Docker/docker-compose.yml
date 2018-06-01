@@ -50,3 +50,16 @@ services:
     image: systemtest
     container_name: systemtest
     command: python /haiku/test/systemtest.py wait
+    depends_on:
+      - "nodeosd"
+      - "keosd"
+      - "haiku-app1"
+      - "haiku-app2"
+      - "haiku-app3"
+
+  babel:
+    image: babel
+    container_name: babel
+    command: python -c 'import time; time.sleep(6000)'
+    depends_on:
+      - "systemtest"

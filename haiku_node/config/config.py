@@ -20,7 +20,7 @@ class UnificationConfig:
             self.__conf = json.load(f)
 
     def __getitem__(self, item):
-        return self.__conf[item]
+        return self.__conf.get(item)
 
     def __setitem__(self, key, value):
         self.__conf[key] = value
