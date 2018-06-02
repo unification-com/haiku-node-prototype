@@ -15,6 +15,18 @@
             "eos_sc_account":"app1",
             "rpc_server":"haiku-app1",
             "rpc_server_port":"8050",
+            "data_source_params": {
+                  "odbc": "mysql+mysqlconnector",
+                  "database": "Heartbit",
+                  "host": "db",
+                  "user": "heartbit_user",
+                  "pass": "password",
+                  "userTable": "Users",
+                  "dataTable": "UserData",
+                  "userIdentifier": "ID",
+                  "dataUserIdentifier": "UserID",
+                  "dataColumnsToInclude": ["Heartrate", "GeoLocation", "TimeStamp", "Pulse"]
+            },
             "db_schemas":[
                 {
                     "schema_name":"app1.db1",
@@ -71,6 +83,18 @@
             "eos_sc_account":"app2",
             "rpc_server":"haiku-app2",
             "rpc_server_port":"8050",
+            "data_source_params": {
+                  "odbc": "mysql+mysqlconnector",
+                  "database": "Datablobs",
+                  "host": "db",
+                  "user": "datablobs_user",
+                  "pass": "password",
+                  "userTable": "BlobCreator",
+                  "dataTable": "BlobData",
+                  "userIdentifier": "CreatorID",
+                  "dataUserIdentifier": "CreatorID",
+                  "dataColumnsToInclude": ["DataBlob", "BlobSize"]
+            },
             "db_schemas":[
                 {
                     "schema_name":"app2.db1",
@@ -127,6 +151,18 @@
             "eos_sc_account":"app3",
             "rpc_server":"haiku-app3",
             "rpc_server_port":"8050",
+            "data_source_params": {
+                  "odbc": "mysql+mysqlconnector",
+                  "database": "Datablobs",
+                  "host": "db",
+                  "user": "datablobs_user",
+                  "pass": "password",
+                  "userTable": "BlobCreator",
+                  "dataTable": "BlobData",
+                  "userIdentifier": "CreatorID",
+                  "dataUserIdentifier": "CreatorID",
+                  "dataColumnsToInclude": ["DataBlob", "BlobSize"]
+            },
             "db_schemas":[
                 {
                     "schema_name":"app3.db1",
