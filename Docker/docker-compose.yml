@@ -5,7 +5,7 @@ services:
   db:
     image: mysql
     environment:
-      MYSQL_USER: haiku
+      MYSQL_USER: admin
       MYSQL_ROOT_PASSWORD: password
       MYSQL_PASSWORD: password
     ports:
