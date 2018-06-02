@@ -1,4 +1,8 @@
 create database Datablobs;
+
+CREATE USER 'datablobs_user'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON * . * TO 'datablobs_user'@'%';
+
 use Datablobs;
 
 CREATE TABLE BlobCreator (
