@@ -23,7 +23,7 @@
                     "db_platform":"mysql",
                     "host": "db",
                     "port": "3306",
-                    "user": "haiku",
+                    "user": "heartbit_user",
                     "pass": "password",
                     "table_maps": [
                       {
@@ -79,7 +79,7 @@
                     "db_platform":"mysql",
                     "host": "db",
                     "port": "3306",
-                    "user": "haiku",
+                    "user": "datablobs_user",
                     "pass": "password",
                     "table_maps": [
                       {
@@ -135,7 +135,7 @@
                     "db_platform":"mysql",
                     "host": "db",
                     "port": "3306",
-                    "user": "haiku",
+                    "user": "datablobs_user",
                     "pass": "password",
                     "table_maps": [
                       {
