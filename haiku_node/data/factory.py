@@ -1,4 +1,5 @@
 import xml.etree.ElementTree as etree
+import pprint
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
@@ -94,8 +95,8 @@ class UnificationDataFactory:
         root = tree.getroot()
         db_schema = etree.tostring(root)
 
-        print("new db schema")
-        print(db_schema)
+        # print("new db schema")
+        # print(db_schema)
 
         # temp hack
         user_table_info = self.__my_lookup.get_real_table_info(db_schema_name, 'users')
@@ -103,7 +104,7 @@ class UnificationDataFactory:
 
         # generate db params for ETL
         data_source_parms = {
-            'odbc': 'mysql+mysqldb',  # TODO: set/get from db schema/conn/config
+            'odbc': 'mysql+mysqlconnector',  # TODO: set/get from db schema/conn/config
             'database': db_schema_map['db_name'],
             'host': db_connection['host'],
             'port': db_connection['port'],
@@ -116,8 +117,13 @@ class UnificationDataFactory:
             'dataColumnsToInclude': cols_to_include
         }
 
+        # TEMP FOR TESTING
         print("data_source_parms")
-        print(data_source_parms)
+        pp = pprint.PrettyPrinter(indent=4)
+        pp.pprint(data_source_parms)
+        print("native User IDs for Query")
+        print(native_user_ids)
+
         # TODO #1 - SHAWN: plug in Shawn's ETL. Pass native_user_ids, data_source_parms
         # TODO #2 - PAUL: transform native IDs to EOS acc names when XML is returned
 
