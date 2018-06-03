@@ -28,10 +28,15 @@ def create_lookup_db(app):
         os.path.abspath(inspect.getfile(inspect.currentframe())))
     parentdir = os.path.dirname(currentdir)
     db_path = Path(f'{parentdir}/test/data/{app}_unification_lookup.db')
+
     db_name = str(db_path.resolve())
 
     print("create db: ", db_name)
     log.info(db_name)
+
+    if os.path.exists(db_name):
+        print(db_name, "exists. Delete")
+        os.unlink(db_name)
 
     conn = sqlite3.connect(db_name)
     c = conn.cursor()

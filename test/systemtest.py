@@ -277,16 +277,16 @@ def wait():
 
     # Run RPC tests
     systest_auth('app1', 'app2', 'user1')
-    systest_auth('app1', 'app3', 'user1')
+    # systest_auth('app1', 'app3', 'user1')
     systest_auth('app2', 'app1', 'user1')
-    systest_auth('app2', 'app3', 'user2')
+    # systest_auth('app2', 'app3', 'user2')
     systest_auth('app3', 'app1', 'user1')
     systest_auth('app3', 'app2', 'user2')
 
     systest_ingest('app1', 'app2', 'user1')
-    systest_ingest('app1', 'app3', 'user1')
+    # systest_ingest('app1', 'app3', 'user1')
     systest_ingest('app2', 'app1', 'user1')
-    systest_ingest('app2', 'app3', 'user2')
+    # systest_ingest('app2', 'app3', 'user2')
     systest_ingest('app3', 'app1', 'user1')
     systest_ingest('app3', 'app2', 'user2')
 
