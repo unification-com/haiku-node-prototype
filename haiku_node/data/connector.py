@@ -1,5 +1,5 @@
 from sqlalchemy import create_engine
-
+import logging
 from haiku_node.config.config import UnificationConfig
 from haiku_node.data.transform_data import fetch_user_data
 
@@ -26,8 +26,15 @@ def run_query(engine, query):
     result = [r[0] for r in t]
     return str(result)
 
-
 def evaluate(data_source_params):
+    res = fetch_user_data(data_source_params)
+    
+    #TODO: String Too big for encryption. Log result, return small string for now
+    #logging.warning(res)
+    
+    return evaluate_safe(data_source_params)
+
+def evaluate_safe(data_source_params):
     engine = app_connector(data_source_params)
 
     if data_source_params['database'] == 'Heartbit':
@@ -43,7 +50,6 @@ if __name__ == "__main__":
     """
     config = UnificationConfig()
     app_config = config.demo_app_config()
-    engine = app_connector(app_config)
-
-    res = fetch_user_data(app_config['data_source_params'])
+    data_source_params = app_config['data_source_params']
+    res = fetch_user_data(data_source_params)
     print(res)

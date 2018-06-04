@@ -6,6 +6,7 @@ import bonobo_sqlalchemy
 import itertools
 from bonobo.config.processors import ContextProcessor, use_context
 import time
+import logging
 
 returnString = ""
 
@@ -31,7 +32,7 @@ def create_xml(context, *args, **kwargs):
         
     yield '\t\t</row>\n'
 
-def get_graph(data_source_parms, **options):
+def get_graph(data_source_parms):
 
     graph = bonobo.Graph()
     graph.add_chain(
@@ -44,7 +45,7 @@ def get_graph(data_source_parms, **options):
     )
     return graph
   
-def get_services(connString, **options):
+def get_services(connString):
     #   NOTE: This set is the set of all available services
     #   right now we only have sqlalchemy engine, with a connstring hardcoded to
     #   a mysqldb ODBC database, but obviously that is parameterizalable
@@ -96,12 +97,16 @@ def assemble_query_string(data_source_parms):
 
 def assemble_query_string_two(data_source_parms):
     return 'SELECT BlobCreator.*, BlobData.DataBlob FROM BlobData LEFT JOIN BlobCreator On BlobData.CreatorID = BlobCreator.CreatorID ORDER BY BlobData.CreatorID'
-    
-    
+     
 def fetch_user_data(data_source_parms):
-    parser = bonobo.get_argument_parser()
-    connString = assemble_connection_string(data_source_parms)
-    with bonobo.parse_args(parser) as options:
-        bonobo.run(get_graph(data_source_parms, **options),services=get_services(connString, **options))
+    try:
+        connString = assemble_connection_string(data_source_parms)
+        bonobo.run(get_graph(data_source_parms),services=get_services(connString))
         
+    except Exception as e:
+        logging.warning("Exception caught: fetch_user_data")
+        logging.warning(e)
+        logging.warning(data_source_params)
+        return 'FAIL DATA'
+   
     return returnString
