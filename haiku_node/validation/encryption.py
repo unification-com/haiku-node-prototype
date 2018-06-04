@@ -43,9 +43,15 @@ def encrypt(public_key, plaintext):
     :param public_key:
     :param plaintext: unicode body
     :return: base64encoded encrypted text
+
+    #TODO: Concat the plaintext until we are able to encrypt large documents
     """
+    MAGIC_CONCAT_NUMBER = 190
+
+    concatenated = plaintext[:MAGIC_CONCAT_NUMBER]
+
     encrypted_body = public_key.encrypt(
-        plaintext.encode('utf-8'), padding_encryption())
+        concatenated.encode('utf-8'), padding_encryption())
     return base64.encodebytes(encrypted_body).decode('utf-8')
 
 
