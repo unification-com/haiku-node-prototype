@@ -4,7 +4,9 @@ from haiku_node.data.factory import UnificationDataFactory
 from haiku_node.config.config import UnificationConfig
 from eosapi import Client
 
-@pytest.mark.skipif(True, reason="requires test setup")
+
+@pytest.mark.skipif(
+    True, reason="Requires a running EOS node, hence is not a unit test")
 def test_data_factory():
     conf = UnificationConfig()
     eos_client = Client(

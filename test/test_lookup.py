@@ -1,9 +1,10 @@
 import pytest
+
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.lookup.eos_lookup import UnificationLookup
-from haiku_node.config.config import UnificationConfig
 
-@pytest.mark.skipif(True, reason="requires test setup")
+
+@pytest.mark.skipif(True, reason="Requires a sqlite database in place")
 def test_user_lookup():
 
     u1name = 15426359793685626880
