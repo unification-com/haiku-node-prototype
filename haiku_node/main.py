@@ -87,7 +87,7 @@ def fetch(provider, user, request_hash):
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
-    provider = Provider(provider, 'https', f'haiku-{provider}', 8050)
+    provider = Provider(provider, 'https', f'haiku-{provider}', PORT)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is requesting data from {provider.name}')
@@ -121,7 +121,7 @@ def view(provider, user, request_hash):
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
-    provider = Provider(provider, 'https', f'haiku-{provider}', 8050)
+    provider = Provider(provider, 'https', f'haiku-{provider}', PORT)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is reading ingested data from '
