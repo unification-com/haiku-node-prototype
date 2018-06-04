@@ -273,7 +273,7 @@ def wait():
 
     # TODO: Implementing sleeping for now
     print("Sleeping")
-    time.sleep(5)
+    time.sleep(45)
 
     # Run RPC tests
     systest_auth('app1', 'app2', 'user1')
