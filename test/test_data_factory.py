@@ -17,16 +17,16 @@ def test_data_factory():
     encrypted_data = data_factory.get_encrypted_data()
     raw_data = data_factory.get_raw_data()
 
-    print(raw_data)
-    print(encrypted_data)
+    print(raw_data[:50])
+    print(encrypted_data[:50])
 
     print("request for user1's data")
     data_factory = UnificationDataFactory(eos_client, 'app1', 'app2', ['user1'])
     encrypted_data = data_factory.get_encrypted_data()
     raw_data = data_factory.get_raw_data()
 
-    print(raw_data)
-    print(encrypted_data)
+    print(raw_data[:50])
+    print(encrypted_data[:50])
 
 
 if __name__ == "__main__":
