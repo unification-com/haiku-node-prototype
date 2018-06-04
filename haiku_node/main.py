@@ -44,7 +44,8 @@ def serve(password):
         else:
             env_password = os.environ.get('keystore')
             if not env_password:
-                click.echo('Password not provided in args nor ENV var')
+                click.echo('Password to keystore not provided in args nor set '
+                           'as the keystore ENV VAR')
             else:
                 spawn_haiku_node(env_password, config)
 
