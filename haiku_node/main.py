@@ -88,6 +88,7 @@ def fetch(provider, user, request_hash):
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
+    # TODO: get host and port values from MOTHER, by passing provider name
     provider = Provider(provider, 'https', f'haiku-{provider}', PORT)
     req_hash = f'request-{request_hash}'
 
