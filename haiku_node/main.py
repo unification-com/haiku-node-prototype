@@ -44,7 +44,8 @@ def serve(password):
         else:
             env_password = os.environ.get('keystore')
             if not env_password:
-                click.echo('Password not provided in args nor ENV var')
+                click.echo('Password to keystore not provided in args nor set '
+                           'as the keystore ENV VAR')
             else:
                 spawn_haiku_node(env_password, config)
 
@@ -87,7 +88,8 @@ def fetch(provider, user, request_hash):
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
-    provider = Provider(provider, 'https', f'haiku-{provider}', 8050)
+    # TODO: get host and port values from MOTHER, by passing provider name
+    provider = Provider(provider, 'https', f'haiku-{provider}', PORT)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is requesting data from {provider.name}')
@@ -121,7 +123,7 @@ def view(provider, user, request_hash):
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
-    provider = Provider(provider, 'https', f'haiku-{provider}', 8050)
+    provider = Provider(provider, 'https', f'haiku-{provider}', PORT)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is reading ingested data from '
