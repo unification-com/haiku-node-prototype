@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 
 from haiku_node.config.config import UnificationConfig
-
+from haiku_node.data.transform_data import fetch_user_data
 
 def assemble_connection_string(data_source):
     odbc = data_source['odbc']
@@ -33,6 +33,9 @@ def evaluate():
     app_config = config.demo_app_config()
     engine = app_connector(app_config)
 
+    res = fetch_user_data(app_config['data_source_params'])
+    print(res)
+    
     if app_config['data_source_params']['database'] == 'Heartbit':
         run_query(engine, "SELECT FirstName FROM Users;")
 
