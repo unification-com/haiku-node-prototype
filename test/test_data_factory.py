@@ -1,4 +1,5 @@
 import pytest
+import os
 
 from haiku_node.data.factory import UnificationDataFactory
 from haiku_node.config.config import UnificationConfig
@@ -13,7 +14,7 @@ def test_data_factory():
         nodes=[f"{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
     print("Bulk request")
-    data_factory = UnificationDataFactory(eos_client, 'app1', 'app2')
+    data_factory = UnificationDataFactory(eos_client, os.environ['app_name'], 'app2')
     encrypted_data = data_factory.get_encrypted_data()
     raw_data = data_factory.get_raw_data()
 
@@ -21,7 +22,7 @@ def test_data_factory():
     print(encrypted_data[:50])
 
     print("request for user1's data")
-    data_factory = UnificationDataFactory(eos_client, 'app1', 'app2', ['user1'])
+    data_factory = UnificationDataFactory(eos_client, os.environ['app_name'], 'app2', ['user1'])
     encrypted_data = data_factory.get_encrypted_data()
     raw_data = data_factory.get_raw_data()
 
