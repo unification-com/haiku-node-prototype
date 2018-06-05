@@ -3,7 +3,7 @@ import pprint
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
-from haiku_node.data.connector import evaluate
+from haiku_node.data.transform_data import fetch_user_data
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.lookup.eos_lookup import UnificationLookup
 from haiku_node.config.keys import get_public_key
@@ -128,5 +128,5 @@ class UnificationDataFactory:
         # TODO #1 - SHAWN: plug in Shawn's ETL. Pass native_user_ids, data_source_parms, and flesh out evaluate
         # TODO #2 - PAUL: transform native IDs to EOS acc names when XML is returned
 
-        self.__raw_data = evaluate(data_source_parms)
+        self.__raw_data = fetch_user_data(data_source_parms)
         self.__encrypted_data = encrypt(get_public_key(self.__requesting_app), self.__raw_data)
