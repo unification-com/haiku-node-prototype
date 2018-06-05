@@ -2,8 +2,9 @@ import json
 
 from haiku_node.config.keys import get_private_key, get_public_key
 from haiku_node.validation.encryption import (
-    symmetric_encrypt, sign_request, asymmetric_encrypt, asymmetric_decrypt,
-    symmetric_decrypt, verify_request)
+    symmetric_encrypt, symmetric_decrypt,
+    asymmetric_encrypt, asymmetric_decrypt,
+    sign_request, verify_request)
 
 dec = lambda s: s.decode('utf-8')
 enc = lambda s: s.encode('utf-8')
