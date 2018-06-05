@@ -1,11 +1,9 @@
 import bonobo
-import requests
-import traceback
-from sqlalchemy import create_engine
 import bonobo_sqlalchemy
-import itertools
+
+from sqlalchemy import create_engine
 from bonobo.config.processors import ContextProcessor, use_context
-import time
+
 import logging
 
 returnString = ""
