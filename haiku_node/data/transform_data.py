@@ -101,10 +101,6 @@ def assemble_query_string(data_source_parms):
     return queryString
 
 
-def assemble_query_string_two(data_source_parms):
-    return 'SELECT BlobCreator.*, BlobData.DataBlob FROM BlobData LEFT JOIN BlobCreator On BlobData.CreatorID = BlobCreator.CreatorID ORDER BY BlobData.CreatorID'
-
-
 def fetch_user_data(data_source_parms):
     try:
         connString = assemble_connection_string(data_source_parms)
