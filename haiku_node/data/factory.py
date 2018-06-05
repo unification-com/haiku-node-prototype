@@ -119,14 +119,14 @@ class UnificationDataFactory:
         }
 
         # TEMP FOR TESTING
-        print("data_source_parms")
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(data_source_parms)
-        print("native User IDs for Query")
-        print(native_user_ids)
+        # print("data_source_parms")
+        # pp = pprint.PrettyPrinter(indent=4)
+        # pp.pprint(data_source_parms)
+        # print("native User IDs for Query")
+        # print(native_user_ids)
 
         # TODO #1 - SHAWN: plug in Shawn's ETL. Pass native_user_ids, data_source_parms, and flesh out evaluate
         # TODO #2 - PAUL: transform native IDs to EOS acc names when XML is returned
 
-        self.__raw_data = fetch_user_data(data_source_parms)
+        self.__raw_data = fetch_user_data(data_source_parms, native_user_ids)
         self.__encrypted_data = encrypt(get_public_key(self.__requesting_app), self.__raw_data)

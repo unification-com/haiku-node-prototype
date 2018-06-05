@@ -34,14 +34,14 @@ def create_xml(context, *args, **kwargs):
     yield '\t\t</row>\n'
 
 
-def get_graph(data_source_parms):
+def get_graph(data_source_parms, native_user_ids):
 
     graph = bonobo.Graph()
     graph.add_chain(
         #   NOTE: The Select statement here assumes a default engine of sqlalchemy.engine
         #   defined in get_services()
         #   I'm fairly sure this can be overridden with paremeters
-        bonobo_sqlalchemy.Select(assemble_query_string(data_source_parms), limit=100),
+        bonobo_sqlalchemy.Select(assemble_query_string(data_source_parms, native_user_ids), limit=100),
         create_xml,
         write_to_string
     )
@@ -59,21 +59,23 @@ def get_services(connString):
 
 def assemble_connection_string(data_source_parms):
     connString = '{odbc}://{user}:{passw}@{host}/{database}' \
-        .format(                                             \
-            odbc=data_source_parms['odbc'],                  \
-            user=data_source_parms['user'],                  \
-            passw=data_source_parms['pass'],                 \
-            host=data_source_parms['host'],                  \
+        .format(
+            odbc=data_source_parms['odbc'],
+            user=data_source_parms['user'],
+            passw=data_source_parms['pass'],
+            host=data_source_parms['host'],
             database=data_source_parms['database'])
     
     return connString
 
 
-def assemble_query_string(data_source_parms):
+def assemble_query_string(data_source_parms, native_user_ids):
     dataColumns = ""
     length = len(data_source_parms['dataColumnsToInclude'])
     iter = 1
     comma = ''
+
+    native_user_ids_str = ''.join(native_user_ids)
     
     print(data_source_parms)
     print("len:", length)
@@ -89,22 +91,26 @@ def assemble_query_string(data_source_parms):
 
     print("Col:", dataColumns)
         
-    queryString = 'SELECT {userTable}.*, {dataColumns} FROM {userTable} LEFT JOIN {dataTable} On {userTable}.{userIdentifier} = {dataTable}.{dataUserIdentifier} ORDER BY {userTable}.{userIdentifier}' \
-            .format(                                                            \
-                dataColumns = dataColumns,                                      \
-                dataTable=data_source_parms['dataTable'],                       \
-                userTable=data_source_parms['userTable'],                       \
-                userIdentifier=data_source_parms['userIdentifier'],             \
-                dataUserIdentifier=data_source_parms['dataUserIdentifier'])
+    queryString = 'SELECT {userTable}.*, {dataColumns} FROM {userTable} LEFT JOIN {dataTable} ' \
+                  'On {userTable}.{userIdentifier} = {dataTable}.{dataUserIdentifier} ' \
+                  'WHERE {userTable}.{userIdentifier} IN ({native_user_ids})' \
+                  'ORDER BY {userTable}.{userIdentifier}' \
+            .format(
+                dataColumns = dataColumns,
+                dataTable=data_source_parms['dataTable'],
+                userTable=data_source_parms['userTable'],
+                userIdentifier=data_source_parms['userIdentifier'],
+                dataUserIdentifier=data_source_parms['dataUserIdentifier'],
+                native_user_ids=native_user_ids_str)
     
     print("res:", queryString)
     return queryString
 
 
-def fetch_user_data(data_source_parms):
+def fetch_user_data(data_source_parms, native_user_ids):
     try:
         connString = assemble_connection_string(data_source_parms)
-        bonobo.run(get_graph(data_source_parms),services=get_services(connString))
+        bonobo.run(get_graph(data_source_parms, native_user_ids),services=get_services(connString))
         
     except Exception as e:
         logging.warning("Exception caught: fetch_user_data")
