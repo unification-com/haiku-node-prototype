@@ -4,6 +4,7 @@ from cryptography.exceptions import InvalidSignature
 from eosapi import Client
 
 from haiku_node.config.keys import get_public_key
+from haiku_node.data.factory import UnificationDataFactory
 from haiku_node.validation.encryption import verify_request
 from haiku_node.validation.payload import unbundle, bundle
 from haiku_node.validation.validation import UnificationAppScValidation
@@ -60,9 +61,10 @@ def obtain_data(eos_account_name, eos_client, acl_contract_acc, users):
     :param users: The users to obtain data for.
     """
 
-    raw_data = 'DATA'
+    data_factory = UnificationDataFactory(
+        eos_client, acl_contract_acc, eos_account_name, users)
     body = {
-        'data': raw_data
+        'data': data_factory.get_raw_data()
     }
     d = bundle(acl_contract_acc, eos_account_name, body, 'Success')
     return flask.jsonify(d), 200
