@@ -6,7 +6,7 @@ import logging
 
 import requests
 
-from haiku_node.validation.payload import bundle, unbundle
+from haiku_node.encryption.payload import bundle, unbundle
 
 log = logging.getLogger(__name__)
 

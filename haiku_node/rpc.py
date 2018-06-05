@@ -5,8 +5,8 @@ from eosapi import Client
 
 from haiku_node.config.keys import get_public_key
 from haiku_node.data.factory import UnificationDataFactory
-from haiku_node.validation.encryption import verify_request
-from haiku_node.validation.payload import unbundle, bundle
+from haiku_node.encryption.encryption import verify_request
+from haiku_node.encryption.payload import unbundle, bundle
 from haiku_node.validation.validation import UnificationAppScValidation
 
 app = flask.Flask(__name__)

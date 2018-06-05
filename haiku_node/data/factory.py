@@ -131,4 +131,7 @@ class UnificationDataFactory:
         # TODO #1 - SHAWN: plug in Shawn's ETL. Pass native_user_ids, data_source_parms, and flesh out evaluate
         # TODO #2 - PAUL: transform native IDs to EOS acc names when XML is returned
 
-        self.__raw_data = fetch_user_data(data_source_parms)
+        if len(native_user_ids) > 0:
+            self.__raw_data = fetch_user_data(data_source_parms)
+        else:
+            self.__raw_data = "<no-data></no-data>"  # temp dummy message for no users granting perms

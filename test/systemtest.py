@@ -16,7 +16,7 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import verify_account
-from haiku_node.validation.encryption import sign_request
+from haiku_node.encryption.encryption import sign_request
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
