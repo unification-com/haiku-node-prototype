@@ -6,8 +6,7 @@ import logging
 
 import requests
 
-from haiku_node.rpc import verify_account
-from haiku_node.validation.encryption import sign_request, decrypt
+from haiku_node.validation.payload import bundle, unbundle
 
 log = logging.getLogger(__name__)
 
@@ -42,12 +41,12 @@ class HaikuDataClient:
             'data_id': request_hash
         }
 
-    def persist_data(self, providing_app_name: str, request_hash, data):
+    def persist_data(self, providing_app_name: str, request_hash, data: dict):
         temp_dir = Path(tempfile.gettempdir())
 
         tp = temp_dir / Path(f"{providing_app_name}-{request_hash}")
         log.info(f'Writing to {tp}')
-        tp.write_text(data, encoding='utf-8')
+        tp.write_text(json.dumps(data), encoding='utf-8')
         return tp
 
     def make_data_request(
@@ -57,13 +56,7 @@ class HaikuDataClient:
         """
 
         body = self.transform_request_id(user, request_hash)
-        private_key = self.keystore.get_rpc_auth_private_key()
-
-        signature = sign_request(private_key, json.dumps(body))
-
-        payload = {"eos_account_name": requesting_app,
-                   "signature": signature,
-                   "body": body}
+        payload = bundle(requesting_app, providing_app.name, body, 'Success')
 
         base = providing_app.base_url()
         r = requests.post(f"{base}/data_request", json=payload, verify=False)
@@ -74,24 +67,25 @@ class HaikuDataClient:
         if r.status_code != 200:
             raise Exception(d['message'])
 
-        # Now verify the response
-        encrypted_body = d['body']
-        decrypted_body = decrypt(private_key, encrypted_body)
-        verify_account(providing_app.name, decrypted_body, d['signature'])
+        bundle_d = unbundle(providing_app.name, requesting_app, d)
+        decrypted_body = bundle_d['data']
 
         log.info(f'"In the air" decrypted content is: {decrypted_body}')
 
         return self.persist_data(
-            providing_app.name, request_hash, encrypted_body)
+            providing_app.name, request_hash, d)
 
-    def read_data_from_store(self, providing_app: Provider, request_hash):
+    def read_data_from_store(
+            self, providing_app: Provider, requesting_app, request_hash):
         temp_dir = Path(tempfile.gettempdir())
 
         tp = temp_dir / Path(f"{providing_app.name}-{request_hash}")
         encrypted_body = tp.read_text()
 
-        private_key = self.keystore.get_rpc_auth_private_key()
+        d = json.loads(encrypted_body)
 
-        decrypted_body = decrypt(private_key, encrypted_body)
+        bundle_d = unbundle(providing_app.name, requesting_app, d)
+        decrypted_body = bundle_d['data']
+
         log.info(f'Decrypted content from persistence store: {decrypted_body}')
         return decrypted_body
