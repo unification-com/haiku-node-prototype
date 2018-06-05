@@ -1,58 +1,47 @@
-import pytest
+import json
 
 from haiku_node.config.keys import get_public_key, get_private_key
 from haiku_node.validation.encryption import (
-    sign_request, verify_request, encrypt, decrypt)
-
-
-def test_sign_and_verify():
-    """
-    App2 makes a request to App1
-    """
-    private_key = get_private_key('app2')
-    public_key = get_public_key('app2')
-
-    message = '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'  # noqa
-    signature = sign_request(private_key, message)
-
-    broken_signature = 'unlucky' + signature[7:]
-
-    from cryptography.exceptions import InvalidSignature
-    with pytest.raises(InvalidSignature):
-        verify_request(public_key, message, broken_signature)
-
-    verify_request(public_key, message, signature)
+    symmetric_encrypt, symmetric_decrypt)
+from haiku_node.validation.payload import bundle, unbundle
 
 
 def test_get_public_key():
-    from haiku_node.config.keys import get_public_key, get_private_key
-
     assert get_public_key('app2') is not None
     assert get_private_key('app2') is not None
-
-
-def test_encryption_over_json():
-    import json
-
-    data_body = "this is the original text"
-
-    public_key = get_public_key('app2')
-    private_key = get_private_key('app2')
-
-    data = json.dumps({'body': encrypt(public_key, data_body)})
-    reload = json.loads(data)
-    plain_text_body = decrypt(private_key, reload['body'])
-
-    assert plain_text_body == data_body
-
-
-def test_encryption():
-    big_data = '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'  # noqa
-    public_key = get_public_key('app2')
-    encrypt(public_key, big_data)
 
 
 def test_generate_keys():
     from haiku_node.validation.encryption import generate_keys
     private_pem, public_pem = generate_keys()
     print(private_pem, public_pem)
+
+
+def test_symmetric():
+    data_body = "this is the original text"
+    token, key = symmetric_encrypt(data_body)
+
+    decrypted_body = symmetric_decrypt(token, key)
+    assert decrypted_body == data_body
+
+
+def test_transfer_over_json():
+    """
+    App1 returns a data payload back to App2
+    """
+
+    big_data = '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'  # noqa
+    payload_d = {
+        'secret field': 'secret value',
+        'big field': big_data
+    }
+
+    sender = 'app1'
+    recipient = 'app2'
+
+    message = bundle(sender, recipient, payload_d, 'Success')
+    wire_data = json.dumps(message)
+    reload = json.loads(wire_data)
+
+    reload_d = unbundle(sender, recipient, reload)
+    assert payload_d == reload_d
