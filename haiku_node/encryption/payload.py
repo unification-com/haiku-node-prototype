@@ -1,7 +1,7 @@
 import json
 
 from haiku_node.config.keys import get_private_key, get_public_key
-from haiku_node.validation.encryption import (
+from haiku_node.encryption.encryption import (
     symmetric_encrypt, symmetric_decrypt,
     asymmetric_encrypt, asymmetric_decrypt,
     sign_request, verify_request)
