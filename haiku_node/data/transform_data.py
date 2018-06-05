@@ -8,15 +8,18 @@ import logging
 
 returnString = ""
 
+
 def write_to_string(*args, **kwargs):
     global returnString
     returnString += args[0]
+
 
 def xml_document(self, context):
     leadString = '<data>\n\t<from>{vfrom}</from>\n\t<timestamp>{time}</timestamp>\n\t<rows>\n'.format(vfrom='TODO', time=89374893798)
     context.send(leadString)
     yield
     context.send('\t</rows>\n</data>\n')
+
 
 @use_context
 @bonobo.config.use_context_processor(xml_document)
@@ -30,6 +33,7 @@ def create_xml(context, *args, **kwargs):
         
     yield '\t\t</row>\n'
 
+
 def get_graph(data_source_parms):
 
     graph = bonobo.Graph()
@@ -42,7 +46,8 @@ def get_graph(data_source_parms):
         write_to_string
     )
     return graph
-  
+
+
 def get_services(connString):
     #   NOTE: This set is the set of all available services
     #   right now we only have sqlalchemy engine, with a connstring hardcoded to
@@ -50,6 +55,7 @@ def get_services(connString):
     return {    
         'sqlalchemy.engine':create_engine(connString)
     }
+
 
 def assemble_connection_string(data_source_parms):
     connString = '{odbc}://{user}:{passw}@{host}/{database}' \
@@ -61,7 +67,8 @@ def assemble_connection_string(data_source_parms):
             database=data_source_parms['database'])
     
     return connString
-    
+
+
 def assemble_query_string(data_source_parms):
     dataColumns = ""
     length = len(data_source_parms['dataColumnsToInclude'])
@@ -93,9 +100,11 @@ def assemble_query_string(data_source_parms):
     print("res:", queryString)
     return queryString
 
+
 def assemble_query_string_two(data_source_parms):
     return 'SELECT BlobCreator.*, BlobData.DataBlob FROM BlobData LEFT JOIN BlobCreator On BlobData.CreatorID = BlobCreator.CreatorID ORDER BY BlobData.CreatorID'
-     
+
+
 def fetch_user_data(data_source_parms):
     try:
         connString = assemble_connection_string(data_source_parms)
