@@ -16,7 +16,7 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import verify_account
-from haiku_node.validation.encryption import sign_request, decrypt
+from haiku_node.validation.encryption import sign_request
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
@@ -108,7 +108,7 @@ def systest_ingest(requesting_app, providing_app, user, local=False):
 
     client = HaikuDataClient(keystore)
     client.make_data_request(requesting_app, provider, user, request_hash)
-    client.read_data_from_store(provider, request_hash)
+    client.read_data_from_store(provider, requesting_app, request_hash)
 
 
 def systest_accounts():
@@ -273,20 +273,10 @@ def wait():
 
     # TODO: Implementing sleeping for now
     print("Sleeping")
-    time.sleep(45)
-
-    # Run RPC tests
-    systest_auth('app1', 'app2', 'user1')
-    # systest_auth('app1', 'app3', 'user1')
-    systest_auth('app2', 'app1', 'user1')
-    # systest_auth('app2', 'app3', 'user2')
-    systest_auth('app3', 'app1', 'user1')
-    systest_auth('app3', 'app2', 'user2')
+    time.sleep(20)
 
     systest_ingest('app1', 'app2', 'user1')
-    # systest_ingest('app1', 'app3', 'user1')
     systest_ingest('app2', 'app1', 'user1')
-    # systest_ingest('app2', 'app3', 'user2')
     systest_ingest('app3', 'app1', 'user1')
     systest_ingest('app3', 'app2', 'user2')
 

@@ -133,7 +133,7 @@ def view(provider, user, request_hash):
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    data = client.read_data_from_store(provider, req_hash)
+    data = client.read_data_from_store(provider, requesting_app, req_hash)
     click.echo(data)
 
 

@@ -6,8 +6,6 @@ from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.data.transform_data import fetch_user_data
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.lookup.eos_lookup import UnificationLookup
-from haiku_node.config.keys import get_public_key
-from haiku_node.validation.encryption import encrypt
 from haiku_node.config.config import UnificationConfig
 
 
@@ -29,7 +27,6 @@ class UnificationDataFactory:
         self.__granted = []
         self.__revoked = []
         self.__raw_data = None
-        self.__encrypted_data = None
 
         self.__native_user_meta = self.__my_lookup.get_native_user_meta()
 
@@ -129,4 +126,3 @@ class UnificationDataFactory:
         # TODO #2 - PAUL: transform native IDs to EOS acc names when XML is returned
 
         self.__raw_data = fetch_user_data(data_source_parms)
-        self.__encrypted_data = encrypt(get_public_key(self.__requesting_app), self.__raw_data)
