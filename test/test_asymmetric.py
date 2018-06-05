@@ -1,5 +1,10 @@
 import json
 
+import pytest
+
+from cryptography.exceptions import InvalidSignature
+from cryptography.fernet import InvalidToken
+
 from haiku_node.config.keys import get_public_key, get_private_key
 from haiku_node.validation.encryption import (
     symmetric_encrypt, symmetric_decrypt)
@@ -30,6 +35,10 @@ def test_transfer_over_json():
     App1 returns a data payload back to App2
     """
 
+    def broken(d, field):
+        d[field] = 'unlucky' + d[field][7:]
+        return d
+
     big_data = '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'  # noqa
     payload_d = {
         'secret field': 'secret value',
@@ -41,7 +50,13 @@ def test_transfer_over_json():
 
     message = bundle(sender, recipient, payload_d, 'Success')
     wire_data = json.dumps(message)
-    reload = json.loads(wire_data)
 
+    with pytest.raises(InvalidToken):
+        unbundle(sender, recipient, broken(json.loads(wire_data), 'payload'))
+
+    with pytest.raises(InvalidSignature):
+        unbundle(sender, recipient, broken(json.loads(wire_data), 'signature'))
+
+    reload = json.loads(wire_data)
     reload_d = unbundle(sender, recipient, reload)
     assert payload_d == reload_d
