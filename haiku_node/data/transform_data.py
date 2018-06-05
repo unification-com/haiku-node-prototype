@@ -93,7 +93,7 @@ def assemble_query_string(data_source_parms):
         
     queryString = 'SELECT {userTable}.*, {dataColumns} FROM {userTable} LEFT JOIN {dataTable} ' \
                   'On {userTable}.{userIdentifier} = {dataTable}.{dataUserIdentifier} ' \
-                  'WHERE {userTable}.{userIdentifier} IN ({native_user_ids})' \
+                  'WHERE {userTable}.{userIdentifier} IN ({native_user_ids}) ' \
                   'ORDER BY {userTable}.{userIdentifier}' \
             .format(
                 dataColumns = dataColumns,
