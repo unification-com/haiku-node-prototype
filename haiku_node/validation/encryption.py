@@ -4,6 +4,10 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
+# TODO: Concat encryption and signature message bodies until we are capable
+# of handling larger bodies
+MAGIC_CONCAT_NUMBER = 190
+
 
 def padding_encryption():
     """
@@ -25,14 +29,19 @@ def padding_signing():
 
 
 def sign_request(private_key, message):
+    concatenated = message[:MAGIC_CONCAT_NUMBER]
+
     signature = private_key.sign(
-        bytes(message, encoding='utf8'), padding_signing(), hashes.SHA256())
+        bytes(concatenated, encoding='utf8'), padding_signing(),
+        hashes.SHA256())
     return str(base64.b64encode(signature), encoding='utf-8')
 
 
 def verify_request(public_key, body, signature):
+    concatenated = body[:MAGIC_CONCAT_NUMBER]
+
     public_key.verify(
-        base64.b64decode(signature), bytes(body, encoding='utf-8'),
+        base64.b64decode(signature), bytes(concatenated, encoding='utf-8'),
         padding_signing(), hashes.SHA256())
 
 
@@ -44,10 +53,7 @@ def encrypt(public_key, plaintext):
     :param plaintext: unicode body
     :return: base64encoded encrypted text
 
-    #TODO: Concat the plaintext until we are able to encrypt large documents
     """
-    MAGIC_CONCAT_NUMBER = 190
-
     concatenated = plaintext[:MAGIC_CONCAT_NUMBER]
 
     encrypted_body = public_key.encrypt(
