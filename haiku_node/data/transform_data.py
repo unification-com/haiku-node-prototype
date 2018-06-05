@@ -106,7 +106,7 @@ def fetch_user_data(data_source_parms):
     except Exception as e:
         logging.warning("Exception caught: fetch_user_data")
         logging.warning(e)
-        logging.warning(data_source_params)
+        logging.warning(data_source_parms)
         return 'FAIL DATA'
    
     return returnString
