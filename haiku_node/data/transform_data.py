@@ -34,14 +34,14 @@ def create_xml(context, *args, **kwargs):
     yield '\t\t</row>\n'
 
 
-def get_graph(data_source_parms, native_user_ids):
+def get_graph(data_source_parms):
 
     graph = bonobo.Graph()
     graph.add_chain(
         #   NOTE: The Select statement here assumes a default engine of sqlalchemy.engine
         #   defined in get_services()
         #   I'm fairly sure this can be overridden with paremeters
-        bonobo_sqlalchemy.Select(assemble_query_string(data_source_parms, native_user_ids), limit=100),
+        bonobo_sqlalchemy.Select(assemble_query_string(data_source_parms), limit=100),
         create_xml,
         write_to_string
     )
@@ -69,13 +69,13 @@ def assemble_connection_string(data_source_parms):
     return connString
 
 
-def assemble_query_string(data_source_parms, native_user_ids):
+def assemble_query_string(data_source_parms):
     dataColumns = ""
     length = len(data_source_parms['dataColumnsToInclude'])
     iter = 1
     comma = ''
 
-    native_user_ids_str = ''.join(native_user_ids)
+    native_user_ids_str = ''.join(data_source_parms['native_user_ids'])
     
     print(data_source_parms)
     print("len:", length)
@@ -107,10 +107,10 @@ def assemble_query_string(data_source_parms, native_user_ids):
     return queryString
 
 
-def fetch_user_data(data_source_parms, native_user_ids):
+def fetch_user_data(data_source_parms):
     try:
         connString = assemble_connection_string(data_source_parms)
-        bonobo.run(get_graph(data_source_parms, native_user_ids),services=get_services(connString))
+        bonobo.run(get_graph(data_source_parms),services=get_services(connString))
         
     except Exception as e:
         logging.warning("Exception caught: fetch_user_data")

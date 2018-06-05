@@ -115,7 +115,8 @@ class UnificationDataFactory:
             'dataTable': data_table_info['real_table_name'],  # temp hack
             'userIdentifier': user_table_info['user_id_column'],  # temp hack
             'dataUserIdentifier': data_table_info['user_id_column'],  # temp hack
-            'dataColumnsToInclude': cols_to_include
+            'dataColumnsToInclude': cols_to_include,
+            'native_user_ids': native_user_ids
         }
 
         # TEMP FOR TESTING
@@ -128,5 +129,5 @@ class UnificationDataFactory:
         # TODO #1 - SHAWN: plug in Shawn's ETL. Pass native_user_ids, data_source_parms, and flesh out evaluate
         # TODO #2 - PAUL: transform native IDs to EOS acc names when XML is returned
 
-        self.__raw_data = fetch_user_data(data_source_parms, native_user_ids)
+        self.__raw_data = fetch_user_data(data_source_parms)
         self.__encrypted_data = encrypt(get_public_key(self.__requesting_app), self.__raw_data)
