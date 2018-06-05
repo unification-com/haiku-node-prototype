@@ -75,7 +75,7 @@ def assemble_query_string(data_source_parms):
     iter = 1
     comma = ''
 
-    native_user_ids_str = ''.join(data_source_parms['native_user_ids'])
+    native_user_ids_str = ','.join(data_source_parms['native_user_ids'])
     
     print(data_source_parms)
     print("len:", length)

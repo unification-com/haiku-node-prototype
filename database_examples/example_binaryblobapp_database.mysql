@@ -6,9 +6,9 @@ GRANT ALL PRIVILEGES ON * . * TO 'datablobs_user'@'%';
 use Datablobs;
 
 CREATE TABLE BlobCreator (
-    CreatorID int NOT NULL,
+    CID int NOT NULL,
 	Name varchar(255),
-    PRIMARY KEY (CreatorID)
+    PRIMARY KEY (CID)
 );
 
 CREATE TABLE BlobData (
@@ -17,11 +17,11 @@ CREATE TABLE BlobData (
 	BlobSize int,
 	CreatorID int,
     PRIMARY KEY (BlobID),
-    FOREIGN KEY (CreatorID) REFERENCES BlobCreator(CreatorID)
+    FOREIGN KEY (CreatorID) REFERENCES BlobCreator(CID)
 );
 
 INSERT INTO BlobCreator
-    (CreatorID,Name)
+    (CID,Name)
 VALUES
     (1, 'Shawn'),
 	(2, 'Nwahs'),

@@ -1,7 +1,7 @@
 {	
 	"binaryblobDatabase":{
 		"BlobCreator":{
-			"CreatorID":{"type":"int","size":32},
+			"CID":{"type":"int","size":32},
 			"Name":{"type":"varchar","size":255}
 		},
 		"BlobData":{
