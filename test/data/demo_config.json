@@ -91,7 +91,7 @@
                   "pass": "password",
                   "userTable": "BlobCreator",
                   "dataTable": "BlobData",
-                  "userIdentifier": "CreatorID",
+                  "userIdentifier": "CID",
                   "dataUserIdentifier": "CreatorID",
                   "dataColumnsToInclude": ["DataBlob", "BlobSize"]
             },
@@ -109,7 +109,7 @@
                       {
                         "schema_table_id": "users",
                         "db_table": "BlobCreator",
-                        "user_id_column": "CreatorID"
+                        "user_id_column": "CID"
                       },
                       {
                         "schema_table_id": "data_1",
@@ -159,7 +159,7 @@
                   "pass": "password",
                   "userTable": "BlobCreator",
                   "dataTable": "BlobData",
-                  "userIdentifier": "CreatorID",
+                  "userIdentifier": "CID",
                   "dataUserIdentifier": "CreatorID",
                   "dataColumnsToInclude": ["DataBlob", "BlobSize"]
             },
@@ -177,7 +177,7 @@
                       {
                         "schema_table_id": "users",
                         "db_table": "BlobCreator",
-                        "user_id_column": "CreatorID"
+                        "user_id_column": "CID"
                       },
                       {
                         "schema_table_id": "data_1",
