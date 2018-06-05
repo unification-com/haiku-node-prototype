@@ -4,8 +4,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import padding, rsa
 
-# TODO: Concat encryption and signature message bodies until we are capable
-# of handling larger bodies
+# TODO: Concat signature message bodies until we are capable signing large docs
 MAGIC_CONCAT_NUMBER = 190
 
 
@@ -34,7 +33,7 @@ def sign_request(private_key, message):
     signature = private_key.sign(
         bytes(concatenated, encoding='utf8'), padding_signing(),
         hashes.SHA256())
-    return str(base64.b64encode(signature), encoding='utf-8')
+    return base64.b64encode(signature).decode('utf-8')
 
 
 def verify_request(public_key, body, signature):
@@ -45,33 +44,33 @@ def verify_request(public_key, body, signature):
         padding_signing(), hashes.SHA256())
 
 
-def encrypt(public_key, plaintext):
-    """
-    JSON transmittable encryption.
+def symmetric_encrypt(plaintext):
+    from cryptography.fernet import Fernet
+    key = Fernet.generate_key()
+    f = Fernet(key)
 
-    :param public_key:
-    :param plaintext: unicode body
-    :return: base64encoded encrypted text
+    encoded = bytes(plaintext, encoding='utf-8')
+    token = f.encrypt(encoded)
 
-    """
-    concatenated = plaintext[:MAGIC_CONCAT_NUMBER]
-
-    encrypted_body = public_key.encrypt(
-        concatenated.encode('utf-8'), padding_encryption())
-    return base64.encodebytes(encrypted_body).decode('utf-8')
+    return token, key
 
 
-def decrypt(private_key, ciphertext):
-    """
-    Decryption base64encoded ciphertext from JSON response.
+def symmetric_decrypt(token, key):
+    from cryptography.fernet import Fernet
+    f = Fernet(key)
+    decrypted_body = f.decrypt(token)
+    return decrypted_body.decode('utf-8')
 
-    :param private_key:
-    :param ciphertext: base64encoded ciphertext
-    :return:
-    """
+
+def asymmetric_encrypt(public_key, key):
+    encrypted = public_key.encrypt(key, padding_encryption())
+    return base64.encodebytes(encrypted)
+
+
+def asymmetric_decrypt(private_key, ciphertext):
     base64decoded = base64.decodebytes(ciphertext.encode('utf-8'))
     return private_key.decrypt(
-        base64decoded, padding_encryption()).decode('utf-8')
+        base64decoded, padding_encryption())
 
 
 def generate_keys():
