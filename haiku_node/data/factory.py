@@ -89,6 +89,11 @@ class UnificationDataFactory:
                 table.text = real_table_data['real_table_name']
                 print("table.text after:", table.text)
                 cols_to_include.append(col.text)
+            else:
+                # temp hack to transform unification_lookup to native user table/col
+                real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, 'data_1')
+                table.text = real_table_data['real_table_name']
+                cols_to_include.append(real_table_data['user_id_column'])
 
         root = tree.getroot()
         db_schema = etree.tostring(root)
@@ -112,15 +117,16 @@ class UnificationDataFactory:
             'dataTable': data_table_info['real_table_name'],  # temp hack
             'userIdentifier': user_table_info['user_id_column'],  # temp hack
             'dataUserIdentifier': data_table_info['user_id_column'],  # temp hack
-            'dataColumnsToInclude': cols_to_include
+            'dataColumnsToInclude': cols_to_include,
+            'native_user_ids': native_user_ids
         }
 
         # TEMP FOR TESTING
-        print("data_source_parms")
-        pp = pprint.PrettyPrinter(indent=4)
-        pp.pprint(data_source_parms)
-        print("native User IDs for Query")
-        print(native_user_ids)
+        # print("data_source_parms")
+        # pp = pprint.PrettyPrinter(indent=4)
+        # pp.pprint(data_source_parms)
+        # print("native User IDs for Query")
+        # print(native_user_ids)
 
         # TODO #1 - SHAWN: plug in Shawn's ETL. Pass native_user_ids, data_source_parms, and flesh out evaluate
         # TODO #2 - PAUL: transform native IDs to EOS acc names when XML is returned

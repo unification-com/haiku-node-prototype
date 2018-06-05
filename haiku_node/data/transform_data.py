@@ -59,11 +59,11 @@ def get_services(connString):
 
 def assemble_connection_string(data_source_parms):
     connString = '{odbc}://{user}:{passw}@{host}/{database}' \
-        .format(                                             \
-            odbc=data_source_parms['odbc'],                  \
-            user=data_source_parms['user'],                  \
-            passw=data_source_parms['pass'],                 \
-            host=data_source_parms['host'],                  \
+        .format(
+            odbc=data_source_parms['odbc'],
+            user=data_source_parms['user'],
+            passw=data_source_parms['pass'],
+            host=data_source_parms['host'],
             database=data_source_parms['database'])
     
     return connString
@@ -74,6 +74,8 @@ def assemble_query_string(data_source_parms):
     length = len(data_source_parms['dataColumnsToInclude'])
     iter = 1
     comma = ''
+
+    native_user_ids_str = ''.join(data_source_parms['native_user_ids'])
     
     print(data_source_parms)
     print("len:", length)
@@ -89,20 +91,20 @@ def assemble_query_string(data_source_parms):
 
     print("Col:", dataColumns)
         
-    queryString = 'SELECT {userTable}.*, {dataColumns} FROM {userTable} LEFT JOIN {dataTable} On {userTable}.{userIdentifier} = {dataTable}.{dataUserIdentifier} ORDER BY {userTable}.{userIdentifier}' \
-            .format(                                                            \
-                dataColumns = dataColumns,                                      \
-                dataTable=data_source_parms['dataTable'],                       \
-                userTable=data_source_parms['userTable'],                       \
-                userIdentifier=data_source_parms['userIdentifier'],             \
-                dataUserIdentifier=data_source_parms['dataUserIdentifier'])
+    queryString = 'SELECT {userTable}.*, {dataColumns} FROM {userTable} LEFT JOIN {dataTable} ' \
+                  'On {userTable}.{userIdentifier} = {dataTable}.{dataUserIdentifier} ' \
+                  'WHERE {userTable}.{userIdentifier} IN ({native_user_ids})' \
+                  'ORDER BY {userTable}.{userIdentifier}' \
+            .format(
+                dataColumns = dataColumns,
+                dataTable=data_source_parms['dataTable'],
+                userTable=data_source_parms['userTable'],
+                userIdentifier=data_source_parms['userIdentifier'],
+                dataUserIdentifier=data_source_parms['dataUserIdentifier'],
+                native_user_ids=native_user_ids_str)
     
     print("res:", queryString)
     return queryString
-
-
-def assemble_query_string_two(data_source_parms):
-    return 'SELECT BlobCreator.*, BlobData.DataBlob FROM BlobData LEFT JOIN BlobCreator On BlobData.CreatorID = BlobCreator.CreatorID ORDER BY BlobData.CreatorID'
 
 
 def fetch_user_data(data_source_parms):
