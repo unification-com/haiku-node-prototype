@@ -8,7 +8,7 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import InvalidToken
 
 from haiku_node.config.keys import get_public_key, get_private_key
-from haiku_node.encryption.encryption import (
+from haiku_node.encryption.tools import (
     symmetric_encrypt, symmetric_decrypt, sign_request, verify_request)
 from haiku_node.encryption.payload import bundle, unbundle
 
@@ -19,7 +19,7 @@ def test_get_public_key():
 
 
 def test_generate_keys():
-    from haiku_node.encryption.encryption import generate_keys
+    from haiku_node.encryption.tools import generate_keys
     private_pem, public_pem = generate_keys()
     print(private_pem, public_pem)
 
