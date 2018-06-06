@@ -8,8 +8,8 @@ from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import InvalidToken
 
 from haiku_node.config.keys import get_public_key, get_private_key
-from haiku_node.encryption.encryption import (
-    symmetric_encrypt, symmetric_decrypt)
+from haiku_node.encryption.tools import (
+    symmetric_encrypt, symmetric_decrypt, sign_request, verify_request)
 from haiku_node.encryption.payload import bundle, unbundle
 
 
@@ -19,7 +19,7 @@ def test_get_public_key():
 
 
 def test_generate_keys():
-    from haiku_node.encryption.encryption import generate_keys
+    from haiku_node.encryption.tools import generate_keys
     private_pem, public_pem = generate_keys()
     print(private_pem, public_pem)
 
@@ -32,11 +32,30 @@ def test_symmetric():
     assert decrypted_body == data_body
 
 
+@pytest.mark.parametrize("message", [
+    "bar",
+    "x" * 100000,
+    "'¡ooʇ ןnɟǝsn sı uʍop-ǝpısdn unicode ¡ooʇ ןnɟǝsn sı uʍop-ǝpısdn"
+])
+def test_sign_and_verify(message):
+    private_key = get_private_key('app2')
+    public_key = get_public_key('app2')
+
+    signature = sign_request(private_key, message)
+
+    broken_signature = 'unlucky' + signature[7:]
+
+    with pytest.raises(InvalidSignature):
+        verify_request(public_key, message, broken_signature)
+
+    verify_request(public_key, message, signature)
+
+
 @pytest.mark.parametrize("payload_d", [
     {},
     {'foo': 'bar'},
     {'foo': '¡ooʇ ןnɟǝsn sı uʍop-ǝpısdn unicode ¡ooʇ ןnɟǝsn sı uʍop-ǝpısdn'},
-    {'big_field': '123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890'},  # noqa
+    {'big_field': "x" * 100000},
 ])
 def test_transfer_over_json(payload_d):
     """
