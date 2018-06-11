@@ -105,8 +105,7 @@ cleos get table app3 app3 dataschemas
 16) Set some sources. Note, for source_type = database, source_name must match an existing schema for the app
 ```
 cleos push action app1 setsource '{"source_name":"app1.db1", "source_type":"database"}' -p app1
-cleos push action app2 setsource '{"source_name":"app2.db2", "source_type":"database"}' -p app2
-cleos push action app3 setsource '{"source_name":"app3.db3", "source_type":"database"}' -p app2
+cleos push action app2 setsource '{"source_name":"app2.db1", "source_type":"database"}' -p app2
 cleos push action app3 setsource '{"source_name":"app1", "source_type":"contract"}' -p app3
 cleos push action app3 setsource '{"source_name":"app2", "source_type":"contract"}' -p app3
 ```
@@ -176,11 +175,6 @@ There's currently no method for specific row queries in EOS Smart Contracts, so 
 25) get app validation status/info from MOTHER:
 ```
 cleos get table unif.mother unif.mother validapps
-```
-26) Can also run a validation test, from the git root:
-```
-python test/test_validation.py app2
-python test/test_validation.py app3
 ```
 
 config/config.json currently set up with "app1" as the data provider, so the above command is checking app2 and app3's validity/permissions as the data requesters.
