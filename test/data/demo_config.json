@@ -393,6 +393,9 @@
         },
         "unif.mother": {
           "wallet_password": "PW5JN14rVAQ4oL19PREuJbDjbde6QfrRmWCXsoBq8866KdxvWYJSH"
+        },
+        "unif.token": {
+          "wallet_password": "PW5JwgsjwK7s2b6Eomwfsv6oVoEn2XcykVYj2KsCPnES65y8a3NTA"
         }
     }
 }

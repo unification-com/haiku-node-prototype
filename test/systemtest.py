@@ -119,7 +119,7 @@ def systest_accounts():
 
     demo_config = json.loads(Path('data/demo_config.json').read_text())
     appnames = ['app1', 'app2', 'app3']
-    usernames = ['user1', 'user2', 'user3', 'unif.mother']
+    usernames = ['user1', 'user2', 'user3', 'unif.mother', 'unif.token']
 
     manager = AccountManager(host=False)
     make_default_accounts(manager, demo_config, appnames, usernames)
