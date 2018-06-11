@@ -9,7 +9,6 @@ import requests
 
 from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.config.config import UnificationConfig
-from eosapi import Client
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +76,9 @@ class HaikuDataClient:
 
         log.info(f'"In the air" decrypted content is: {decrypted_body}')
 
-        #TODO: better method
+        # TODO: get amount from Smart Contract
+        # TODO: send reward to data provider too
+        # TODO: better method
         tree = etree.ElementTree(etree.fromstring(decrypted_body))
         users_to_pay = tree.findall('unification_users/unification_user')
         for username in users_to_pay:
