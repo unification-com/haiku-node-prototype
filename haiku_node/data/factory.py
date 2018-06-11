@@ -127,10 +127,8 @@ class UnificationDataFactory:
         # pp.pprint(data_source_parms)
         # print("native User IDs for Query")
         # print(native_user_ids)
- 
-        # TODO #1 - SHAWN: plug in Shawn's ETL. Pass native_user_ids, data_source_parms, and flesh out evaluate
-        # TODO #2 - PAUL: transform native IDs to EOS acc names when XML is returned
 
+        # grab list of EOS account names
         if len(native_user_ids) > 0:
             unification_ids = {}
             for id in native_user_ids:
