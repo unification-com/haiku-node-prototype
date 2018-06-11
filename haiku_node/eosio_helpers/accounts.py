@@ -123,6 +123,46 @@ class AccountManager:
 
         print(ret.stdout)
 
+    def token_contract(self, username):
+        log.info('Associating token contract')
+        ret = self.cleos(
+            ["set", "contract", username,
+             "/eos/contracts/eosio.token",
+             "/eos/contracts/eosio.token/eosio.token.wast",
+             "/eos/contracts/eosio.token/eosio.token.abi",
+             "-p", username])
+
+        print(ret.stdout)
+
+    def create_und_token(self):
+        log.info('Create UND tokens')
+        # TODO: migrate maximum_supply to demo_config.json
+        d = {
+            'issuer': 'eosio',
+            'maximum_supply': '1000000000.0000 UND'
+        }
+        ret = self.cleos(
+            ['push', 'action', 'unif.token', 'create', json.dumps(d), '-p',
+             'unif.token'])
+
+        print(ret.stdout)
+
+    def issue_unds(self, username):
+        log.info(f'Issue 100 UND tokens to {username}')
+
+        # TODO: migrate quantity to demo_config.json
+        d = {
+            'to': username,
+            'quantity': '100.0000 UND',
+            'memo': 'memo'
+        }
+        ret = self.cleos(
+            ['push', 'action', 'unif.token', 'issue', json.dumps(d), '-p',
+             'eosio'])
+
+        print(ret.stdout)
+
+
     def associate_contracts(self, username):
         log.info('Associating acl contracts')
         ret = self.cleos(["set", "contract", username,
@@ -296,6 +336,14 @@ def make_default_accounts(
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
+    manager.token_contract('unif.token')
+
+    print("Wait for transactions to process")
+    time.sleep(BLOCK_SLEEP)
+    manager.create_und_token()
+
+    print("Wait for transactions to process")
+    time.sleep(BLOCK_SLEEP)
 
     for appname in appnames:
         manager.associate_contracts(appname)
@@ -311,6 +359,9 @@ def make_default_accounts(
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
         manager.validate_with_mother(demo_apps, appname)
+        print("Wait for transactions to process")
+        time.sleep(BLOCK_SLEEP)
+        manager.issue_unds(appname)
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
