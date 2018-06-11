@@ -43,7 +43,7 @@ def create_xml(context, *args, **kwargs):
             item = newItem
             field_string = 'account_name'
 
-        yield '\t\t\t<field>\n\t\t\t\t<field_name>{id}</field_name>\n\t\t\t\t<value>{value}</value>\n\t\t\t\t<type>{type}</type>\n\t\t\t</field>\n'.format(id=field_string, value=item, type=type(item))
+        yield '\t\t\t<field>\n\t\t\t\t<field_name>{id}</field_name>\n\t\t\t\t<value>{value}</value>\n\t\t\t\t<type>{type}</type>\n\t\t\t</field>\n'.format(id=field_string, value=item, type=type(item).__name__)
 
         iter += 1
 
