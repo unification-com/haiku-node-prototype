@@ -19,6 +19,11 @@ def run_test(app):
     print(u_acl.get_db_schemas())
     print("Data Sources:")
     print(u_acl.get_data_sources())
+    print("User UND Reward:")
+    print(u_acl.get_user_und_reward())
+    print("App UND Reward:")
+    print(u_acl.get_app_und_reward())
+
 
     print("Current VALID Schema(s), as per MOTHER:")
     um = UnificationMother(eos_client, app)

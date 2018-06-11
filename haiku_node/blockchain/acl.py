@@ -11,12 +11,16 @@ class UnificationACL:
         self.__permission_rec_table = "permrecords"
         self.__db_schema_table = "dataschemas"
         self.__data_sources_table = "datasources"
+        self.__und_rewards_table = "undrewards"
 
         self.__acl_contract_acc = acl_contract_acc
         self.__eosClient = eos_client
 
         self.__db_schemas = {}
         self.__data_sources = {}
+
+        self.__user_und_reward = 0
+        self.__app_und_reward = 0
 
         self.__run()
 
@@ -49,6 +53,12 @@ class UnificationACL:
                 revoked.append(int(i['user_account']))
 
         return granted, revoked
+
+    def get_app_und_reward(self):
+        return self.__app_und_reward
+
+    def get_user_und_reward(self):
+        return self.__user_und_reward
 
     def __load_db_schemas(self):
         table_data = self.__eosClient.get_table_rows(
@@ -84,6 +94,15 @@ class UnificationACL:
             }
             self.__data_sources[source_name] = d
 
+    def __load_und_rewards(self):
+        table_data = self.__eosClient.get_table_rows(
+            self.__acl_contract_acc,
+            self.__acl_contract_acc, self.__und_rewards_table, True, 0, -1, -1)
+
+        self.__app_und_reward = table_data['rows'][0]['app_amt']
+        self.__user_und_reward = table_data['rows'][0]['user_amt']
+
     def __run(self):
         self.__load_db_schemas()
         self.__load_data_sources()
+        self.__load_und_rewards()
