@@ -156,6 +156,17 @@ class AccountManager:
                  appname])
             print(ret.stdout)
 
+    def set_und_rewards(self, app_config, appname):
+        app_conf = app_config[appname]
+        d = {
+            'user_amt': app_conf['und_rewards']['user_amt'],
+            'app_amt': app_conf['und_rewards']['app_amt'],
+        }
+        ret = self.cleos(
+            ['push', 'action', appname, 'setrewards', json.dumps(d), '-p',
+             appname])
+        print(ret.stdout)
+
     def get_code_hash(self, appname):
         ret = self.cleos(['get', 'code', appname])
         return ret.stdout.strip()[len('code hash: '):]
@@ -294,6 +305,9 @@ def make_default_accounts(
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
         manager.set_data_sources(demo_apps, appname)
+        print("Wait for transactions to process")
+        time.sleep(BLOCK_SLEEP)
+        manager.set_und_rewards(demo_apps, appname)
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
         manager.validate_with_mother(demo_apps, appname)
