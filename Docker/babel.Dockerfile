@@ -1,4 +1,4 @@
-FROM debian:latest
+FROM debian:stretch-slim
 
 RUN apt-get update && \
     apt-get -y install \
@@ -9,17 +9,16 @@ RUN apt-get update && \
         libsqlite3-dev wget curl llvm libncurses5-dev libncursesw5-dev xz-utils tk-dev
 
 RUN curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/pyenv-installer | bash && \
-    /root/.pyenv/bin/pyenv install 3.6.0 && \
-    ln -s /root/.pyenv/versions/3.6.0/bin/python3 /usr/bin/python && \
-    ln -s /root/.pyenv/versions/3.6.0/bin/pip3 /usr/bin/pip
+    /root/.pyenv/bin/pyenv install 3.6.0
 
 RUN mkdir /haiku
 COPY requirements.txt /haiku
 
 WORKDIR /haiku
 
-RUN pip install -r requirements.txt && \
-    ln -s /root/.pyenv/versions/3.6.0/bin/pytest /usr/bin/pytest
+ENV PATH="/root/.pyenv/versions/3.6.0/bin:${PATH}"
+
+RUN pip install -r requirements.txt
 
 COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
 
