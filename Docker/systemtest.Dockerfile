@@ -3,6 +3,7 @@ FROM haiku
 COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
 COPY --from=unification-contracts /eos/contracts/unification_acl /eos/contracts/unification_acl
 COPY --from=unification-contracts /eos/contracts/unification_mother /eos/contracts/unification_mother
+COPY --from=unification-contracts /eos/contracts/eosio.token /eos/contracts/eosio.token
 
 COPY bin/haiku /usr/bin/haiku
 COPY haiku_node /haiku/haiku_node
