@@ -104,7 +104,7 @@ class UnificationDataFactory:
         # temp hack
         user_table_info = self.__my_lookup.get_real_table_info(db_schema_name, 'users')
         data_table_info = self.__my_lookup.get_real_table_info(db_schema_name, 'data_1')
-
+        
         # generate db params for ETL
         data_source_parms = {
             'odbc': 'mysql+mysqlconnector',  # TODO: set/get from db schema/conn/config
@@ -127,11 +127,16 @@ class UnificationDataFactory:
         # pp.pprint(data_source_parms)
         # print("native User IDs for Query")
         # print(native_user_ids)
-
+ 
         # TODO #1 - SHAWN: plug in Shawn's ETL. Pass native_user_ids, data_source_parms, and flesh out evaluate
         # TODO #2 - PAUL: transform native IDs to EOS acc names when XML is returned
 
         if len(native_user_ids) > 0:
+            unification_ids = {}
+            for id in native_user_ids:
+                unification_ids[id] = self.__my_lookup.get_eos_account(id)
+            
+            data_source_parms['unification_ids'] = unification_ids       
             self.__raw_data = fetch_user_data(data_source_parms)
         else:
             self.__raw_data = "<no-data></no-data>"  # temp dummy message for no users granting perms
