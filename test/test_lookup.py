@@ -1,14 +1,14 @@
 import pytest
+import sqlite3
+
+from create_lookups import app_sqlite_target
 
 from haiku_node.eosio_helpers import eosio_account
-from haiku_node.lookup.eos_lookup import UnificationLookup
+from haiku_node.lookup.eos_lookup import UnificationLookup, default_db
 
 
 @pytest.mark.parametrize("app_name", ['app1', 'app2', 'app3'])
 def test_validate_lookup_dbs(app_name):
-    import sqlite3
-    from create_lookups import app_sqlite_target
-
     db_name = app_sqlite_target(app_name)
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
@@ -20,23 +20,29 @@ def test_validate_lookup_dbs(app_name):
     assert res == '2'
 
 
-@pytest.mark.skipif(True, reason="Requires a sqlite database in place")
-def test_user_lookup():
+@pytest.mark.parametrize("app_name", ['app1'])
+def test_user_lookup(app_name):
+    db_name = app_sqlite_target(app_name)
+    ul = UnificationLookup(db_name)
+    user_lookup(ul)
 
+
+def user_lookup(ul: UnificationLookup):
     u1name = 15426359793685626880
     u1name_str = '15426359793685626880'
     u1_str = 'user1'
     u1_n_id = 1
 
-    print(f"eosio_account.name_to_string({u1name}) =", eosio_account.name_to_string(u1name))
-    print(f"eosio_account.name_to_string('{u1name_str}') =", eosio_account.name_to_string(u1name_str))
-    print(f"eosio_account.string_to_name('{u1_str}') =", eosio_account.string_to_name(u1_str))
+    print(f"eosio_account.name_to_string({u1name}) =",
+          eosio_account.name_to_string(u1name))
+    print(f"eosio_account.name_to_string('{u1name_str}') =",
+          eosio_account.name_to_string(u1name_str))
+    print(f"eosio_account.string_to_name('{u1_str}') =",
+          eosio_account.string_to_name(u1_str))
 
     assert (eosio_account.name_to_string(u1name) == u1_str) is True
     assert (eosio_account.name_to_string(u1name_str) == u1_str) is True
     assert (eosio_account.string_to_name(u1_str) == u1name) is True
-
-    ul = UnificationLookup()
 
     print(f"Lookup account as readable string: '{u1_str}'")
     n_id = ul.get_native_user_id(u1_str)
@@ -77,4 +83,4 @@ def test_user_lookup():
 
 
 if __name__ == "__main__":
-    test_user_lookup()
+    user_lookup(UnificationLookup(default_db()))
