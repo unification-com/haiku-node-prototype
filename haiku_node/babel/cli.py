@@ -44,6 +44,8 @@ def permissions(user):
     for va in valid_apps['rows']:
         apps.append(eosio_account.name_to_string(int(va['acl_contract_acc'])))
 
+    click.echo(f"{bold(user)} Permissions overview:")
+
     for requester, provider in product(apps, apps):
         if requester == provider:
             continue
@@ -102,6 +104,9 @@ def grant(provider, requester, user, password):
     :param user: The EOS user account name that is granting access.
     :param password: The EOS user account's password.
     """
+    click.echo(f"{bold(user)} is granting {bold(requester)} "
+               f"access to their data held in {bold(provider)}:")
+
     accounts = AccountManager()
     accounts.unlock_wallet(user, password)
     result = accounts.grant(provider, requester, user)
@@ -127,6 +132,8 @@ def revoke(provider, requester, user, password):
     :param user: The EOS user account name that is revoking access.
     :param password: The EOS user account's password.
     """
+    click.echo(f"{bold(user)} is revoking access from {bold(requester)} "
+               f"to their data in held {bold(provider)}:")
     accounts = AccountManager()
     accounts.unlock_wallet(user, password)
     result = accounts.revoke(provider, requester, user)
@@ -138,21 +145,28 @@ def revoke(provider, requester, user, password):
 
 @main.command()
 @click.argument('user')
-def balance(user):
+@click.argument('password')
+def balance(user, password):
     """
     Get UND balance for an account
 
     \b
     :param user: The EOS user account name
+    :param password: The EOS user account's wallet password.
     """
+    accounts = AccountManager()
+    accounts.unlock_wallet(user, password)
     my_balance = get_balance(user)
+    accounts.lock_wallet(user)
+
     click.echo(bold(f'{user} Balance: {my_balance}'))
 
 @main.command()
 @click.argument('from_acc')
 @click.argument('to_acc')
 @click.argument('amount')
-def transfer(from_acc, to_acc, amount):
+@click.argument('password')
+def transfer(from_acc, to_acc, amount, password):
     """
     Quick UND transfer method.
 
@@ -160,15 +174,22 @@ def transfer(from_acc, to_acc, amount):
     :param from_acc: The EOS user account name SENDING the UNDs
     :param to_acc: The EOS user account name RECEIVING the UNDs
     :param amount: amount to send
+    :param password: The SENDING EOS user account's wallet password.
     """
     # TODO: need to make the babel client initialised, and locked to a user
 
     amt = "{0:.4f}".format(round(float(amount), 4))
 
+    click.echo(f"{bold(from_acc)} is transferring {bold(amt)} UND"
+               f"to {bold(to_acc)}:")
+
     my_balance = get_balance(from_acc)
     click.echo(bold(f'{from_acc} Old Balance: {my_balance}'))
     their_balance = get_balance(to_acc)
     click.echo(bold(f'{to_acc} Old Balance: {their_balance}'))
+
+    accounts = AccountManager()
+    accounts.unlock_wallet(from_acc, password)
 
     conf = UnificationConfig()
     d = {
@@ -185,6 +206,8 @@ def transfer(from_acc, to_acc, amount):
     ret = subprocess.run(
         cmd, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, universal_newlines=True)
+
+    accounts.lock_wallet(from_acc)
 
     stripped = ret.stdout.strip()
     click.echo(bold(f'Transfer result: {stripped}'))
