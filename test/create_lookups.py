@@ -8,31 +8,36 @@ from pathlib import Path
 import logging
 
 log = logging.getLogger(__name__)
-currentdir = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-parentdir = os.path.dirname(currentdir)
-demo_config = json.loads(
-    Path(parentdir + '/test/data/demo_config.json').read_text())
-demo_apps = demo_config['demo_apps']
+
 appnames = ['app1', 'app2', 'app3']
 
-demo_permissions = demo_config['demo_permissions']
 
-print(demo_apps)
-print(demo_permissions)
+def get_demo_config():
+    currentdir = os.path.dirname(
+        os.path.abspath(inspect.getfile(inspect.currentframe())))
+    parentdir = os.path.dirname(currentdir)
+    demo_config = json.loads(
+        Path(parentdir + '/test/data/demo_config.json').read_text())
+    return demo_config
 
 
-def create_lookup_db(app):
-    global demo_apps
-    app_conf = demo_apps[app]
-
-    log.info(f'Create {app} Lookup')
+def target_file(app):
     currentdir = os.path.dirname(
         os.path.abspath(inspect.getfile(inspect.currentframe())))
     parentdir = os.path.dirname(currentdir)
     db_path = Path(f'{parentdir}/test/data/lookups/{app}.unification_lookup.db')
 
     db_name = str(db_path.resolve())
+    return db_name
+
+
+def create_lookup_db(app):
+    demo_config = get_demo_config()
+    demo_apps = demo_config['demo_apps']
+    app_conf = demo_apps[app]
+
+    log.info(f'Create {app} Lookup')
+    db_name = target_file(app)
 
     print("create db: ", db_name)
     log.info(db_name)
@@ -79,11 +84,6 @@ def create_lookup_db(app):
     conn.close()
 
 
-def process():
-    for app in appnames:
-        create_lookup_db(app)
-
-
 def configure_logging():
     log.setLevel(logging.DEBUG)
     ch = logging.StreamHandler()
@@ -96,4 +96,6 @@ def configure_logging():
 
 if __name__ == "__main__":
     configure_logging()
-    process()
+
+    for app in appnames:
+        create_lookup_db(app)
