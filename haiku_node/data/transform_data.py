@@ -3,7 +3,6 @@ import bonobo_sqlalchemy
 
 from sqlalchemy import create_engine
 from bonobo.config.processors import ContextProcessor, use_context
-from haiku_node.lookup.eos_lookup import UnificationLookup
 import logging
 
 returnString = ""
