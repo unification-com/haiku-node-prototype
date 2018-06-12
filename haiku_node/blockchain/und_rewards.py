@@ -1,9 +1,9 @@
-import os
 import json
 import logging
 import subprocess
 
 from eosapi import Client
+
 from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain.acl import UnificationACL
 
@@ -11,9 +11,9 @@ log = logging.getLogger(__name__)
 
 
 class UndRewards:
-    def __init__(self):
+    def __init__(self, acl_acc):
+        self.__my_acl_acc = acl_acc
         conf = UnificationConfig()
-        self.__my_acl_acc = os.environ['app_name']
         self.__eos_client_pre = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
                                  "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}"]
 

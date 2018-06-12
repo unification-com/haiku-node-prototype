@@ -74,7 +74,7 @@ class HaikuDataClient:
         log.info(f'"In the air" decrypted content is: {decrypted_body}')
 
         # TODO: only pay if data is valid
-        und_reward = UndRewards()
+        und_reward = UndRewards(providing_app.name)
 
         tree = etree.ElementTree(etree.fromstring(decrypted_body))
         users_to_pay = tree.findall('unification_users/unification_user')
