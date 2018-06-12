@@ -1,4 +1,5 @@
 import logging
+import subprocess
 from itertools import product
 
 import click
@@ -133,6 +134,20 @@ def revoke(provider, requester, user, password):
         click.echo(bold('Revoke succeeded'))
     else:
         click.echo(bold('Revoke failed'))
+
+@main.command()
+@click.argument('user')
+def balance(user):
+    conf = UnificationConfig()
+    cmd = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
+                 "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
+                 'get', 'currency', 'balance', 'unif.token', user, 'UND']
+
+    result = subprocess.run(
+        cmd, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, universal_newlines=True)
+
+    click.echo(bold(f'{user} Balance: {result}'))
 
 
 if __name__ == "__main__":

@@ -35,7 +35,7 @@ class UndRewards:
         d = {
             'from': self.__my_acl_acc,
             'to': to,
-            'quantity': f'{reward} UND',
+            'quantity': f'{reward}.0000 UND',  # TODO - need to fix precision
             'memo': 'UND Reward'
         }
         # cleos push action eosio.token transfer '[ "app3", "user1", "1.0000 UND", "m" ]' -p app3
