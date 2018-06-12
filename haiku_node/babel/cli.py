@@ -139,6 +139,12 @@ def revoke(provider, requester, user, password):
 @main.command()
 @click.argument('user')
 def balance(user):
+    """
+    Get UND balance for an account
+
+    \b
+    :param user: The EOS user account name
+    """
     my_balance = get_balance(user)
     click.echo(bold(f'{user} Balance: {my_balance}'))
 
@@ -147,7 +153,17 @@ def balance(user):
 @click.argument('to_acc')
 @click.argument('amount')
 def transfer(from_acc, to_acc, amount):
+    """
+    Quick UND transfer method.
+
+    \b
+    :param from_acc: The EOS user account name SENDING the UNDs
+    :param to_acc: The EOS user account name RECEIVING the UNDs
+    :param amount: amount to send
+    """
     # TODO: need to make the babel client initialised, and locked to a user
+
+    amt = "{0:.4f}".format(round(float(amount), 4))
 
     my_balance = get_balance(from_acc)
     click.echo(bold(f'{from_acc} Old Balance: {my_balance}'))
@@ -158,7 +174,7 @@ def transfer(from_acc, to_acc, amount):
     d = {
         'from': from_acc,
         'to': to_acc,
-        'quantity': f'{amount}.0000 UND',  # TODO - need to fix precision
+        'quantity': f'{amt} UND',  # TODO - need to fix precision
         'memo': 'UND transfer'
     }
 
