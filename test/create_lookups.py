@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 appnames = ['app1', 'app2', 'app3']
 
 
-def test_root():
+def test_root() -> Path:
     return Path(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -20,19 +20,19 @@ def get_demo_config():
     return json.loads(demo_config.read_text())
 
 
-def target_file(app_name):
+def app_sqlite_target(app_name: str) -> str:
     db_path = Path(test_root() / Path(
         f'data/lookups/{app_name}.unification_lookup.db'))
     return str(db_path.resolve())
 
 
-def create_lookup_db(app):
+def create_lookup_db(app_name: str):
     demo_config = get_demo_config()
     demo_apps = demo_config['demo_apps']
-    app_conf = demo_apps[app]
+    app_conf = demo_apps[app_name]
 
-    log.info(f'Create {app} Lookup')
-    db_name = target_file(app)
+    log.info(f'Create {app_name} Lookup')
+    db_name = app_sqlite_target(app_name)
 
     log.info(f"create db: {db_name}")
 
@@ -64,17 +64,6 @@ def create_lookup_db(app):
                 f"'{tm['db_table']}', '{tm['user_id_column']}')")
 
     conn.commit()
-    conn.close()
-
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-
-    log.info('Test user2 == 2')
-    t = ('user2',)
-    c.execute('SELECT native_id FROM lookup WHERE eos_account=?', t)
-    res = c.fetchone()[0]
-    log.info(f"user2 native ID: {res}")
-
     conn.close()
 
 

@@ -4,6 +4,22 @@ from haiku_node.eosio_helpers import eosio_account
 from haiku_node.lookup.eos_lookup import UnificationLookup
 
 
+@pytest.mark.parametrize("app_name", ['app1', 'app2', 'app3'])
+def test_validate_lookup_dbs(app_name):
+    import sqlite3
+    from create_lookups import app_sqlite_target
+
+    db_name = app_sqlite_target(app_name)
+    conn = sqlite3.connect(db_name)
+    c = conn.cursor()
+
+    t = ('user2',)
+    c.execute('SELECT native_id FROM lookup WHERE eos_account=?', t)
+    res = c.fetchone()[0]
+    conn.close()
+    assert res == '2'
+
+
 @pytest.mark.skipif(True, reason="Requires a sqlite database in place")
 def test_user_lookup():
 
