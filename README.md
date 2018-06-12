@@ -147,10 +147,10 @@ E.g.
 
 Transfer UNDs using babel
 
-    babel transfer [from] [to] [amount]
-    babel transfer user1 user2 1
+    babel transfer [from] [to] [amount] [wallet_password]
+    babel transfer user1 user2 1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx
     
 Check UND balance
 
-    babel balance [account_name]
-    babel balance user1
+    babel balance [account_name] [wallet_password]
+    babel balance user1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx
