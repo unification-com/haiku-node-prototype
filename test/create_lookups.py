@@ -1,7 +1,10 @@
-import os, inspect
+import os
+import inspect
 import json
 import sqlite3
+
 from pathlib import Path
+
 import logging
 
 log = logging.getLogger(__name__)
@@ -27,7 +30,7 @@ def create_lookup_db(app):
     currentdir = os.path.dirname(
         os.path.abspath(inspect.getfile(inspect.currentframe())))
     parentdir = os.path.dirname(currentdir)
-    db_path = Path(f'{parentdir}/test/data/{app}_unification_lookup.db')
+    db_path = Path(f'{parentdir}/test/data/lookups/{app}.unification_lookup.db')
 
     db_name = str(db_path.resolve())
 
@@ -41,16 +44,10 @@ def create_lookup_db(app):
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
 
-    c.execute('''CREATE TABLE lookup
-                             (native_id text, eos_account text)''')
-
-    c.execute('''CREATE TABLE lookup_meta
-                                     (native_table text, native_field text, field_type text)''')
-
-    c.execute('''CREATE TABLE schema_map
-                                         (sc_schema_name text, native_db text, native_db_platform text)''')
-    c.execute('''CREATE TABLE table_maps
-                                         (sc_schema_name text, sc_table_name text, real_table_name text, user_id_column text)''')
+    c.execute('''CREATE TABLE lookup (native_id text, eos_account text)''')
+    c.execute('''CREATE TABLE lookup_meta (native_table text, native_field text, field_type text)''')
+    c.execute('''CREATE TABLE schema_map (sc_schema_name text, native_db text, native_db_platform text)''')
+    c.execute('''CREATE TABLE table_maps (sc_schema_name text, sc_table_name text, real_table_name text, user_id_column text)''')
 
     c.execute(f"INSERT INTO lookup_meta VALUES ('{app_conf['lookup']['lookup_meta']['native_table']}', "
               f"'{app_conf['lookup']['lookup_meta']['native_field']}', "
