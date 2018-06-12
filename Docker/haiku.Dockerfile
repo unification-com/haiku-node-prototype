@@ -34,5 +34,6 @@ RUN echo "haiku view app2 user1 data-1" >> /root/.bash_history && \
 COPY bin/haiku /usr/bin/haiku
 COPY haiku_node /haiku/haiku_node
 COPY test /haiku/test
+COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
 
 CMD ["/haiku/test/bootstrap.sh"]

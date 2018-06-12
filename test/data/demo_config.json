@@ -77,6 +77,10 @@
                   "eos_account": "user3"
                 }
               ]
+            },
+            "und_rewards": {
+              "user_amt": 1,
+              "app_amt": 100
             }
         },
         "app2":{
@@ -145,6 +149,10 @@
                   "eos_account": "user3"
                 }
               ]
+            },
+            "und_rewards": {
+              "user_amt": 1,
+              "app_amt": 100
             }
         },
         "app3":{
@@ -221,6 +229,10 @@
                   "eos_account": "user3"
                 }
               ]
+            },
+            "und_rewards": {
+              "user_amt": 2,
+              "app_amt": 150
             }
         }
     },
@@ -381,6 +393,9 @@
         },
         "unif.mother": {
           "wallet_password": "PW5JN14rVAQ4oL19PREuJbDjbde6QfrRmWCXsoBq8866KdxvWYJSH"
+        },
+        "unif.token": {
+          "wallet_password": "PW5JwgsjwK7s2b6Eomwfsv6oVoEn2XcykVYj2KsCPnES65y8a3NTA"
         }
     }
 }

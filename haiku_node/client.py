@@ -1,12 +1,13 @@
 import json
 import tempfile
+import xml.etree.ElementTree as etree
 from pathlib import Path
 
 import logging
-
 import requests
 
 from haiku_node.encryption.payload import bundle, unbundle
+from haiku_node.blockchain.und_rewards import UndRewards
 
 log = logging.getLogger(__name__)
 
@@ -72,6 +73,20 @@ class HaikuDataClient:
 
         log.info(f'"In the air" decrypted content is: {decrypted_body}')
 
+        # TODO: only pay if data is valid
+        und_reward = UndRewards(providing_app.name)
+
+        tree = etree.ElementTree(etree.fromstring(decrypted_body))
+        users_to_pay = tree.findall('unification_users/unification_user')
+        for username in users_to_pay:
+            print(f'pay {username.text}')
+            ret = und_reward.send_reward(username.text)
+            print(ret)
+
+        print(f"Pay provider {providing_app.name}")
+        ret = und_reward.send_reward(providing_app.name, False)
+        print(ret)
+
         return self.persist_data(
             providing_app.name, request_hash, d)
 
@@ -89,3 +104,4 @@ class HaikuDataClient:
 
         log.info(f'Decrypted content from persistence store: {decrypted_body}')
         return decrypted_body
+

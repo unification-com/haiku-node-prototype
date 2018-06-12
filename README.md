@@ -136,4 +136,21 @@ because it is encrypted using App3's public RSA key. Via Babel, we can
 decrypt the data using App3's private RSA key and view it:
 
     haiku view app2 user1 data-1
+    
+Fetch the UND balance for an app/user:
 
+    cleos get currency balance unif.token [account_name] UND
+
+E.g.
+
+    cleos get currency balance unif.token user1 UND
+
+Transfer UNDs using babel
+
+    babel transfer [from] [to] [amount]
+    babel transfer user1 user2 1
+    
+Check UND balance
+
+    babel balance [account_name]
+    babel balance user1

@@ -1,4 +1,6 @@
 import logging
+import subprocess
+import json
 from itertools import product
 
 import click
@@ -133,6 +135,68 @@ def revoke(provider, requester, user, password):
         click.echo(bold('Revoke succeeded'))
     else:
         click.echo(bold('Revoke failed'))
+
+@main.command()
+@click.argument('user')
+def balance(user):
+    my_balance = get_balance(user)
+    click.echo(bold(f'{user} Balance: {my_balance}'))
+
+@main.command()
+@click.argument('from_acc')
+@click.argument('to_acc')
+@click.argument('amount')
+def transfer(from_acc, to_acc, amount):
+    # TODO: need to make the babel client initialised, and locked to a user
+
+    my_balance = get_balance(from_acc)
+    click.echo(bold(f'{from_acc} Old Balance: {my_balance}'))
+    their_balance = get_balance(to_acc)
+    click.echo(bold(f'{to_acc} Old Balance: {their_balance}'))
+
+    conf = UnificationConfig()
+    d = {
+        'from': from_acc,
+        'to': to_acc,
+        'quantity': f'{amount}.0000 UND',  # TODO - need to fix precision
+        'memo': 'UND transfer'
+    }
+
+    cmd = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
+           "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
+           'push', 'action', 'unif.token', 'transfer',  json.dumps(d), "-p", from_acc]
+
+    ret = subprocess.run(
+        cmd, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, universal_newlines=True)
+
+    stripped = ret.stdout.strip()
+    click.echo(bold(f'Transfer result: {stripped}'))
+
+    my_balance = get_balance(from_acc)
+    click.echo(bold(f'{from_acc} New Balance: {my_balance}'))
+    their_balance = get_balance(to_acc)
+    click.echo(bold(f'{to_acc} New Balance: {their_balance}'))
+
+
+def get_balance(user):
+    conf = UnificationConfig()
+    cmd = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
+           "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
+           'get', 'currency', 'balance', 'unif.token', user, 'UND']
+
+    ret = subprocess.run(
+        cmd, stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, universal_newlines=True)
+
+    stripped = ret.stdout.strip()
+
+    if len(stripped) > 0:
+        my_balance = stripped
+    else:
+        my_balance = '0.0000 UND'
+
+    return my_balance
 
 
 if __name__ == "__main__":

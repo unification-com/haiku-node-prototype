@@ -13,10 +13,12 @@ from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
+from haiku_node.encryption.tools import sign_request
 from haiku_node.eosio_helpers import eosio_account
+from haiku_node.eosio_helpers.accounts import (
+    AccountManager, make_default_accounts)
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import verify_account
-from haiku_node.encryption.tools import sign_request
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
@@ -114,12 +116,9 @@ def systest_ingest(requesting_app, providing_app, user, local=False):
 def systest_accounts():
     log.info('Running systest accounts')
 
-    from haiku_node.eosio_helpers.accounts import (
-        AccountManager, make_default_accounts)
-
     demo_config = json.loads(Path('data/demo_config.json').read_text())
     appnames = ['app1', 'app2', 'app3']
-    usernames = ['user1', 'user2', 'user3', 'unif.mother']
+    usernames = ['user1', 'user2', 'user3', 'unif.mother', 'unif.token']
 
     manager = AccountManager(host=False)
     make_default_accounts(manager, demo_config, appnames, usernames)
@@ -275,10 +274,17 @@ def wait():
     print("Sleeping")
     time.sleep(20)
 
+    manager = AccountManager(host=False)
+    for appname, balance in {'app1': 100, 'app2': 100, 'app3': 100}.items():
+        assert manager.get_und_rewards(appname) == balance
+
     systest_ingest('app1', 'app2', 'user1')
     systest_ingest('app2', 'app1', 'user1')
     systest_ingest('app3', 'app1', 'user1')
     systest_ingest('app3', 'app2', 'user2')
+
+    for appname, balance in {'app1': 98, 'app2': 100, 'app3': 100}.items():
+        assert manager.get_und_rewards(appname) == balance
 
     # The User3 has denied access to for app2 to access data on app 1
     try:

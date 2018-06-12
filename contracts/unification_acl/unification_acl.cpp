@@ -239,4 +239,30 @@ namespace UnificationFoundation {
 
 
     }
+
+
+    void unification_acl::setrewards(const uint64_t user_amt, const uint64_t app_amt) {
+        eosio::print("call setrewards()");
+
+        require_auth(_self);
+
+        unifrewards und_rewards(_self, _self);
+
+        auto rew_itr = und_rewards.find(1);
+        if(rew_itr != und_rewards.end()) {
+            //update
+            und_rewards.modify(rew_itr, _self /*payer*/, [&](auto &r_rec) {
+                r_rec.user_amt = user_amt;
+                r_rec.app_amt = app_amt;
+            });
+        } else {
+            //insert
+            und_rewards.emplace(_self, [&]( auto& r_rec ) {
+                r_rec.pkey = 1;
+                r_rec.user_amt = user_amt;
+                r_rec.app_amt = app_amt;
+            });
+        }
+    }
+
 }

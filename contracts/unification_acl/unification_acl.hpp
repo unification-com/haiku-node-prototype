@@ -5,9 +5,6 @@
 
 #include <regex>
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/action.hpp>
-#include <eosiolib/contract.hpp>
-#include <eosiolib/print.hpp>
 
 namespace UnificationFoundation {
     using namespace eosio;
@@ -33,6 +30,9 @@ namespace UnificationFoundation {
 
         //@abi action
         void addhash(account_name schema_name, uint64_t schema_vers, uint64_t timestamp, std::string data_hash);
+
+        //@abi action
+        void setrewards(uint64_t user_amt, uint64_t app_amt);
 
     private:
 
@@ -110,11 +110,20 @@ namespace UnificationFoundation {
                 indexed_by< N(bytime), const_mem_fun<datahashes, uint64_t, &datahashes::by_time> >
         > unifhashes;
 
-//        struct data_rewards {
-//
-//        };
+        //@abi table undrewards i64
+        struct undrewards {
+            uint64_t pkey;
+            uint64_t user_amt;
+            uint64_t app_amt;
+
+            uint64_t primary_key() const { return pkey; }
+
+            EOSLIB_SERIALIZE(undrewards, (pkey)(user_amt)(app_amt))
+        };
+
+        typedef eosio::multi_index<N(undrewards), undrewards> unifrewards;
 
     };
 
-    EOSIO_ABI(unification_acl, (grant)(revoke)(check)(setschema)(setsource)(addhash))
+    EOSIO_ABI(unification_acl, (grant)(revoke)(check)(setschema)(setsource)(addhash)(setrewards))
 }

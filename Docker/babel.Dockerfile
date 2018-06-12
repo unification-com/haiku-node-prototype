@@ -35,4 +35,5 @@ RUN echo "babel permissions user1" >> /root/.bash_history && \
 COPY bin/babel /usr/bin/babel
 COPY haiku_node /haiku/haiku_node
 COPY test /haiku/test
+COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
 

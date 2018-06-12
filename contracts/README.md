@@ -131,9 +131,9 @@ cleos get code app3
 18) Validate each app with MOTHER - acl_contract_hash value is from step #16. schema_vers is comman and colon separated list of schema_name:schema_vers, to represent latest valid schemas and versions for the app. Get from: `cleos get table app1 app1 unifschemas`
 
 ```
-cleos push action unif.mother validate '{"acl_contract_acc":"app1", "schema_vers":"app1.db1:1", "acl_contract_hash": "276f649beabdfc40a3d02676c2a121a8be6b45165e7b017bab6befb64d0fb309", "rpc_server_ip": "haiku-app1", "rpc_server_port":8050 }' -p unif.mother
-cleos push action unif.mother validate '{"acl_contract_acc":"app2", "schema_vers":"app2.db1:1", "acl_contract_hash": "276f649beabdfc40a3d02676c2a121a8be6b45165e7b017bab6befb64d0fb309", "rpc_server_ip": "haiku-app2", "rpc_server_port":8050 }' -p unif.mother
-cleos push action unif.mother validate '{"acl_contract_acc":"app3", "schema_vers":"app3.db1:1", "acl_contract_hash": "276f649beabdfc40a3d02676c2a121a8be6b45165e7b017bab6befb64d0fb309", "rpc_server_ip": "haiku-app3", "rpc_server_port":8050 }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app1", "schema_vers":"app1.db1:1", "acl_contract_hash": "fa10e15d2bbfe93ed25b8660f821e59fe86d264e48d639db90d2cd27cd243235", "rpc_server_ip": "haiku-app1", "rpc_server_port":8050 }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app2", "schema_vers":"app2.db1:1", "acl_contract_hash": "fa10e15d2bbfe93ed25b8660f821e59fe86d264e48d639db90d2cd27cd243235", "rpc_server_ip": "haiku-app2", "rpc_server_port":8050 }' -p unif.mother
+cleos push action unif.mother validate '{"acl_contract_acc":"app3", "schema_vers":"app3.db1:1", "acl_contract_hash": "fa10e15d2bbfe93ed25b8660f821e59fe86d264e48d639db90d2cd27cd243235", "rpc_server_ip": "haiku-app3", "rpc_server_port":8050 }' -p unif.mother
 ```
 
 19) Simulate user1 granting access for app2 to access data in app1:
@@ -175,6 +175,18 @@ There's currently no method for specific row queries in EOS Smart Contracts, so 
 25) get app validation status/info from MOTHER:
 ```
 cleos get table unif.mother unif.mother validapps
+```
+
+26) Set up some UND rewards:
+```
+cleos push action app1 setrewards '{"user_amt":1, "app_amt":100 }' -p app1
+cleos push action app2 setrewards '{"user_amt":1, "app_amt":100 }' -p app2
+cleos push action app3 setrewards '{"user_amt":2, "app_amt":150 }' -p app3
+```
+
+27) Check:
+```
+cleos get table app1 app1 undrewards
 ```
 
 config/config.json currently set up with "app1" as the data provider, so the above command is checking app2 and app3's validity/permissions as the data requesters.
