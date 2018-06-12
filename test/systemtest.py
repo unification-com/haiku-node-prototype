@@ -274,14 +274,17 @@ def wait():
     print("Sleeping")
     time.sleep(20)
 
+    manager = AccountManager(host=False)
+    for appname, balance in {'app1': 100, 'app2': 100, 'app3': 100}.items():
+        assert manager.get_und_rewards(appname) == balance
+
     systest_ingest('app1', 'app2', 'user1')
     systest_ingest('app2', 'app1', 'user1')
     systest_ingest('app3', 'app1', 'user1')
     systest_ingest('app3', 'app2', 'user2')
 
-    # ToDo: systests for UND tokens, in app1, app2, app3:
-    # cleos get currency balance unif.token app1 UND
-    # should return 100.0000 UND for each
+    for appname, balance in {'app1': 98, 'app2': 100, 'app3': 100}.items():
+        assert manager.get_und_rewards(appname) == balance
 
     # The User3 has denied access to for app2 to access data on app 1
     try:

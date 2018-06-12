@@ -162,7 +162,6 @@ class AccountManager:
 
         print(ret.stdout)
 
-
     def associate_contracts(self, username):
         log.info('Associating acl contracts')
         ret = self.cleos(["set", "contract", username,
@@ -206,6 +205,19 @@ class AccountManager:
             ['push', 'action', appname, 'setrewards', json.dumps(d), '-p',
              appname])
         print(ret.stdout)
+
+    def get_und_rewards(self, appname : str) -> float:
+        ret = self.cleos(
+            ['get', 'currency', 'balance', 'unif.token', appname, 'UND'])
+        stripped = ret.stdout.strip()
+
+        embed_postfix = ' UND'
+        if stripped.endswith(embed_postfix):
+            stripped = stripped[:-(len(embed_postfix))]
+        else:
+            raise Exception(f"Unexpected postfix: {stripped}")
+
+        return float(stripped)
 
     def get_code_hash(self, appname):
         ret = self.cleos(['get', 'code', appname])
