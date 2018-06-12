@@ -1,133 +1,128 @@
 import bonobo
 import bonobo_sqlalchemy
-
+import logging
 from sqlalchemy import create_engine
 from bonobo.config.processors import ContextProcessor, use_context
-import logging
 
-returnString = ""
-global_parms = []
+class TransformData:
 
-def write_to_string(*args, **kwargs):
-    global returnString
-    returnString += args[0]
+    def __init__(self, data_source_parms):
+        self.__data_source_parms = data_source_parms
 
-def xml_document(self, context):
-    leadString = '<data>\n\t<from>{vfrom}</from>\n\t<timestamp>{time}</timestamp>\n\t<unification_users>\n'
-    unification_users = global_parms['unification_ids']
+    def write_to_string(self, *args, **kwargs):
+        self.__result_string += args[0]
 
-    for unification_id_key in unification_users:
-        leadString += '\t\t<unification_user>'
-        leadString += unification_users[unification_id_key]
-        leadString += '</unification_user>\n'
+    def build_xml_document_header(self):
+        self.__result_string = '<data>\n\t<from>{vfrom}</from>\n\t<timestamp>{time}\
+            </timestamp>\n\t<unification_users>\n'.format(vfrom='TODO', time=89374893798)
+        
+        unification_users = self.__data_source_parms['unification_ids']
 
-    leadString += '\t</unification_users>\n\t<rows>\n'.format(vfrom='TODO', time=89374893798)
-    context.send(leadString)
-    yield
-    context.send('\t</rows>\n</data>\n')
+        for unification_id_key in unification_users:
+            self.__result_string += '\t\t<unification_user>'
+            self.__result_string += unification_users[unification_id_key]
+            self.__result_string += '</unification_user>\n'
 
+        self.__result_string += '\t</unification_users>\n\t<rows>\n'
 
-@use_context
-@bonobo.config.use_context_processor(xml_document)
-def create_xml(context, *args, **kwargs):
-    iter = 0;
-    global global_parms
+    def build_xml_document_footer(self):
+        self.__result_string += '\t</rows>\n</data>\n'
 
-    yield '\t\t<row>\n'
-    fields = context.get_input_fields()
-    for item in args:
-        field_string = fields[iter]
+    #@bonobo.config.use_context_processor(xml_document)
+    @use_context
+    def create_xml(self, context, *args, **kwargs):
+        iter = 0;
+        yield '\t\t<row>\n'
+        fields = context.get_input_fields()
+        for item in args:
+            field_string = fields[iter]
 
-        if fields[iter] == global_parms['userIdentifier']:
-            newItem = global_parms['unification_ids'][str(item)]
-            item = newItem
-            field_string = 'account_name'
+            if fields[iter] == self.__data_source_parms['userIdentifier']:
+                newItem = self.__data_source_parms['unification_ids'][str(item)]
+                item = newItem
+                field_string = 'account_name'
 
-        yield '\t\t\t<field>\n\t\t\t\t<field_name>{id}</field_name>\n\t\t\t\t<value>{value}</value>\n\t\t\t\t<type>{type}</type>\n\t\t\t</field>\n'.format(id=field_string, value=item, type=type(item).__name__)
+            yield '\t\t\t<field>\n\t\t\t\t<field_name>{id}</field_name>\n\t\t\t\t<value>{value}</value>\n\t\t\t\t<type>{type}</type>\n\t\t\t</field>\n'.format(id=field_string, value=item, type=type(item).__name__)
 
-        iter += 1
+            iter += 1
 
-    yield '\t\t</row>\n'
+        yield '\t\t</row>\n'
 
-def get_graph(data_source_parms):
-
-    graph = bonobo.Graph()
-    graph.add_chain(
-        #   NOTE: The Select statement here assumes a default engine of sqlalchemy.engine
-        #   defined in get_services()
-        #   I'm fairly sure this can be overridden with paremeters
-        bonobo_sqlalchemy.Select(assemble_query_string(data_source_parms), limit=100),
-        create_xml,
-        write_to_string
-    )
-    return graph
+    def get_graph(self):
+        graph = bonobo.Graph()
+        graph.add_chain(
+            #   NOTE: The Select statement here assumes a default engine of sqlalchemy.engine
+            #   defined in get_services()
+            #   I'm fairly sure this can be overridden with paremeters
+            bonobo_sqlalchemy.Select(self.assemble_query_string(), limit=100),
+            self.create_xml,
+            self.write_to_string
+        )
+        return graph
 
 
-def get_services(connString):
-    #   NOTE: This set is the set of all available services
-    #   right now we only have sqlalchemy engine, with a connstring hardcoded to
-    #   a mysqldb ODBC database, but obviously that is parameterizalable
-    return {    
-        'sqlalchemy.engine':create_engine(connString)
-    }
+    def get_services(self, connString):
+        #   NOTE: This set is the set of all available services
+        #   right now we only have sqlalchemy engine, with a connstring hardcoded to
+        #   a mysqldb ODBC database, but obviously that is parameterizalable
+        return {
+            'sqlalchemy.engine':create_engine(connString)
+        }
 
 
-def assemble_connection_string(data_source_parms):
-    connString = '{odbc}://{user}:{passw}@{host}/{database}' \
-        .format(
-            odbc=data_source_parms['odbc'],
-            user=data_source_parms['user'],
-            passw=data_source_parms['pass'],
-            host=data_source_parms['host'],
-            database=data_source_parms['database'])
-    
-    return connString
+    def assemble_connection_string(self):
+        connString = '{odbc}://{user}:{passw}@{host}/{database}' \
+            .format(
+                odbc=self.__data_source_parms['odbc'],
+                user=self.__data_source_parms['user'],
+                passw=self.__data_source_parms['pass'],
+                host=self.__data_source_parms['host'],
+                database=self.__data_source_parms['database'])
 
+        return connString
 
-def assemble_query_string(data_source_parms):
-    dataColumns = ""
-    length = len(data_source_parms['dataColumnsToInclude'])
-    iter = 1
-    comma = ''
+    def assemble_query_string(self):
+        dataColumns = ""
+        length = len(self.__data_source_parms['dataColumnsToInclude'])
+        iter = 1
+        comma = ''
 
-    native_user_ids_str = ','.join(data_source_parms['native_user_ids'])
-    
-    for item in data_source_parms['dataColumnsToInclude']:
-        if iter != length:
-            comma = ','
-        else:
-            comma = ''
-            
-        dataColumns += '{dataTable}.{item}{comma}'.format(dataTable=data_source_parms['dataTable'], item=item,comma=comma)
-        iter = iter + 1
+        native_user_ids_str = ','.join(self.__data_source_parms['native_user_ids'])
 
-    queryString = 'SELECT {userTable}.{userIdentifier}, {dataColumns} FROM {userTable} LEFT JOIN {dataTable} ' \
+        for item in self.__data_source_parms['dataColumnsToInclude']:
+            if iter != length:
+                comma = ','
+            else:
+                comma = ''
+
+            dataColumns += '{dataTable}.{item}{comma}'.format(dataTable=self.__data_source_parms['dataTable'], item=item,comma=comma)
+            iter = iter + 1
+
+        queryString = 'SELECT {userTable}.{userIdentifier}, {dataColumns} FROM {userTable} LEFT JOIN {dataTable} ' \
                   'On {userTable}.{userIdentifier} = {dataTable}.{dataUserIdentifier} ' \
                   'WHERE {userTable}.{userIdentifier} IN ({native_user_ids}) ' \
                   'ORDER BY {userTable}.{userIdentifier}' \
-            .format(
-                dataColumns = dataColumns,
-                dataTable=data_source_parms['dataTable'],
-                userTable=data_source_parms['userTable'],
-                userIdentifier=data_source_parms['userIdentifier'],
-                dataUserIdentifier=data_source_parms['dataUserIdentifier'],
-                native_user_ids=native_user_ids_str)
-    
-    return queryString
+                .format(
+                    dataColumns = dataColumns,
+                    dataTable=self.__data_source_parms['dataTable'],
+                    userTable=self.__data_source_parms['userTable'],
+                    userIdentifier=self.__data_source_parms['userIdentifier'],
+                    dataUserIdentifier=self.__data_source_parms['dataUserIdentifier'],
+                    native_user_ids=native_user_ids_str)
 
+        return queryString
 
-def fetch_user_data(data_source_parms):
-    global global_parms
-    global_parms = data_source_parms
+    def fetch_user_data(self):
+        try:
+            self.build_xml_document_header()
+            connString = self.assemble_connection_string()
+            bonobo.run(self.get_graph(),services=self.get_services(connString))
+            self.build_xml_document_footer()
 
-    try:
-        connString = assemble_connection_string(data_source_parms)
-        bonobo.run(get_graph(data_source_parms),services=get_services(connString))
-        
-    except Exception as e:
-        logging.warning("Exception caught: fetch_user_data")
-        logging.warning(e)
-        logging.warning(data_source_parms)
-        return 'FAIL DATA'
-   
-    return returnString
+        except Exception as e:
+            logging.warning("Exception caught: fetch_user_data")
+            logging.warning(e)
+            logging.warning(self.__data_source_parms)
+            return 'FAIL DATA'
+
+        return self.__result_string
