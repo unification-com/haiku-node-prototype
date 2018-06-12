@@ -5,7 +5,7 @@ from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.data.transform_data import fetch_user_data
 from haiku_node.eosio_helpers import eosio_account
-from haiku_node.lookup.eos_lookup import UnificationLookup
+from haiku_node.lookup.eos_lookup import UnificationLookup, default_db
 from haiku_node.config.config import UnificationConfig
 
 
@@ -18,7 +18,7 @@ class UnificationDataFactory:
 
         self.__my_mother = UnificationMother(eos_client, acl_contract_acc)
         self.__my_acl = UnificationACL(eos_client, acl_contract_acc)
-        self.__my_lookup = UnificationLookup()
+        self.__my_lookup = UnificationLookup(default_db())
         self.__users = users
 
         self.__valid_db_schemas = self.__my_mother.get_valid_db_schemas()

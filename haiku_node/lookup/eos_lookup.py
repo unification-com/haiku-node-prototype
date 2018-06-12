@@ -1,17 +1,21 @@
-import os, inspect
+import os
 import sqlite3
 from pathlib import Path
+
 from haiku_node.eosio_helpers import eosio_account
+
+
+def default_db():
+    currentdir = os.path.dirname(os.path.abspath(__file__))
+    parentdir = os.path.dirname(currentdir)
+    db_path = Path(parentdir + '/lookup/unification_lookup.db')
+    return str(db_path.resolve())
 
 
 class UnificationLookup:
 
-    def __init__(self):
-        currentdir = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        parentdir = os.path.dirname(currentdir)
-        db_path = Path(parentdir + '/lookup/unification_lookup.db')
-        self.__db_name = str(db_path.resolve())
+    def __init__(self, db_name: Path):
+        self.__db_name = db_name
 
     def get_native_user_id(self, account_name):
 
@@ -76,7 +80,8 @@ class UnificationLookup:
     def get_real_table_info(self, schema_name, sc_table_name):
         self.__open_con()
         t = (schema_name, sc_table_name)
-        self.__c.execute('SELECT * FROM table_maps WHERE sc_schema_name=? AND sc_table_name=?', t)
+        self.__c.execute('SELECT * FROM table_maps WHERE sc_schema_name=? AND '
+                         'sc_table_name=?', t)
 
         res = self.__c.fetchone()
 
