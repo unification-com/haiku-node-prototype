@@ -1,5 +1,4 @@
 import json
-import inspect
 import os
 import sqlite3
 
@@ -12,23 +11,19 @@ log = logging.getLogger(__name__)
 appnames = ['app1', 'app2', 'app3']
 
 
+def test_root():
+    return Path(os.path.dirname(os.path.abspath(__file__)))
+
+
 def get_demo_config():
-    currentdir = os.path.dirname(
-        os.path.abspath(inspect.getfile(inspect.currentframe())))
-    parentdir = os.path.dirname(currentdir)
-    demo_config = json.loads(
-        Path(parentdir + '/test/data/demo_config.json').read_text())
-    return demo_config
+    demo_config = Path(test_root() / Path('data/demo_config.json'))
+    return json.loads(demo_config.read_text())
 
 
-def target_file(app):
-    currentdir = os.path.dirname(
-        os.path.abspath(inspect.getfile(inspect.currentframe())))
-    parentdir = os.path.dirname(currentdir)
-    db_path = Path(f'{parentdir}/test/data/lookups/{app}.unification_lookup.db')
-
-    db_name = str(db_path.resolve())
-    return db_name
+def target_file(app_name):
+    db_path = Path(test_root() / Path(
+        f'data/lookups/{app_name}.unification_lookup.db'))
+    return str(db_path.resolve())
 
 
 def create_lookup_db(app):
