@@ -1,6 +1,6 @@
-import os
-import inspect
 import json
+import inspect
+import os
 import sqlite3
 
 from pathlib import Path
@@ -39,11 +39,10 @@ def create_lookup_db(app):
     log.info(f'Create {app} Lookup')
     db_name = target_file(app)
 
-    print("create db: ", db_name)
-    log.info(db_name)
+    log.info(f"create db: {db_name}")
 
     if os.path.exists(db_name):
-        print(db_name, "exists. Delete")
+        log.info(f"{db_name} exists. Delete")
         os.unlink(db_name)
 
     conn = sqlite3.connect(db_name)
@@ -79,7 +78,7 @@ def create_lookup_db(app):
     t = ('user2',)
     c.execute('SELECT native_id FROM lookup WHERE eos_account=?', t)
     res = c.fetchone()[0]
-    print("user2 native ID:", res)
+    log.info(f"user2 native ID: {res}")
 
     conn.close()
 
