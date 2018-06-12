@@ -110,6 +110,8 @@ def data_request():
         # data
         if v.valid():
             users = bundle_d.get('users')
+            # TODO: need to ensure, somewhere, that the requesting app can afford to pay for the data!
+            # perhaps pre-calculate how much it'll cost, and throw "CannotAfford" exception (with HTTP 401)
             return obtain_data(sender, eos_client, conf['acl_contract'], users)
         else:
             return invalid_app()

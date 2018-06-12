@@ -145,3 +145,12 @@ E.g.
 
     cleos get currency balance unif.token user1 UND
 
+Transfer UNDs using babel
+
+    babel transfer [from] [to] [amount]
+    babel transfer user1 user2 1
+    
+Check UND balance
+
+    babel balance [account_name]
+    babel balance user1
