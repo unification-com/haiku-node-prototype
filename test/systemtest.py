@@ -13,10 +13,12 @@ from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
+from haiku_node.encryption.tools import sign_request
 from haiku_node.eosio_helpers import eosio_account
+from haiku_node.eosio_helpers.accounts import (
+    AccountManager, make_default_accounts)
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import verify_account
-from haiku_node.encryption.tools import sign_request
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
@@ -113,9 +115,6 @@ def systest_ingest(requesting_app, providing_app, user, local=False):
 
 def systest_accounts():
     log.info('Running systest accounts')
-
-    from haiku_node.eosio_helpers.accounts import (
-        AccountManager, make_default_accounts)
 
     demo_config = json.loads(Path('data/demo_config.json').read_text())
     appnames = ['app1', 'app2', 'app3']
