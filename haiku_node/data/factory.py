@@ -3,7 +3,7 @@ import pprint
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
-from haiku_node.data.transform_data import fetch_user_data
+from haiku_node.data.transform_data import TransformData
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.lookup.eos_lookup import UnificationLookup, default_db
 from haiku_node.config.config import UnificationConfig
@@ -134,7 +134,8 @@ class UnificationDataFactory:
             for id in native_user_ids:
                 unification_ids[id] = self.__my_lookup.get_eos_account(id)
             
-            data_source_parms['unification_ids'] = unification_ids       
-            self.__raw_data = fetch_user_data(data_source_parms)
+            data_source_parms['unification_ids'] = unification_ids
+            data_transform = TransformData(data_source_parms)
+            self.__raw_data = data_transform.fetch_user_data()
         else:
             self.__raw_data = "<no-data></no-data>"  # temp dummy message for no users granting perms
