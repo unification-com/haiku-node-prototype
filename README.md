@@ -136,7 +136,9 @@ because it is encrypted using App3's public RSA key. Via Babel, we can
 decrypt the data using App3's private RSA key and view it:
 
     haiku view app2 user1 data-1
-    
+
+### Checking balances
+
 Fetch the UND balance for an app/user:
 
     cleos get currency balance unif.token [account_name] UND
