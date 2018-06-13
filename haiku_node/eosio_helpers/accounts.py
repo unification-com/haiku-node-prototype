@@ -147,13 +147,15 @@ class AccountManager:
 
         print(ret.stdout)
 
-    def issue_unds(self, username):
-        log.info(f'Issue 100 UND tokens to {username}')
+    def issue_unds(self, app_config, appname):
+        app_conf = app_config[appname]
+        quantity = "{0:.4f}".format(round(float(app_conf['und_rewards']['start_balance']), 4))
+        log.info(f'Issue 100 UND tokens to {appname}')
 
         # TODO: migrate quantity to demo_config.json
         d = {
-            'to': username,
-            'quantity': '100.0000 UND',
+            'to': appname,
+            'quantity': f'{quantity} UND',
             'memo': 'memo'
         }
         ret = self.cleos(
@@ -373,7 +375,7 @@ def make_default_accounts(
         manager.validate_with_mother(demo_apps, appname)
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
-        manager.issue_unds(appname)
+        manager.issue_unds(demo_apps, appname)
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)

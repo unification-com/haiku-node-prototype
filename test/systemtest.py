@@ -274,6 +274,7 @@ def wait():
     print("Sleeping")
     time.sleep(20)
 
+    # TODO: get start balance from demo_config[app]['und_rewards']['start_balance']
     manager = AccountManager(host=False)
     for app, balance in {'app1': 100.0, 'app2': 100.0, 'app3': 100.0}.items():
         log.info(f'App {app} has a balance of {balance} UND')
@@ -284,6 +285,8 @@ def wait():
     systest_ingest('app3', 'app1', 'user1')
     systest_ingest('app3', 'app2', 'user2')
 
+    # TODO: calculate based on demo_config[app]['und_rewards']
+    # and user permissions in demo_config
     time.sleep(1)
     for app, balance in {'app1': 114.0, 'app2': 114.0, 'app3': 66.0}.items():
         log.info(f'App {app} should have a balance of {balance} UND')
