@@ -4,8 +4,8 @@ import click
 
 from cryptography.fernet import Fernet
 
-from haiku_node.config.config import UnificationConfig
 from haiku_node.client import HaikuDataClient, Provider, Unauthorized
+from haiku_node.config.config import UnificationConfig
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import app
 
