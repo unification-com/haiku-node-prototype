@@ -28,15 +28,6 @@ def invalid_response():
     }), 401
 
 
-def unauthorized_for_user():
-    return flask.jsonify({
-        'success': False,
-        'message': 'Unauthorized For User',
-        'signature': None,
-        'body': None
-    }), 401
-
-
 def generic_error():
     return flask.jsonify({
         'success': False,

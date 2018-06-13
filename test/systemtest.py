@@ -91,7 +91,7 @@ def systest_auth(requesting_app, providing_app, user):
     verify_account(providing_app, decrypted_body, d['signature'])
 
 
-def systest_ingest(requesting_app, providing_app, user, local=False):
+def systest_ingest(requesting_app, providing_app, user, balances, local=False):
     log.info(f'Testing ingestion: {requesting_app} is requesting data from '
              f'{providing_app}')
     request_hash = f'data-request-{providing_app}-{requesting_app}'
@@ -111,6 +111,15 @@ def systest_ingest(requesting_app, providing_app, user, local=False):
     client = HaikuDataClient(keystore)
     client.make_data_request(requesting_app, provider, user, request_hash)
     client.read_data_from_store(provider, requesting_app, request_hash)
+
+    # Update the system test record of the balances
+    rewards = lambda app: demo_config['demo_apps'][app]['und_rewards']
+    balances[requesting_app] = balances[requesting_app] - (
+            rewards(requesting_app)['app_amt'] +
+            rewards(requesting_app)['user_amt'])
+    balances[providing_app] = (
+            balances[providing_app] + rewards(requesting_app)['app_amt'])
+    return balances
 
 
 def systest_accounts():
@@ -248,7 +257,11 @@ def host():
     """
     Test from the host machine.
     """
-    systest_ingest('app2', 'app1', 'user3', local=True)
+    balances = {}
+    for k, d in demo_config['demo_apps'].items():
+        balances[d['eos_sc_account']] = d['und_rewards']['start_balance']
+
+    systest_ingest('app2', 'app1', 'user3', balances, local=True)
 
 
 @main.command()
@@ -274,32 +287,25 @@ def wait():
     print("Sleeping")
     time.sleep(20)
 
-    # TODO: get start balance from demo_config[app]['und_rewards']['start_balance']
     manager = AccountManager(host=False)
-    for app, balance in {'app1': 100.0, 'app2': 100.0, 'app3': 100.0}.items():
-        log.info(f'App {app} has a balance of {balance} UND')
+
+    balances = {}
+    for k, d in demo_config['demo_apps'].items():
+        balances[d['eos_sc_account']] = d['und_rewards']['start_balance']
+
+    balances = systest_ingest('app1', 'app2', 'user1', balances)
+    balances = systest_ingest('app2', 'app1', 'user1', balances)
+    balances = systest_ingest('app3', 'app1', 'user1', balances)
+    balances = systest_ingest('app3', 'app2', 'user2', balances)
+
+    time.sleep(1)
+    for app, balance in balances.items():
+        log.info(f"App {app} has a balance of {balance} UND")
         assert manager.get_und_rewards(app) == balance
 
-    systest_ingest('app1', 'app2', 'user1')
-    systest_ingest('app2', 'app1', 'user1')
-    systest_ingest('app3', 'app1', 'user1')
-    systest_ingest('app3', 'app2', 'user2')
-
-    # TODO: calculate based on demo_config[app]['und_rewards']
-    # and user permissions in demo_config
-    time.sleep(1)
-    for app, balance in {'app1': 114.0, 'app2': 114.0, 'app3': 66.0}.items():
-        log.info(f'App {app} should have a balance of {balance} UND')
-        actual_balance = manager.get_und_rewards(app)
-        log.info(f'App {app} has a balance of {actual_balance}')
-        assert actual_balance == balance
-
     # The User3 has denied access to for app2 to access data on app 1
-    try:
-        systest_ingest('app2', 'app1', 'user3')
-        assert False
-    except Exception as e:
-        assert True
+    balances = systest_ingest('app2', 'app1', 'user3', balances)
+    # TODO: User denied requests have granular balance effects
 
     # Run forever
     while True:
