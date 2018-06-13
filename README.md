@@ -80,10 +80,10 @@ and finally bring the composition up:
 The Babel and Haiku CLI
 -----------------------
 
-There are two command line tools, simulating the behaivour of the end
-user, and the Haiku server. Their names are respectively, 'babel' and
-'haiku'.We are going to demonstrate App3 consuming data from App1 and
-App2.
+In this prototype implementation, there are two command line tools
+simulating the behaivour of the Haiku server, and the end user. Their
+names are respectively "haiku" and "babel". We are going to demonstrate
+App3 consuming data from App1 and App2.
 
 Once the Docker composition is up, and the system tests have run, open a
 bash process on the `babel` container:
