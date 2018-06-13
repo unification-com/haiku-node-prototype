@@ -18,7 +18,7 @@ Update apt
 
     sudo apt-get update
 
-Install prerquisites
+Install prerequisites
 
     sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
 
