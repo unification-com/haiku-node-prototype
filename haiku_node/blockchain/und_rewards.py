@@ -30,11 +30,7 @@ class UndRewards:
         self.__app_und_reward = acl.get_app_und_reward()
 
     def send_reward(self, to, is_user=True):
-
-        if is_user:
-            reward = self.__user_und_reward
-        else:
-            reward = self.__app_und_reward
+        reward = self.__user_und_reward if is_user else self.__app_und_reward
 
         d = {
             'from': self.__my_acl_acc,
