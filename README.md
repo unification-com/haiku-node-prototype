@@ -151,8 +151,37 @@ Transfer UNDs using babel
 
     babel transfer [from] [to] [amount] [wallet_password]
     babel transfer user1 user2 1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx
-    
+
 Check UND balance
 
     babel balance [account_name] [wallet_password]
     babel balance user1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx
+
+Contribution Guidelines
+-----------------------
+
+### Regenerating Static Resources
+
+Often, when the contents of `demo_config.json` is changed, the lookup
+databases need to be regenerated, and commited. The simplest way to do
+this is:
+
+Bring the composition up and open a bash process in the systemtest
+container:
+
+    docker exec -it systemtest /bin/bash
+
+Regenerate the lookup tables:
+
+    python create_lookups.py
+
+This should have deleted the current ones, and created new ones.
+
+On the host machine, in the root of the repo, download the lookup
+databases:
+
+    docker cp systemtest:/haiku/test/data/lookups/app1.unification_lookup.db test/data/lookups/app1.unification_lookup.db
+    docker cp systemtest:/haiku/test/data/lookups/app2.unification_lookup.db test/data/lookups/app2.unification_lookup.db
+    docker cp systemtest:/haiku/test/data/lookups/app3.unification_lookup.db test/data/lookups/app3.unification_lookup.db
+
+Finally, commit these wil the reason for the change.
