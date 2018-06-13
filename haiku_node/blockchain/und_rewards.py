@@ -11,7 +11,11 @@ log = logging.getLogger(__name__)
 
 
 class UndRewards:
-    def __init__(self, acl_acc):
+    def __init__(self, acl_acc: str):
+        """
+
+        :param acl_acc: The account name of the payer.
+        """
         self.__my_acl_acc = acl_acc
         conf = UnificationConfig()
         self.__eos_client_pre = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
