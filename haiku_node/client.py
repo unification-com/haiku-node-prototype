@@ -79,13 +79,12 @@ class HaikuDataClient:
         tree = etree.ElementTree(etree.fromstring(decrypted_body))
         users_to_pay = tree.findall('unification_users/unification_user')
         for username in users_to_pay:
-            print(f'pay {username.text}')
             ret = und_reward.send_reward(username.text)
-            print(ret)
+            log.debug(ret)
 
-        print(f"Pay provider {providing_app.name}")
+        log.debug(f"Pay provider {providing_app.name}")
         ret = und_reward.send_reward(providing_app.name, False)
-        print(ret)
+        log.debug(ret)
 
         return self.persist_data(
             providing_app.name, request_hash, d)
