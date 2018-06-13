@@ -166,7 +166,7 @@ Often, when the contents of `demo_config.json` is changed, the lookup
 databases need to be regenerated, and commited. The simplest way to do
 this is:
 
-Bring the composition up and open a bash process in the systemtest
+Bring the composition up and open a bash process in the `systemtest`
 container:
 
     docker exec -it systemtest /bin/bash
@@ -184,4 +184,4 @@ databases:
     docker cp systemtest:/haiku/test/data/lookups/app2.unification_lookup.db test/data/lookups/app2.unification_lookup.db
     docker cp systemtest:/haiku/test/data/lookups/app3.unification_lookup.db test/data/lookups/app3.unification_lookup.db
 
-Finally, commit these wil the reason for the change.
+Finally, commit these with the reason for the change.
