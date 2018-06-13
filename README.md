@@ -18,7 +18,7 @@ Update apt
 
     sudo apt-get update
 
-Install prerquisites
+Install prerequisites
 
     sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
 
@@ -80,10 +80,10 @@ and finally bring the composition up:
 The Babel and Haiku CLI
 -----------------------
 
-There are two command line tools, simulating the behaivour of the end
-user, and the Haiku server. Their names are respectively, 'babel' and
-'haiku'.We are going to demonstrate App3 consuming data from App1 and
-App2.
+In this prototype implementation, there are two command line tools
+simulating the behaivour of the Haiku server, and the end user. Their
+names are respectively "haiku" and "babel". We are going to demonstrate
+App3 consuming data from App1 and App2.
 
 Once the Docker composition is up, and the system tests have run, open a
 bash process on the `babel` container:
@@ -136,7 +136,9 @@ because it is encrypted using App3's public RSA key. Via Babel, we can
 decrypt the data using App3's private RSA key and view it:
 
     haiku view app2 user1 data-1
-    
+
+### Checking balances
+
 Fetch the UND balance for an app/user:
 
     cleos get currency balance unif.token [account_name] UND
@@ -149,8 +151,37 @@ Transfer UNDs using babel
 
     babel transfer [from] [to] [amount] [wallet_password]
     babel transfer user1 user2 1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx
-    
+
 Check UND balance
 
     babel balance [account_name] [wallet_password]
     babel balance user1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx
+
+Contribution Guidelines
+-----------------------
+
+### Regenerating Static Resources
+
+Often, when the contents of `demo_config.json` is changed, the lookup
+databases need to be regenerated, and commited. The simplest way to do
+this is:
+
+Bring the composition up and open a bash process in the `systemtest`
+container:
+
+    docker exec -it systemtest /bin/bash
+
+Regenerate the lookup tables:
+
+    python create_lookups.py
+
+This should have deleted the current ones, and created new ones.
+
+On the host machine, in the root of the repo, download the lookup
+databases:
+
+    docker cp systemtest:/haiku/test/data/lookups/app1.unification_lookup.db test/data/lookups/app1.unification_lookup.db
+    docker cp systemtest:/haiku/test/data/lookups/app2.unification_lookup.db test/data/lookups/app2.unification_lookup.db
+    docker cp systemtest:/haiku/test/data/lookups/app3.unification_lookup.db test/data/lookups/app3.unification_lookup.db
+
+Finally, commit these with the reason for the change.
