@@ -275,16 +275,21 @@ def wait():
     time.sleep(20)
 
     manager = AccountManager(host=False)
-    for appname, balance in {'app1': 100, 'app2': 100, 'app3': 100}.items():
-        assert manager.get_und_rewards(appname) == balance
+    for app, balance in {'app1': 100.0, 'app2': 100.0, 'app3': 100.0}.items():
+        log.info(f'App {app} has a balance of {balance} UND')
+        assert manager.get_und_rewards(app) == balance
 
     systest_ingest('app1', 'app2', 'user1')
     systest_ingest('app2', 'app1', 'user1')
     systest_ingest('app3', 'app1', 'user1')
     systest_ingest('app3', 'app2', 'user2')
 
-    for appname, balance in {'app1': 98, 'app2': 100, 'app3': 100}.items():
-        assert manager.get_und_rewards(appname) == balance
+    time.sleep(1)
+    for app, balance in {'app1': 114.0, 'app2': 114.0, 'app3': 66.0}.items():
+        log.info(f'App {app} should have a balance of {balance} UND')
+        actual_balance = manager.get_und_rewards(app)
+        log.info(f'App {app} has a balance of {actual_balance}')
+        assert actual_balance == balance
 
     # The User3 has denied access to for app2 to access data on app 1
     try:
