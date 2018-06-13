@@ -1,6 +1,5 @@
 import json
 import os
-import inspect
 
 
 class UnificationConfig:
@@ -22,6 +21,5 @@ class UnificationConfig:
         return str(self.__conf)
 
     def parent_directory(self):
-        currentdir = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
+        currentdir = os.path.dirname(os.path.abspath(__file__))
         return os.path.dirname(currentdir)
