@@ -80,7 +80,8 @@
             },
             "und_rewards": {
               "user_amt": 1,
-              "app_amt": 100
+              "app_amt": 10,
+              "start_balance": 100
             }
         },
         "app2":{
@@ -152,7 +153,8 @@
             },
             "und_rewards": {
               "user_amt": 1,
-              "app_amt": 100
+              "app_amt": 10,
+              "start_balance": 100
             }
         },
         "app3":{
@@ -232,7 +234,8 @@
             },
             "und_rewards": {
               "user_amt": 2,
-              "app_amt": 150
+              "app_amt": 15,
+              "start_balance": 100
             }
         }
     },

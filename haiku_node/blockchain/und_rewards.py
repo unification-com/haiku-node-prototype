@@ -11,7 +11,11 @@ log = logging.getLogger(__name__)
 
 
 class UndRewards:
-    def __init__(self, acl_acc):
+    def __init__(self, acl_acc: str):
+        """
+
+        :param acl_acc: The account name of the payer.
+        """
         self.__my_acl_acc = acl_acc
         conf = UnificationConfig()
         self.__eos_client_pre = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
@@ -26,11 +30,7 @@ class UndRewards:
         self.__app_und_reward = acl.get_app_und_reward()
 
     def send_reward(self, to, is_user=True):
-
-        if is_user:
-            reward = self.__user_und_reward
-        else:
-            reward = self.__app_und_reward
+        reward = self.__user_und_reward if is_user else self.__app_und_reward
 
         d = {
             'from': self.__my_acl_acc,
