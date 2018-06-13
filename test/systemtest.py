@@ -257,7 +257,11 @@ def host():
     """
     Test from the host machine.
     """
-    systest_ingest('app2', 'app1', 'user3', local=True)
+    balances = {}
+    for k, d in demo_config['demo_apps'].items():
+        balances[d['eos_sc_account']] = d['und_rewards']['start_balance']
+
+    systest_ingest('app2', 'app1', 'user3', balances, local=True)
 
 
 @main.command()
