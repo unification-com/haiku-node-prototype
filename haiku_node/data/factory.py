@@ -79,10 +79,12 @@ class UnificationDataFactory:
         fields = tree.findall('fields/field')
 
         cols_to_include = []
+        base64_encode_cols = []
 
         for field in fields:
             table = field.find('table')
             col = field.find('name')
+            col_type = field.find('type')
             if table.text != 'unification_lookup':
                 print("table.text before:", table.text)
                 real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, table.text)
@@ -95,6 +97,9 @@ class UnificationDataFactory:
                 real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, 'data_1')
                 table.text = real_table_data['real_table_name']
                 cols_to_include.append(real_table_data['user_id_column'])
+                if col_type.text == 'base64_mime_image':
+                    base64_encode_cols.append(col.text)
+
 
         root = tree.getroot()
         db_schema = etree.tostring(root)
@@ -119,7 +124,8 @@ class UnificationDataFactory:
             'userIdentifier': user_table_info['user_id_column'],  # temp hack
             'dataUserIdentifier': data_table_info['user_id_column'],  # temp hack
             'dataColumnsToInclude': cols_to_include,
-            'native_user_ids': native_user_ids
+            'native_user_ids': native_user_ids,
+            'base64_encode_cols': base64_encode_cols
         }
 
         # TEMP FOR TESTING
