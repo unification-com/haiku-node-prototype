@@ -1,5 +1,5 @@
 FROM mysql:8
 
-COPY database_examples/example_heartbit_database.mysql /docker-entrypoint-initdb.d/example_heartbit_database.sql
-COPY database_examples/example_binaryblobapp_database.mysql /docker-entrypoint-initdb.d/example_binaryblobapp_database.sql
-COPY database_examples/example_imagestorage_database.mysql /docker-entrypoint-initdb.d/example_imagestorage_database.sql
+COPY data_sources/mysql/01-heartbit.sql /docker-entrypoint-initdb.d/01-heartbit.sql
+COPY data_sources/mysql/02-binaryblobapp.sql /docker-entrypoint-initdb.d/02-binaryblobapp.sql
+COPY data_sources/mysql/03-imagestorage.sql /docker-entrypoint-initdb.d/03-imagestorage.sql
