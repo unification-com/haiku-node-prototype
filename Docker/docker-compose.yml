@@ -61,7 +61,7 @@ services:
     depends_on:
       - "db"
     volumes:
-        - ${HAIKU_ROOT}/test/data/imageblobs:/data/imageblobs:ro
+        - ${HAIKU_ROOT}/data_sources/imageblobs:/data/imageblobs:ro
 
   systemtest:
     image: systemtest
