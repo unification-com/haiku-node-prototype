@@ -37,9 +37,6 @@ class UnificationDataFactory:
 
         self.__generate_data()
 
-    def get_encrypted_data(self):
-        return self.__encrypted_data
-
     def get_raw_data(self):
         return self.__raw_data
 
