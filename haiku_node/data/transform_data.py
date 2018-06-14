@@ -13,40 +13,48 @@ class TransformData:
         self.__result_string += args[0]
 
     def build_xml_document_header(self):
-        self.__result_string = '<data>\n\t<from>{vfrom}</from>\n\t<timestamp>{time}\
-            </timestamp>\n\t<unification_users>\n'.format(vfrom='TODO', time=89374893798)
+        self.__result_string = '<data><from>{vfrom}</from><timestamp>{time}</timestamp><unification_users>'\
+            .format(vfrom='TODO', time=89374893798)
         
         unification_users = self.__data_source_parms['unification_ids']
 
         for unification_id_key in unification_users:
-            self.__result_string += '\t\t<unification_user>'
+            self.__result_string += '<unification_user>'
             self.__result_string += unification_users[unification_id_key]
-            self.__result_string += '</unification_user>\n'
+            self.__result_string += '</unification_user>'
 
-        self.__result_string += '\t</unification_users>\n\t<rows>\n'
+        self.__result_string += '</unification_users><rows>'
 
     def build_xml_document_footer(self):
-        self.__result_string += '\t</rows>\n</data>\n'
+        self.__result_string += '</rows></data>'
 
     #@bonobo.config.use_context_processor(xml_document)
     @use_context
     def create_xml(self, context, *args, **kwargs):
         iter = 0;
-        yield '\t\t<row>\n'
+        yield '<row>'
         fields = context.get_input_fields()
         for item in args:
             field_string = fields[iter]
 
+            # Check to see if this field is a userID from the data table
+            # we dont want to expose it, ignore it
+            if fields[iter] == self.__data_source_parms['dataUserIdentifier']:
+                iter += 1
+                continue
+                
+            # We always want to replace the userID frmo the user table
+            # with the unification account identifier
             if fields[iter] == self.__data_source_parms['userIdentifier']:
                 newItem = self.__data_source_parms['unification_ids'][str(item)]
                 item = newItem
                 field_string = 'account_name'
 
-            yield '\t\t\t<field>\n\t\t\t\t<field_name>{id}</field_name>\n\t\t\t\t<value>{value}</value>\n\t\t\t\t<type>{type}</type>\n\t\t\t</field>\n'.format(id=field_string, value=item, type=type(item).__name__)
+            yield '<field><field_name>{id}</field_name><value>{value}</value><type>{type}</type></field>'.format(id=field_string, value=item, type=type(item).__name__)
 
             iter += 1
 
-        yield '\t\t</row>\n'
+        yield '</row>'
 
     def get_graph(self):
         graph = bonobo.Graph()

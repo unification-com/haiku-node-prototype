@@ -1,9 +1,13 @@
+DROP DATABASE IF EXISTS `Imagestorage`;
 create database Imagestorage;
 
 CREATE USER 'imgstore_user'@'%' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON * . * TO 'imgstore_user'@'%';
 
 use Imagestorage;
+
+CREATE USER 'imagestorage_user'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON * . * TO 'imagestorage_user'@'%';
 
 CREATE TABLE ImageOwners (
     OID int NOT NULL,
