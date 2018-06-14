@@ -125,7 +125,8 @@ class UnificationDataFactory:
             'dataUserIdentifier': data_table_info['user_id_column'],  # temp hack
             'dataColumnsToInclude': cols_to_include,
             'native_user_ids': native_user_ids,
-            'base64_encode_cols': base64_encode_cols
+            'base64_encode_cols': base64_encode_cols,
+            'providing_app': self.__acl_contract_acc
         }
 
         # TEMP FOR TESTING
