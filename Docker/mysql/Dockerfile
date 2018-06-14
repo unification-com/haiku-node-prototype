@@ -2,3 +2,4 @@ FROM mysql:8
 
 COPY database_examples/example_heartbit_database.mysql /docker-entrypoint-initdb.d/example_heartbit_database.sql
 COPY database_examples/example_binaryblobapp_database.mysql /docker-entrypoint-initdb.d/example_binaryblobapp_database.sql
+COPY database_examples/example_imagestorage_database.mysql /docker-entrypoint-initdb.d/example_imagestorage_database.sql

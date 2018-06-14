@@ -1,29 +1,33 @@
 create database Imagestorage;
+
+CREATE USER 'imgstore_user'@'%' IDENTIFIED BY 'password';
+GRANT ALL PRIVILEGES ON * . * TO 'imgstore_user'@'%';
+
 use Imagestorage;
 
 CREATE TABLE ImageOwners (
-    OwnerID int NOT NULL,
+    OID int NOT NULL,
 	FacebookID int,
-    PRIMARY KEY (OwnerID)
+    PRIMARY KEY (OID)
 );
 
 CREATE TABLE ImageData (
     ImageID int NOT NULL,
-    ImageLocation varchar(255),
+    Image varchar(255),
 	OwnerID int,
     PRIMARY KEY (ImageID),
-    FOREIGN KEY (OwnerID) REFERENCES ImageOwners(OwnerID)
+    FOREIGN KEY (OwnerID) REFERENCES ImageOwners(OID)
 );
 
 INSERT INTO ImageOwners
-    (OwnerID,FacebookID)
+    (OID,FacebookID)
 VALUES
     (1, 34983984),
 	(2, 37438784),
 	(3, 93849344);
 	
 INSERT INTO ImageData
-    (ImageID,ImageLocation,OwnerID)
+    (ImageID,Image,OwnerID)
 VALUES
 	(1, '/data/imageblobs/img1.jpg', 1),
 	(2, '/data/imageblobs/img2.jpg', 1),

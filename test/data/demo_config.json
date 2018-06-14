@@ -15,18 +15,6 @@
             "eos_sc_account":"app1",
             "rpc_server":"haiku-app1",
             "rpc_server_port":"8050",
-            "data_source_params": {
-                  "odbc": "mysql+mysqlconnector",
-                  "database": "Heartbit",
-                  "host": "db",
-                  "user": "heartbit_user",
-                  "pass": "password",
-                  "userTable": "Users",
-                  "dataTable": "UserData",
-                  "userIdentifier": "ID",
-                  "dataUserIdentifier": "UserID",
-                  "dataColumnsToInclude": ["Heartrate", "GeoLocation", "TimeStamp", "Pulse"]
-            },
             "db_schemas":[
                 {
                     "schema_name":"app1.db1",
@@ -55,6 +43,14 @@
                 {
                     "source_name":"app1.db1",
                     "source_type":"database"
+                },
+                {
+                    "source_name":"app2",
+                    "source_type":"contract"
+                },
+                {
+                    "source_name":"app3",
+                    "source_type":"contract"
                 }
             ],
             "lookup": {
@@ -88,18 +84,6 @@
             "eos_sc_account":"app2",
             "rpc_server":"haiku-app2",
             "rpc_server_port":"8050",
-            "data_source_params": {
-                  "odbc": "mysql+mysqlconnector",
-                  "database": "Datablobs",
-                  "host": "db",
-                  "user": "datablobs_user",
-                  "pass": "password",
-                  "userTable": "BlobCreator",
-                  "dataTable": "BlobData",
-                  "userIdentifier": "CID",
-                  "dataUserIdentifier": "CreatorID",
-                  "dataColumnsToInclude": ["DataBlob", "BlobSize"]
-            },
             "db_schemas":[
                 {
                     "schema_name":"app2.db1",
@@ -128,6 +112,14 @@
                 {
                     "source_name":"app2.db1",
                     "source_type":"database"
+                },
+                {
+                    "source_name":"app1",
+                    "source_type":"contract"
+                },
+                {
+                    "source_name":"app3",
+                    "source_type":"contract"
                 }
             ],
             "lookup": {
@@ -161,38 +153,26 @@
             "eos_sc_account":"app3",
             "rpc_server":"haiku-app3",
             "rpc_server_port":"8050",
-            "data_source_params": {
-                  "odbc": "mysql+mysqlconnector",
-                  "database": "Datablobs",
-                  "host": "db",
-                  "user": "datablobs_user",
-                  "pass": "password",
-                  "userTable": "BlobCreator",
-                  "dataTable": "BlobData",
-                  "userIdentifier": "CID",
-                  "dataUserIdentifier": "CreatorID",
-                  "dataColumnsToInclude": ["DataBlob", "BlobSize"]
-            },
             "db_schemas":[
                 {
                     "schema_name":"app3.db1",
-                    "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Image</name><type>base65_mime_image</type><is-null>true</is-null><table>ImageData</table></field></fields></schema-template>",
-                    "database":"Datablobs",
+                    "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Image</name><type>base65_mime_image</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>",
+                    "database":"Imagestorage",
                     "db_platform":"mysql",
                     "host": "db",
                     "port": "3306",
-                    "user": "datablobs_user",
+                    "user": "imgstore_user",
                     "pass": "password",
                     "table_maps": [
                       {
                         "schema_table_id": "users",
-                        "db_table": "BlobCreator",
-                        "user_id_column": "CID"
+                        "db_table": "ImageOwners",
+                        "user_id_column": "OID"
                       },
                       {
                         "schema_table_id": "data_1",
-                        "db_table": "BlobData",
-                        "user_id_column": "CreatorID"
+                        "db_table": "ImageData",
+                        "user_id_column": "OwnerID"
                       }
                     ]
                 }
@@ -214,7 +194,7 @@
             "lookup": {
               "lookup_meta": {
                 "native_table": "ImageOwners",
-                "native_field": "OwnerID",
+                "native_field": "OID",
                 "field_type": "int"
               },
               "lookup_users": [
