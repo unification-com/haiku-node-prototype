@@ -1,192 +1,39 @@
-Some instructions for compiling/testing the ACL smart contract on EOS installation. Assumes eosio Dawn 4,0 (latest EOS github master branch) is built/installed, and nodeos is running:
+# Smart Contracts
 
-0) for brevity, run nodeos with the following plugins:
-```
-nodeos -e -p eosio --plugin eosio::wallet_api_plugin --plugin eosio::chain_api_plugin --plugin eosio::history_api_plugin
-```
+The following three Smart Contracts are used and deployed within the prototype:
 
-make sure eosio.bios contract is running:
+## eosio.token
 
-```
-cd /path/to/eos/github/download
-cleos set contract eosio build/contracts/eosio.bios -p eosio
-```
+Deployed on the `unif.token` EOS account, and used to implement the 
+UND token infrastructure within the Prototype.
 
-1) Create some wallets:
-```
-cleos wallet create -n user1
-cleos wallet create -n user2
-cleos wallet create -n user3
-cleos wallet create -n app1
-cleos wallet create -n app2
-cleos wallet create -n app3
-cleos wallet create -n unif.mother
-```
+## unification_acl
 
-make a note of the passwords!
+Deployed on each UApp's EOS account: `app1`, `app2`, and `app3`.
 
-2) Unlock the wallets:
+1. Stores metadata about data sources. Can only be modified by the 
+app account on which the Smart Contract is deployed
+2. Stores schema templates describing the data the app is making 
+available within the Unification ecosystem. Can only be modified by the 
+app account on which the Smart Contract is deployed
+3. Stores user permission maps, describing which apps can access a 
+users data within this app. Can only be modified by the user
+4. Stores UND reward structures - i.e. how much this app will pay users/other
+apps for data.
 
-```
-cleos wallet unlock -n user1
-```
-etc. - repeat for each wallet
+## unification_mother
 
-__Note: You will need to unlock the wallets each time you restart `nodeos`__
+Deployed on the `unif.mother` EOS account.
 
-3) Create a bunch of keys - one keypair for each wallet will do for testing:
-```
-cleos create key
-```
+1. Stores a list of valid (and invalidated) apps within the Unification ecosystem.
+Haiku Node always "calls MOTHER" to check that an app requesting its data is
+valid.
+2. Stores the code hash for each app's `unification_acl` Smart Contract
+(at the time of validation). If the current deployed hash does not match
+the hash stored in MOTHER, then data requests are rejected by Haiku Nodes.
+3. Stores current valid schemas and versions for app data sources. If an app
+modifies it's data schema template, or adds/removes sources, they won't
+be "active" within the ecosystem until MOTHER is informed.
 
-repeat for each wallet created, so you have 7 public/private key pairs
-
-Make a note of the keys
-
-4) Import PRIVATE keys into the wallets. For each wallet:
-
-```
-cleos wallet import -n user1 [private_key]
-```
-
-repeat for each wallet, using a different private key for each one
-
-5) Create Accounts on blockchain:
-```
-cleos create account eosio user1 [user1_public_key] [user1_public_key]
-```
-
-repeat for user2, user3, app1 etc. Ensure correct public key is used (i.e. matches the private key imported into each wallet)
-
-6) Copy unification_mother/unification_mother.cpp, .hpp and .abi to [download_dir_of_eos_git_]eos/contracts/unification_mother
-
-7) Copy unification_acl/unification_acl.cpp, .hpp and .abi to [download_dir_of_eos_git_]eos/contracts/unification_acl
-
-7) `cd [download_dir_of_eos_git]/eos/contracts/unification_mother`
-
-8) `eosiocpp -o unification_mother.wast unification_mother.cpp`
-
-9) `cd ../unification_acl`
-
-10) `eosiocpp -o unification_acl.wast unification_acl.cpp`
-
-11) `cd ..`
-
-12) `cleos set contract app1 unification_acl unification_acl/unification_acl.wast unification_acl/unification_acl.abi -p app1`
-
-This will set the contract for the app1 account - so, this becomes the ACL Smart Contract for app1
-
-13) Repeat for app2, app3
-```
-cleos set contract app2 unification_acl unification_acl/unification_acl.wast unification_acl/unification_acl.abi -p app2
-cleos set contract app3 unification_acl unification_acl/unification_acl.wast unification_acl/unification_acl.abi -p app3
-```
-
-14) Set the unification MOTHER smart contract
-```
-cleos set contract unif.mother unification_mother unification_mother/unification_mother.wast unification_mother/unification_mother.abi -p unif.mother
-```
-
-15) Set the schema for each app:
-```
-cleos push action app1 setschema '{"schema_name":"app1.db1", "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>heartrate</name><type>int</type><is-null>true</is-null><table>UserData</table></field><field><name>Pulse</name><type>int</type><is-null>true</is-null><table>UserData</table></field></fields></schema-template>" }' -p app1
-cleos push action app2 setschema '{"schema_name":"app2.db1", "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>GeoLocation</name><type>int</type><is-null>true</is-null><table>PeopleData</table></field><field><name>TimeStamp</name><type>int</type><is-null>true</is-null><table>PeopleData</table></field></fields></schema-template>" }' -p app2
-cleos push action app3 setschema '{"schema_name":"app3.db1", "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Image</name><type>base65_mime_image</type><is-null>true</is-null><table>ImageData</table></field></fields></schema-template>" }' -p app3
-```
-
-Schema tables can be retrieved:
-
-```
-cleos get table app1 app1 dataschemas
-cleos get table app2 app2 dataschemas
-cleos get table app3 app3 dataschemas
-```
-
-16) Set some sources. Note, for source_type = database, source_name must match an existing schema for the app
-```
-cleos push action app1 setsource '{"source_name":"app1.db1", "source_type":"database"}' -p app1
-cleos push action app2 setsource '{"source_name":"app2.db1", "source_type":"database"}' -p app2
-cleos push action app3 setsource '{"source_name":"app1", "source_type":"contract"}' -p app3
-cleos push action app3 setsource '{"source_name":"app2", "source_type":"contract"}' -p app3
-```
-
-Sources tables can be retrieved:
-
-```
-cleos get table app1 app1 datasources
-cleos get table app2 app2 datasources
-cleos get table app3 app3 datasources
-```
-
-17) Get the code hash for each deplyed app contract (will probably be the same for each)
-
-16) Get the code hash for each deployed app contract (will probably be the same for each)
-
-```
-cleos get code app1
-cleos get code app2
-cleos get code app3
-```
-
-18) Validate each app with MOTHER - acl_contract_hash value is from step #16. schema_vers is comman and colon separated list of schema_name:schema_vers, to represent latest valid schemas and versions for the app. Get from: `cleos get table app1 app1 unifschemas`
-
-```
-cleos push action unif.mother validate '{"acl_contract_acc":"app1", "schema_vers":"app1.db1:1", "acl_contract_hash": "fa10e15d2bbfe93ed25b8660f821e59fe86d264e48d639db90d2cd27cd243235", "rpc_server_ip": "haiku-app1", "rpc_server_port":8050 }' -p unif.mother
-cleos push action unif.mother validate '{"acl_contract_acc":"app2", "schema_vers":"app2.db1:1", "acl_contract_hash": "fa10e15d2bbfe93ed25b8660f821e59fe86d264e48d639db90d2cd27cd243235", "rpc_server_ip": "haiku-app2", "rpc_server_port":8050 }' -p unif.mother
-cleos push action unif.mother validate '{"acl_contract_acc":"app3", "schema_vers":"app3.db1:1", "acl_contract_hash": "fa10e15d2bbfe93ed25b8660f821e59fe86d264e48d639db90d2cd27cd243235", "rpc_server_ip": "haiku-app3", "rpc_server_port":8050 }' -p unif.mother
-```
-
-19) Simulate user1 granting access for app2 to access data in app1:
-```
-cleos push action app1 grant '{"user_account":"user1", "requesting_app":"app2" }' -p user1
-```
-
-so, basically, it's calling the "grant" function on app1's ACL Smart Contract, telling it that user1 is granting access to app2. The "-p user1" is required, because only user1 can grant this access, and the Smart Contract code checks that user1 has signed this transaction and has the authority to do so.
-
-You can also try changing "-p user1" to "-p user2" (leaving everything else in the command as it is), and the transaction should be rejected because user2 doesn't have the authority to speak for user1.
-
-20) Simulate user1 granting access for app3 to access data in app1:
-```
-cleos push action app1 grant '{"user_account":"user1", "requesting_app":"app3" }' -p user1
-```
-
-21) Simulate user3 denying access for app2 to access data in app1:
-```
-cleos push action app1 revoke '{"user_account":"user3", "requesting_app":"app2" }' -p user3
-```
-
-22) Query app1's permissions table for app2:
-```
-cleos get table app1 app2 permrecords
-```
-
-This basically grabs the table from app1's ACL Smart Contract, and filters it by permissions for app2. "unifacl" is just the name of the table within the Smart Contract
-
-23) Query app1's permissions table for app3:
-```
-cleos get table app1 app3 permrecords
-```
-24) Check if app2 has access to user1's data:
-```
-cleos push action app1 check '{"user_account":"user1", "requesting_app":"app2" }' -p app1
-```
-There's currently no method for specific row queries in EOS Smart Contracts, so this is a temporary workaround, implementing the eosio::print method. I.e., unlike Ethereum/Solidity, there's currently no way to return values from a Smart Contract, and the cleos get table can only return rows for the given scope (in this smart contract, each requesting app has its own scope, and the user's account is used as the primary key within that scope). Hopefully, eventually, cleos get table will support primary key search too
-
-25) get app validation status/info from MOTHER:
-```
-cleos get table unif.mother unif.mother validapps
-```
-
-26) Set up some UND rewards:
-```
-cleos push action app1 setrewards '{"user_amt":1, "app_amt":100 }' -p app1
-cleos push action app2 setrewards '{"user_amt":1, "app_amt":100 }' -p app2
-cleos push action app3 setrewards '{"user_amt":2, "app_amt":150 }' -p app3
-```
-
-27) Check:
-```
-cleos get table app1 app1 undrewards
-```
-
-config/config.json currently set up with "app1" as the data provider, so the above command is checking app2 and app3's validity/permissions as the data requesters.
+All data stored within the `unification_mother` Smart Contract can only
+be updated by the `unif.mother` account.
