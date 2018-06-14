@@ -60,6 +60,8 @@ services:
     - "8853:8050"
     depends_on:
       - "db"
+    volumes:
+        - ${HAIKU_ROOT}/test/data/imageblobs:/data/imageblobs:ro
 
   systemtest:
     image: systemtest
