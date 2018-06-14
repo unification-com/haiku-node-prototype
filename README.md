@@ -116,9 +116,11 @@ Haiku node:
 
 and attempt to fetch the data:
 
-    haiku fetch app2 user1 data-1
+    haiku fetch app2 data-1 --user user1
 
-The request should be denied.
+    haiku view app2 data-1
+
+The data set should be empty.
 
 ### Changing Permissions
 
@@ -129,13 +131,13 @@ with it's EOS account password. On the `babel` container, execute:
 
 Now, fetching the data should be permitted:
 
-    haiku fetch app2 user1 data-1
+    haiku fetch app2 data-1 --user user1
 
 Currently, the data is stored locally, and cannot be viewed directly
 because it is encrypted using App3's public RSA key. Via Babel, we can
 decrypt the data using App3's private RSA key and view it:
 
-    haiku view app2 user1 data-1
+    haiku view app2 data-1
 
 ### Checking balances
 
