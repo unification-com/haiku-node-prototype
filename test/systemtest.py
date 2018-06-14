@@ -13,12 +13,11 @@ from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
-from haiku_node.encryption.tools import sign_request
+from haiku_node.encryption.payload import bundle
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.eosio_helpers.accounts import (
     AccountManager, make_default_accounts)
 from haiku_node.keystore.keystore import UnificationKeystore
-from haiku_node.rpc import verify_account
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
@@ -47,48 +46,30 @@ def base_url(protocol, host, port):
 
 def systest_auth(requesting_app, providing_app, user):
     """
-    Testing signing and verifying a data request.
+    Ensuring that an incorrectly signed request is rejected.
 
     """
+    def broken(d, field):
+        d[field] = 'unlucky' + d[field][7:]
+        return d
+
     log.info(f'{requesting_app} is requesting data from {providing_app}')
 
-    base = base_url('https', f"haiku-{providing_app}", 8050)
-    body = {
-        'users': [user],
-        'data_id': 'data-request'
-    }
+    body = {'users': [user], 'data_id': 'request_hash'}
 
-    password = password_d[requesting_app]['password']
-    encoded_password = str.encode(password)
-    ks = UnificationKeystore(encoded_password, app_name=requesting_app)
-    private_key = ks.get_rpc_auth_private_key()
+    app_config = demo_config['demo_apps'][providing_app]
+    port = app_config['rpc_server_port']
 
-    signature = sign_request(private_key, json.dumps(body))
+    provider = Provider(
+        providing_app, 'https', app_config['rpc_server'], port)
 
-    # An unsuccessfully query
-    broken_signature = 'unlucky' + signature[7:]
-    payload = {"eos_account_name": requesting_app,
-               "signature": broken_signature,
-               "body": body}
+    payload = bundle(requesting_app, provider.name, body, 'Success')
+    payload = broken(payload, 'signature')
+
+    base = provider.base_url()
 
     r = requests.post(f"{base}/data_request", json=payload, verify=False)
-
     assert r.status_code == 401
-    assert r.json()['success'] is False
-
-    # Now, a successful query
-    payload = {"eos_account_name": requesting_app,
-               "signature": signature,
-               "body": body}
-
-    r = requests.post(f"{base}/data_request", json=payload, verify=False)
-    assert r.status_code == 200
-    d = r.json()
-    assert d['success'] is True
-
-    # Now verify the response
-    decrypted_body = decrypt(private_key, d['body'])
-    verify_account(providing_app, decrypted_body, d['signature'])
 
 
 def systest_ingest(requesting_app, providing_app, user, balances, local=False):
@@ -296,6 +277,9 @@ def wait():
     time.sleep(20)
 
     manager = AccountManager(host=False)
+
+    # First ensure that an incorrectly signed request is rejected
+    systest_auth('app1', 'app2', 'user1')
 
     balances = {}
     for k, d in demo_config['demo_apps'].items():
