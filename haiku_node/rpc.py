@@ -46,6 +46,15 @@ def invalid_app():
     }), 401
 
 
+def error_request_self():
+    return flask.jsonify({
+        'success': False,
+        'message': 'Cannot request data from self!',
+        'signature': None,
+        'body': None
+    }), 418
+
+
 def obtain_data(eos_account_name, eos_client, acl_contract_acc, users):
     """
     :param eos_account_name: The account name of the requesting App.
@@ -81,6 +90,10 @@ def data_request():
 
         sender = d['eos_account_name']
         recipient = conf['acl_contract']
+
+        if sender == recipient:
+            return error_request_self()
+
         bundle_d = unbundle(sender, recipient, d)
 
         eos_client = Client(
