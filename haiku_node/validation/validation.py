@@ -18,7 +18,6 @@ class UnificationAppScValidation:
     def __init__(self, eos_client, acl_contract, requesting_app,
                  get_perms=True):
         """
-        :param conf: config json object
         :param requesting_app: the eos account name of the requesting app
         """
         self.__permission_rec_table = "permrecords"
