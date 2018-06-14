@@ -264,6 +264,17 @@ def host():
     systest_ingest('app2', 'app1', 'user3', balances, local=True)
 
 
+def completion_banner():
+    return '\n' \
+           '==============================================\n' \
+           '= HAIKU NODE PROTOTYPE INITIALISED AND READY =\n' \
+           '= ------------------------------------------ =\n' \
+           '= You can now interact with the demo         =\n' \
+           '= system. Read the wiki for more details     =\n' \
+           '= on how to interact with the demo           =\n' \
+           '==============================================\n'
+
+
 @main.command()
 def wait():
     """
@@ -271,7 +282,6 @@ def wait():
     """
     log.info('Waiting for the system to come up')
 
-    print("Sleeping")
     time.sleep(5)
 
     # create EOS accounts
@@ -283,8 +293,6 @@ def wait():
     systest_smart_contract_acl()
     systest_user_permissions()
 
-    # TODO: Implementing sleeping for now
-    print("Sleeping")
     time.sleep(20)
 
     manager = AccountManager(host=False)
@@ -307,7 +315,9 @@ def wait():
     balances = systest_ingest('app2', 'app1', 'user3', balances)
     # TODO: User denied requests have granular balance effects
 
-    # Run forever
+    log.info(completion_banner())
+
+    # Run forever, so that one can exec into the container
     while True:
         time.sleep(6000)
 
