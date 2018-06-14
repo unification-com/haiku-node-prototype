@@ -1,3 +1,4 @@
+import base64
 import bonobo
 import bonobo_sqlalchemy
 import logging
@@ -49,6 +50,11 @@ class TransformData:
                 newItem = self.__data_source_parms['unification_ids'][str(item)]
                 item = newItem
                 field_string = 'account_name'
+
+            if field_string in self.__data_source_parms['base64_encode_cols']:
+                image = open(item, 'rb')
+                image_read = image.read()
+                item = base64.encodebytes(image_read)
 
             yield '<field><field_name>{id}</field_name><value>{value}</value><type>{type}</type></field>'.format(id=field_string, value=item, type=type(item).__name__)
 

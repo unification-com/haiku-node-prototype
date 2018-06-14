@@ -92,15 +92,15 @@ class UnificationDataFactory:
                 table.text = real_table_data['real_table_name']
                 print("table.text after:", table.text)
                 cols_to_include.append(col.text)
+                if col_type.text == 'base64_mime_image':
+                    base64_encode_cols.append(col.text)
             else:
                 # temp hack to transform unification_lookup to native user table/col
                 real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, 'data_1')
                 table.text = real_table_data['real_table_name']
                 cols_to_include.append(real_table_data['user_id_column'])
-                if col_type.text == 'base64_mime_image':
-                    base64_encode_cols.append(col.text)
 
-
+        print(base64_encode_cols)
         root = tree.getroot()
         db_schema = etree.tostring(root)
 
