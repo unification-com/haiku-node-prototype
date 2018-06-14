@@ -2,6 +2,7 @@ import base64
 import bonobo
 import bonobo_sqlalchemy
 import logging
+import time
 from sqlalchemy import create_engine
 from bonobo.config.processors import ContextProcessor, use_context
 
@@ -15,7 +16,7 @@ class TransformData:
 
     def build_xml_document_header(self):
         self.__result_string = '<data><from>{vfrom}</from><timestamp>{time}</timestamp><unification_users>'\
-            .format(vfrom='TODO', time=89374893798)
+            .format(vfrom=self.__data_source_parms['providing_app'], time=int(time.time()))
         
         unification_users = self.__data_source_parms['unification_ids']
 
