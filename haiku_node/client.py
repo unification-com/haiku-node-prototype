@@ -23,10 +23,6 @@ class Provider:
         return f"{self.protocol}://{self.host}:{self.port}"
 
 
-class Unauthorized(Exception):
-    pass
-
-
 class HaikuDataClient:
     def __init__(self, keystore, protocol='https', local=False):
         self.keystore = keystore
@@ -38,7 +34,7 @@ class HaikuDataClient:
         # TODO: Convert to a particular request body
         """
         return {
-            'users': [user],
+            'users': [] if user is None else [user],
             'data_id': request_hash
         }
 
@@ -63,8 +59,6 @@ class HaikuDataClient:
         r = requests.post(f"{base}/data_request", json=payload, verify=False)
         d = r.json()
 
-        if r.status_code == 401:
-            raise Unauthorized(d['message'])
         if r.status_code != 200:
             raise Exception(d['message'])
 
@@ -79,13 +73,12 @@ class HaikuDataClient:
         tree = etree.ElementTree(etree.fromstring(decrypted_body))
         users_to_pay = tree.findall('unification_users/unification_user')
         for username in users_to_pay:
-            print(f'pay {username.text}')
             ret = und_reward.send_reward(username.text)
-            print(ret)
+            log.debug(ret)
 
-        print(f"Pay provider {providing_app.name}")
+        log.debug(f"Pay provider {providing_app.name}")
         ret = und_reward.send_reward(providing_app.name, False)
-        print(ret)
+        log.debug(ret)
 
         return self.persist_data(
             providing_app.name, request_hash, d)
@@ -104,4 +97,3 @@ class HaikuDataClient:
 
         log.info(f'Decrypted content from persistence store: {decrypted_body}')
         return decrypted_body
-

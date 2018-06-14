@@ -26,8 +26,9 @@ ENV PYTHONPATH /haiku
 
 EXPOSE 8050
 
-RUN echo "haiku view app2 user1 data-1" >> /root/.bash_history && \
-    echo "haiku fetch app2 user1 data-1" >> /root/.bash_history && \
+RUN echo "haiku view app2 data-1" >> /root/.bash_history && \
+    echo "haiku fetch app2 data-1" >> /root/.bash_history && \
+    echo "haiku fetch app2 data-1 --user user1" >> /root/.bash_history && \
     echo "alias ll='ls -la'" >> /root/.bashrc
 
 COPY bin/haiku /usr/bin/haiku

@@ -143,6 +143,7 @@ def revoke(provider, requester, user, password):
     else:
         click.echo(bold('Revoke failed'))
 
+
 @main.command()
 @click.argument('user')
 @click.argument('password')
@@ -151,7 +152,7 @@ def balance(user, password):
     Get UND balance for an account
 
     \b
-    :param user: The EOS user account name
+    :param user: The EOS user account name.
     :param password: The EOS user account's wallet password.
     """
     accounts = AccountManager()
@@ -160,6 +161,7 @@ def balance(user, password):
     accounts.lock_wallet(user)
 
     click.echo(bold(f'{user} Balance: {my_balance}'))
+
 
 @main.command()
 @click.argument('from_acc')
@@ -171,9 +173,9 @@ def transfer(from_acc, to_acc, amount, password):
     Quick UND transfer method.
 
     \b
-    :param from_acc: The EOS user account name SENDING the UNDs
-    :param to_acc: The EOS user account name RECEIVING the UNDs
-    :param amount: amount to send
+    :param from_acc: The EOS user account name SENDING the UNDs.
+    :param to_acc: The EOS user account name RECEIVING the UNDs.
+    :param amount: amount to send.
     :param password: The SENDING EOS user account's wallet password.
     """
     # TODO: need to make the babel client initialised, and locked to a user

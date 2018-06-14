@@ -4,8 +4,8 @@ import click
 
 from cryptography.fernet import Fernet
 
+from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
-from haiku_node.client import HaikuDataClient, Provider, Unauthorized
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import app
 
@@ -73,16 +73,16 @@ def init():
 
 @main.command()
 @click.argument('provider')
-@click.argument('user')
 @click.argument('request_hash')
-def fetch(provider, user, request_hash):
+@click.option('--user', default=None)
+def fetch(provider, request_hash, user):
     """
     Fetch data from an App to this App for a particular user.
 
     \b
     :param provider: The app name of the data provider.
-    :param user: The EOS user account name to query.
     :param request_hash: The particular piece of data in concern.
+    :param user: Obtain data for a specific user EOS user account.
     :return:
     """
     requesting_app = os.environ['app_name']
@@ -92,31 +92,28 @@ def fetch(provider, user, request_hash):
     provider = Provider(provider, 'https', f'haiku-{provider}', PORT)
     req_hash = f'request-{request_hash}'
 
-    click.echo(f'App {requesting_app} is requesting data from {provider.name}')
+    suffix = 'for all users' if user is None else f'for {user}'
+    click.echo(f'App {requesting_app} is requesting data from {provider.name}'
+               f' {suffix}')
 
     encoded_password = str.encode(password)
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    try:
-        data_path = client.make_data_request(
-            requesting_app, provider, user, req_hash)
-        click.echo(f'Data written to {data_path}')
-    except Unauthorized:
-        click.echo(f'{user} has {bold("not authorized")} this request')
+    data_path = client.make_data_request(
+        requesting_app, provider, user, req_hash)
+    click.echo(f'Data written to {data_path}')
 
 
 @main.command()
 @click.argument('provider')
-@click.argument('user')
 @click.argument('request_hash')
-def view(provider, user, request_hash):
+def view(provider, request_hash):
     """
     Read data stored locally from an Data Provider for a particular user.
 
     \b
     :param provider: The app name of the data provider.
-    :param user: The EOS user account name to query.
     :param request_hash: The particular piece of data in concern.
     :return:
     """
