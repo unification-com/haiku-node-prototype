@@ -3,10 +3,10 @@ import pprint
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.config.config import UnificationConfig
 from haiku_node.data.transform_data import TransformData
 from haiku_node.eosio_helpers import eosio_account
 from haiku_node.lookup.eos_lookup import UnificationLookup, default_db
-from haiku_node.config.config import UnificationConfig
 
 
 class UnificationDataFactory:
