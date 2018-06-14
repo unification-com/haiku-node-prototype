@@ -1,5 +1,4 @@
 import xml.etree.ElementTree as etree
-import pprint
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
@@ -11,7 +10,12 @@ from haiku_node.config.config import UnificationConfig
 
 class UnificationDataFactory:
 
-    def __init__(self, eos_client, acl_contract_acc, requesting_app, users=None):
+    def __init__(self, eos_client, acl_contract_acc, requesting_app, users):
+        """
+
+        :param users: A list of users we want to obtain data for. If an empty
+        list is provided, then data for all permissible users are provided.
+        """
         self.__acl_contract_acc = acl_contract_acc
         self.__requesting_app = requesting_app
         self.__haiku_conf = UnificationConfig()
@@ -19,7 +23,7 @@ class UnificationDataFactory:
         self.__my_mother = UnificationMother(eos_client, acl_contract_acc)
         self.__my_acl = UnificationACL(eos_client, acl_contract_acc)
         self.__my_lookup = UnificationLookup(default_db())
-        self.__users = users
+        self.__users = None if len(users) == 0 else users
 
         self.__valid_db_schemas = self.__my_mother.get_valid_db_schemas()
         self.__my_db_schemas = []
