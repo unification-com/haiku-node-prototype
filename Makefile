@@ -14,11 +14,5 @@ all:
 haiku:
 	docker build -f Docker/haiku.Dockerfile -t haiku .
 
-systest:
-	docker build -f Docker/systemtest.Dockerfile -t systemtest .
-
-run:
-	docker run -it systemtest /bin/bash
-
 pytest:
 	export PYTHONPATH="."; pytest .
