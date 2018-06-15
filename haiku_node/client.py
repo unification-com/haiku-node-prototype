@@ -6,8 +6,8 @@ from pathlib import Path
 import logging
 import requests
 
-from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.blockchain.und_rewards import UndRewards
+from haiku_node.encryption.payload import bundle, unbundle
 
 log = logging.getLogger(__name__)
 
