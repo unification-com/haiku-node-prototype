@@ -3,9 +3,7 @@ import flask
 from cryptography.exceptions import InvalidSignature
 from eosapi import Client
 
-from haiku_node.config.keys import get_public_key
 from haiku_node.data.factory import UnificationDataFactory
-from haiku_node.encryption.tools import verify_request
 from haiku_node.encryption.payload import unbundle, bundle
 from haiku_node.validation.validation import UnificationAppScValidation
 
@@ -13,10 +11,6 @@ app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
 
 logger = app.logger
-
-
-def verify_account(eos_account_name: str, body, signature):
-    verify_request(get_public_key(eos_account_name), body, signature)
 
 
 def invalid_response():
