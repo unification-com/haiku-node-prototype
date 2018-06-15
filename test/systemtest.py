@@ -40,10 +40,6 @@ def main():
     init_logging()
 
 
-def base_url(protocol, host, port):
-    return f"{protocol}://{host}:{port}"
-
-
 def systest_auth(requesting_app, providing_app, user):
     """
     Ensuring that an incorrectly signed request is rejected.
