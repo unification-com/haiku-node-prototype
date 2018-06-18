@@ -2,12 +2,15 @@ import json
 import tempfile
 import xml.etree.ElementTree as etree
 from pathlib import Path
+from eosapi import Client
 
 import logging
 import requests
 
 from haiku_node.blockchain.und_rewards import UndRewards
 from haiku_node.encryption.payload import bundle, unbundle
+from haiku_node.validation.validation import UnificationAppScValidation
+from haiku_node.config.config import UnificationConfig
 
 log = logging.getLogger(__name__)
 
@@ -51,6 +54,19 @@ class HaikuDataClient:
         """
         Make a data request from one App to another.
         """
+
+        # Check if the providing app is valid according to MOTHER
+        conf = UnificationConfig()
+        eos_client = Client(
+            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+
+        v = UnificationAppScValidation(
+            eos_client, conf['acl_contract'],  providing_app.name,
+            get_perms=True)
+
+        if not v.valid():
+            raise Exception(f"Providing App {providing_app.name} is "
+                            f"NOT valid according to MOTHER")
 
         body = self.transform_request_id(user, request_hash)
         payload = bundle(requesting_app, providing_app.name, body, 'Success')
