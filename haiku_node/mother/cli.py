@@ -4,8 +4,8 @@ import click
 from eosapi import Client
 
 from haiku_node.config.config import UnificationConfig
-from haiku_node.eosio_helpers.accounts import AccountManager
 from haiku_node.eosio_helpers import eosio_account
+from haiku_node.eosio_helpers.accounts import AccountManager
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,6 @@ def validapps():
     Display valid apps.
 
     \b
-    :param user: The EOS user account name to query.
     """
     click.echo(bold("Valid apps according to MOTHER:"))
 
@@ -50,7 +49,6 @@ def invalidapps():
     Display invalid apps.
 
     \b
-    :param user: The EOS user account name to query.
     """
     click.echo(bold("Invalid apps according to MOTHER:"))
 
@@ -80,7 +78,7 @@ def validate(appname, password):
 
     \b
     :param appname: The app name of the data provider.
-    :param password: The EOS user account's password.
+    :param password: The Mother EOS user account's password.
     """
     click.echo(f"Validating app {bold(appname)} "
                "with MOTHER:")
@@ -104,7 +102,7 @@ def invalidate(appname, password):
 
     \b
     :param appname: The app name of the data provider.
-    :param password: The EOS user account's password.
+    :param password: The Mother EOS user account's password.
     """
     click.echo(f"Invalidating app {bold(appname)} "
                "with MOTHER:")
