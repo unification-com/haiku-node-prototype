@@ -23,7 +23,6 @@ def validapps():
     Display valid apps.
 
     \b
-    :param user: The EOS user account name to query.
     """
     click.echo(bold("Valid apps according to MOTHER:"))
 
@@ -50,7 +49,6 @@ def invalidapps():
     Display invalid apps.
 
     \b
-    :param user: The EOS user account name to query.
     """
     click.echo(bold("Invalid apps according to MOTHER:"))
 
