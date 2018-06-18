@@ -248,6 +248,22 @@ class AccountManager:
              '-p', 'unif.mother'])
             print(ret.stdout)
 
+    def validate_with_mother(self, appname):
+        d = {
+            'acl_contract_acc': appname
+        }
+        return self.cleos(
+            ['push', 'action', 'unif.mother', 'validate', json.dumps(d),
+             '-p', 'unif.mother'])
+
+    def invalidate_with_mother(self, appname):
+        d = {
+            'acl_contract_acc': appname
+        }
+        return self.cleos(
+            ['push', 'action', 'unif.mother', 'invalidate', json.dumps(d),
+             '-p', 'unif.mother'])
+
     def grant(self, provider, requester, user):
         d = {
             'user_account': user,
