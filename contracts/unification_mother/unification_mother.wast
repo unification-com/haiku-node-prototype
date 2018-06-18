@@ -9,9 +9,9 @@
  (type $FUNCSIG$iiii (func (param i32 i32 i32) (result i32)))
  (type $FUNCSIG$vi (func (param i32)))
  (type $FUNCSIG$vj (func (param i64)))
+ (type $FUNCSIG$vijii (func (param i32 i64 i32 i32)))
  (type $FUNCSIG$i (func (result i32)))
  (type $FUNCSIG$iii (func (param i32 i32) (result i32)))
- (type $FUNCSIG$vijii (func (param i32 i64 i32 i32)))
  (type $FUNCSIG$ijjjjii (func (param i64 i64 i64 i64 i32 i32) (result i32)))
  (import "env" "abort" (func $abort))
  (import "env" "action_data_size" (func $action_data_size (result i32)))
@@ -30,8 +30,8 @@
  (import "env" "read_action_data" (func $read_action_data (param i32 i32) (result i32)))
  (import "env" "require_auth" (func $require_auth (param i64)))
  (import "env" "require_auth2" (func $require_auth2 (param i64 i64)))
- (table 5 5 anyfunc)
- (elem (i32.const 0) $__wasm_nullptr $_ZN21UnificationFoundation18unification_mother6getappEy $_ZN21UnificationFoundation18unification_mother7isvalidEy $_ZN21UnificationFoundation18unification_mother8validateEyNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_S7_t $_ZN21UnificationFoundation18unification_mother10invalidateEy)
+ (table 6 6 anyfunc)
+ (elem (i32.const 0) $__wasm_nullptr $_ZN21UnificationFoundation18unification_mother7isvalidEy $_ZN21UnificationFoundation18unification_mother6addnewEyNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_S7_t $_ZN21UnificationFoundation18unification_mother6getappEy $_ZN21UnificationFoundation18unification_mother10invalidateEy $_ZN21UnificationFoundation18unification_mother8validateEy)
  (memory $0 1)
  (data (i32.const 4) "\c0c\00\00")
  (data (i32.const 16) "onerror\00")
@@ -60,7 +60,8 @@
  (export "now" (func $now))
  (export "_ZN5eosio12require_authERKNS_16permission_levelE" (func $_ZN5eosio12require_authERKNS_16permission_levelE))
  (export "apply" (func $apply))
- (export "_ZN21UnificationFoundation18unification_mother8validateEyNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_S7_t" (func $_ZN21UnificationFoundation18unification_mother8validateEyNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_S7_t))
+ (export "_ZN21UnificationFoundation18unification_mother6addnewEyNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_S7_t" (func $_ZN21UnificationFoundation18unification_mother6addnewEyNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_S7_t))
+ (export "_ZN21UnificationFoundation18unification_mother8validateEy" (func $_ZN21UnificationFoundation18unification_mother8validateEy))
  (export "_ZN21UnificationFoundation18unification_mother10invalidateEy" (func $_ZN21UnificationFoundation18unification_mother10invalidateEy))
  (export "_ZN21UnificationFoundation18unification_mother7isvalidEy" (func $_ZN21UnificationFoundation18unification_mother7isvalidEy))
  (export "_ZN21UnificationFoundation18unification_mother6getappEy" (func $_ZN21UnificationFoundation18unification_mother6getappEy))
@@ -129,7 +130,7 @@
      (i32.load offset=4
       (i32.const 0)
      )
-     (i32.const 80)
+     (i32.const 96)
     )
    )
   )
@@ -565,20 +566,67 @@
      )
     )
    )
-   (i64.store offset=72
+   (i64.store offset=88
     (get_local $9)
     (get_local $0)
    )
    (block $label$21
     (block $label$22
      (block $label$23
-      (br_if $label$23
-       (i64.gt_s
-        (get_local $2)
-        (i64.const 8428038897099505663)
+      (block $label$24
+       (br_if $label$24
+        (i64.le_s
+         (get_local $2)
+         (i64.const 7111864220337045503)
+        )
        )
+       (br_if $label$23
+        (i64.eq
+         (get_local $2)
+         (i64.const 7111864220337045504)
+        )
+       )
+       (br_if $label$22
+        (i64.eq
+         (get_local $2)
+         (i64.const 8428038897099505664)
+        )
+       )
+       (br_if $label$13
+        (i64.ne
+         (get_local $2)
+         (i64.const 8518110889532981248)
+        )
+       )
+       (i32.store offset=60
+        (get_local $9)
+        (i32.const 0)
+       )
+       (i32.store offset=56
+        (get_local $9)
+        (i32.const 1)
+       )
+       (i64.store offset=32 align=4
+        (get_local $9)
+        (i64.load offset=56
+         (get_local $9)
+        )
+       )
+       (drop
+        (call $_ZN5eosio14execute_actionIN21UnificationFoundation18unification_motherES2_JyEEEbPT_MT0_FvDpT1_E
+         (i32.add
+          (get_local $9)
+          (i32.const 88)
+         )
+         (i32.add
+          (get_local $9)
+          (i32.const 32)
+         )
+        )
+       )
+       (br $label$13)
       )
-      (br_if $label$22
+      (br_if $label$21
        (i64.eq
         (get_local $2)
         (i64.const -2764395866176356352)
@@ -587,48 +635,36 @@
       (br_if $label$13
        (i64.ne
         (get_local $2)
-        (i64.const 7111864220337045504)
+        (i64.const 3626300880115990528)
        )
       )
-      (i32.store offset=44
+      (i32.store offset=84
        (get_local $9)
        (i32.const 0)
       )
-      (i32.store offset=40
+      (i32.store offset=80
        (get_local $9)
-       (i32.const 1)
+       (i32.const 2)
       )
-      (i64.store offset=32 align=4
+      (i64.store offset=8 align=4
        (get_local $9)
-       (i64.load offset=40
+       (i64.load offset=80
         (get_local $9)
        )
       )
       (drop
-       (call $_ZN5eosio14execute_actionIN21UnificationFoundation18unification_motherES2_JyEEEbPT_MT0_FvDpT1_E
+       (call $_ZN5eosio14execute_actionIN21UnificationFoundation18unification_motherES2_JyNSt3__112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEES9_S9_tEEEbPT_MT0_FvDpT1_E
         (i32.add
          (get_local $9)
-         (i32.const 72)
+         (i32.const 88)
         )
         (i32.add
          (get_local $9)
-         (i32.const 32)
+         (i32.const 8)
         )
        )
       )
       (br $label$13)
-     )
-     (br_if $label$21
-      (i64.eq
-       (get_local $2)
-       (i64.const 8428038897099505664)
-      )
-     )
-     (br_if $label$13
-      (i64.ne
-       (get_local $2)
-       (i64.const 8518110889532981248)
-      )
      )
      (i32.store offset=52
       (get_local $9)
@@ -636,9 +672,9 @@
      )
      (i32.store offset=48
       (get_local $9)
-      (i32.const 2)
+      (i32.const 3)
      )
-     (i64.store offset=24 align=4
+     (i64.store offset=40 align=4
       (get_local $9)
       (i64.load offset=48
        (get_local $9)
@@ -648,11 +684,11 @@
       (call $_ZN5eosio14execute_actionIN21UnificationFoundation18unification_motherES2_JyEEEbPT_MT0_FvDpT1_E
        (i32.add
         (get_local $9)
-        (i32.const 72)
+        (i32.const 88)
        )
        (i32.add
         (get_local $9)
-        (i32.const 24)
+        (i32.const 40)
        )
       )
      )
@@ -664,39 +700,39 @@
     )
     (i32.store offset=64
      (get_local $9)
-     (i32.const 3)
+     (i32.const 4)
     )
-    (i64.store offset=8 align=4
+    (i64.store offset=24 align=4
      (get_local $9)
      (i64.load offset=64
       (get_local $9)
      )
     )
     (drop
-     (call $_ZN5eosio14execute_actionIN21UnificationFoundation18unification_motherES2_JyNSt3__112basic_stringIcNS3_11char_traitsIcEENS3_9allocatorIcEEEES9_S9_tEEEbPT_MT0_FvDpT1_E
+     (call $_ZN5eosio14execute_actionIN21UnificationFoundation18unification_motherES2_JyEEEbPT_MT0_FvDpT1_E
       (i32.add
        (get_local $9)
-       (i32.const 72)
+       (i32.const 88)
       )
       (i32.add
        (get_local $9)
-       (i32.const 8)
+       (i32.const 24)
       )
      )
     )
     (br $label$13)
    )
-   (i32.store offset=60
+   (i32.store offset=76
     (get_local $9)
     (i32.const 0)
    )
-   (i32.store offset=56
+   (i32.store offset=72
     (get_local $9)
-    (i32.const 4)
+    (i32.const 5)
    )
    (i64.store offset=16 align=4
     (get_local $9)
-    (i64.load offset=56
+    (i64.load offset=72
      (get_local $9)
     )
    )
@@ -704,7 +740,7 @@
     (call $_ZN5eosio14execute_actionIN21UnificationFoundation18unification_motherES2_JyEEEbPT_MT0_FvDpT1_E
      (i32.add
       (get_local $9)
-      (i32.const 72)
+      (i32.const 88)
      )
      (i32.add
       (get_local $9)
@@ -717,11 +753,11 @@
    (i32.const 0)
    (i32.add
     (get_local $9)
-    (i32.const 80)
+    (i32.const 96)
    )
   )
  )
- (func $_ZN21UnificationFoundation18unification_mother8validateEyNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_S7_t (type $FUNCSIG$vijiiii) (param $0 i32) (param $1 i64) (param $2 i32) (param $3 i32) (param $4 i32) (param $5 i32)
+ (func $_ZN21UnificationFoundation18unification_mother6addnewEyNSt3__112basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEES7_S7_t (type $FUNCSIG$vijiiii) (param $0 i32) (param $1 i64) (param $2 i32) (param $3 i32) (param $4 i32) (param $5 i32)
   (local $6 i32)
   (local $7 i64)
   (local $8 i32)
@@ -849,7 +885,7 @@
      (i32.const 1)
      (i32.const 336)
     )
-    (call $_ZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE6modifyIZNS2_8validateEyNSt3__112basic_stringIcNS6_11char_traitsIcEENS6_9allocatorIcEEEESC_SC_tE3$_1EEvRKS3_yOT_
+    (call $_ZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE6modifyIZNS2_6addnewEyNSt3__112basic_stringIcNS6_11char_traitsIcEENS6_9allocatorIcEEEESC_SC_tE3$_1EEvRKS3_yOT_
      (i32.add
       (get_local $8)
       (i32.const 32)
@@ -959,7 +995,7 @@
      (i32.const 32)
     )
    )
-   (call $_ZZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE7emplaceIZNS2_8validateEyNSt3__112basic_stringIcNS6_11char_traitsIcEENS6_9allocatorIcEEEESC_SC_tE3$_0EENS4_14const_iteratorEyOT_ENKUlRSF_E_clINS4_4itemEEEDaSH_
+   (call $_ZZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE7emplaceIZNS2_6addnewEyNSt3__112basic_stringIcNS6_11char_traitsIcEENS6_9allocatorIcEEEESC_SC_tE3$_0EENS4_14const_iteratorEyOT_ENKUlRSF_E_clINS4_4itemEEEDaSH_
     (i32.add
      (get_local $8)
      (i32.const 96)
@@ -1456,7 +1492,7 @@
   )
   (i32.const 1)
  )
- (func $_ZN21UnificationFoundation18unification_mother10invalidateEy (type $FUNCSIG$vij) (param $0 i32) (param $1 i64)
+ (func $_ZN21UnificationFoundation18unification_mother8validateEy (type $FUNCSIG$vij) (param $0 i32) (param $1 i64)
   (local $2 i64)
   (local $3 i32)
   (local $4 i32)
@@ -1560,7 +1596,7 @@
    (get_local $3)
    (i32.const 336)
   )
-  (call $_ZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE6modifyIZNS2_10invalidateEyE3$_2EEvRKS3_yOT_
+  (call $_ZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE6modifyIZNS2_8validateEyE3$_2EEvRKS3_yOT_
    (i32.add
     (get_local $5)
     (i32.const 8)
@@ -1745,6 +1781,134 @@
    )
   )
   (i32.const 1)
+ )
+ (func $_ZN21UnificationFoundation18unification_mother10invalidateEy (type $FUNCSIG$vij) (param $0 i32) (param $1 i64)
+  (local $2 i64)
+  (local $3 i32)
+  (local $4 i32)
+  (local $5 i32)
+  (i32.store offset=4
+   (i32.const 0)
+   (tee_local $5
+    (i32.sub
+     (i32.load offset=4
+      (i32.const 0)
+     )
+     (i32.const 48)
+    )
+   )
+  )
+  (call $require_auth
+   (i64.load
+    (get_local $0)
+   )
+  )
+  (i32.store
+   (i32.add
+    (get_local $5)
+    (i32.const 40)
+   )
+   (i32.const 0)
+  )
+  (i64.store offset=24
+   (get_local $5)
+   (i64.const -1)
+  )
+  (i64.store offset=32
+   (get_local $5)
+   (i64.const 0)
+  )
+  (i64.store offset=8
+   (get_local $5)
+   (tee_local $2
+    (i64.load
+     (get_local $0)
+    )
+   )
+  )
+  (i64.store offset=16
+   (get_local $5)
+   (get_local $2)
+  )
+  (set_local $4
+   (i32.const 0)
+  )
+  (block $label$0
+   (br_if $label$0
+    (i32.lt_s
+     (tee_local $3
+      (call $db_find_i64
+       (get_local $2)
+       (get_local $2)
+       (i64.const -2764395868126707712)
+       (get_local $1)
+      )
+     )
+     (i32.const 0)
+    )
+   )
+   (call $eosio_assert
+    (i32.eq
+     (i32.load offset=48
+      (tee_local $4
+       (call $_ZNK5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE31load_object_by_primary_iteratorEl
+        (i32.add
+         (get_local $5)
+         (i32.const 8)
+        )
+        (get_local $3)
+       )
+      )
+     )
+     (i32.add
+      (get_local $5)
+      (i32.const 8)
+     )
+    )
+    (i32.const 112)
+   )
+  )
+  (call $eosio_assert
+   (tee_local $3
+    (i32.ne
+     (get_local $4)
+     (i32.const 0)
+    )
+   )
+   (i32.const 304)
+  )
+  (set_local $2
+   (i64.load
+    (get_local $0)
+   )
+  )
+  (call $eosio_assert
+   (get_local $3)
+   (i32.const 336)
+  )
+  (call $_ZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE6modifyIZNS2_10invalidateEyE3$_3EEvRKS3_yOT_
+   (i32.add
+    (get_local $5)
+    (i32.const 8)
+   )
+   (get_local $4)
+   (get_local $2)
+  )
+  (drop
+   (call $_ZNSt3__113__vector_baseIN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE8item_ptrENS_9allocatorIS7_EEED2Ev
+    (i32.add
+     (get_local $5)
+     (i32.const 32)
+    )
+   )
+  )
+  (i32.store offset=4
+   (i32.const 0)
+   (i32.add
+    (get_local $5)
+    (i32.const 48)
+   )
+  )
  )
  (func $_ZN21UnificationFoundation18unification_mother7isvalidEy (type $FUNCSIG$vij) (param $0 i32) (param $1 i64)
   (local $2 i64)
@@ -3936,7 +4100,7 @@
    (return)
   )
  )
- (func $_ZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE6modifyIZNS2_10invalidateEyE3$_2EEvRKS3_yOT_ (param $0 i32) (param $1 i32) (param $2 i64)
+ (func $_ZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE6modifyIZNS2_10invalidateEyE3$_3EEvRKS3_yOT_ (param $0 i32) (param $1 i32) (param $2 i64)
   (local $3 i64)
   (local $4 i32)
   (local $5 i32)
@@ -4730,6 +4894,175 @@
   )
   (get_local $0)
  )
+ (func $_ZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE6modifyIZNS2_8validateEyE3$_2EEvRKS3_yOT_ (param $0 i32) (param $1 i32) (param $2 i64)
+  (local $3 i64)
+  (local $4 i32)
+  (local $5 i32)
+  (local $6 i32)
+  (i32.store offset=4
+   (i32.const 0)
+   (tee_local $5
+    (i32.sub
+     (i32.load offset=4
+      (i32.const 0)
+     )
+     (i32.const 16)
+    )
+   )
+  )
+  (call $eosio_assert
+   (i32.eq
+    (i32.load offset=48
+     (get_local $1)
+    )
+    (get_local $0)
+   )
+   (i32.const 384)
+  )
+  (call $eosio_assert
+   (i64.eq
+    (i64.load
+     (get_local $0)
+    )
+    (call $current_receiver)
+   )
+   (i32.const 432)
+  )
+  (i32.store8 offset=46
+   (get_local $1)
+   (i32.const 1)
+  )
+  (set_local $3
+   (i64.load
+    (get_local $1)
+   )
+  )
+  (call $eosio_assert
+   (i32.const 1)
+   (i32.const 496)
+  )
+  (i32.store
+   (tee_local $6
+    (get_local $5)
+   )
+   (i32.const 0)
+  )
+  (drop
+   (call $_ZN21UnificationFoundationlsIN5eosio10datastreamIjEEEERT_S5_RKNS_18unification_mother9validappsE
+    (get_local $6)
+    (get_local $1)
+   )
+  )
+  (block $label$0
+   (block $label$1
+    (br_if $label$1
+     (i32.lt_u
+      (tee_local $4
+       (i32.load
+        (get_local $6)
+       )
+      )
+      (i32.const 513)
+     )
+    )
+    (set_local $5
+     (call $malloc
+      (get_local $4)
+     )
+    )
+    (br $label$0)
+   )
+   (i32.store offset=4
+    (i32.const 0)
+    (tee_local $5
+     (i32.sub
+      (get_local $5)
+      (i32.and
+       (i32.add
+        (get_local $4)
+        (i32.const 15)
+       )
+       (i32.const -16)
+      )
+     )
+    )
+   )
+  )
+  (i32.store offset=4
+   (get_local $6)
+   (get_local $5)
+  )
+  (i32.store
+   (get_local $6)
+   (get_local $5)
+  )
+  (i32.store offset=8
+   (get_local $6)
+   (i32.add
+    (get_local $5)
+    (get_local $4)
+   )
+  )
+  (drop
+   (call $_ZN21UnificationFoundationlsIN5eosio10datastreamIPcEEEERT_S6_RKNS_18unification_mother9validappsE
+    (get_local $6)
+    (get_local $1)
+   )
+  )
+  (call $db_update_i64
+   (i32.load offset=52
+    (get_local $1)
+   )
+   (get_local $2)
+   (get_local $5)
+   (get_local $4)
+  )
+  (block $label$2
+   (br_if $label$2
+    (i32.lt_u
+     (get_local $4)
+     (i32.const 513)
+    )
+   )
+   (call $free
+    (get_local $5)
+   )
+  )
+  (block $label$3
+   (br_if $label$3
+    (i64.lt_u
+     (get_local $3)
+     (i64.load offset=16
+      (get_local $0)
+     )
+    )
+   )
+   (i64.store
+    (i32.add
+     (get_local $0)
+     (i32.const 16)
+    )
+    (select
+     (i64.const -2)
+     (i64.add
+      (get_local $3)
+      (i64.const 1)
+     )
+     (i64.gt_u
+      (get_local $3)
+      (i64.const -3)
+     )
+    )
+   )
+  )
+  (i32.store offset=4
+   (i32.const 0)
+   (i32.add
+    (get_local $6)
+    (i32.const 16)
+   )
+  )
+ )
  (func $_ZN5boost4mp116detail16tuple_apply_implIRZN5eosio14execute_actionIN21UnificationFoundation18unification_motherES6_JyNSt3__112basic_stringIcNS7_11char_traitsIcEENS7_9allocatorIcEEEESD_SD_tEEEbPT_MT0_FvDpT1_EEUlDpT_E_RNS7_5tupleIJySD_SD_SD_tEEEJLj0ELj1ELj2ELj3ELj4EEEEDTclclsr3stdE7forwardISE_Efp_Espclsr3stdE3getIXT1_EEclsr3stdE7forwardISG_Efp0_EEEEOSE_OSG_NS0_16integer_sequenceIjJXspT1_EEEE (param $0 i32) (param $1 i32)
   (local $2 i64)
   (local $3 i32)
@@ -5016,7 +5349,7 @@
    )
   )
  )
- (func $_ZZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE7emplaceIZNS2_8validateEyNSt3__112basic_stringIcNS6_11char_traitsIcEENS6_9allocatorIcEEEESC_SC_tE3$_0EENS4_14const_iteratorEyOT_ENKUlRSF_E_clINS4_4itemEEEDaSH_ (param $0 i32) (param $1 i32)
+ (func $_ZZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE7emplaceIZNS2_6addnewEyNSt3__112basic_stringIcNS6_11char_traitsIcEENS6_9allocatorIcEEEESC_SC_tE3$_0EENS4_14const_iteratorEyOT_ENKUlRSF_E_clINS4_4itemEEEDaSH_ (param $0 i32) (param $1 i32)
   (local $2 i32)
   (local $3 i32)
   (local $4 i64)
@@ -5233,7 +5566,7 @@
    )
   )
  )
- (func $_ZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE6modifyIZNS2_8validateEyNSt3__112basic_stringIcNS6_11char_traitsIcEENS6_9allocatorIcEEEESC_SC_tE3$_1EEvRKS3_yOT_ (param $0 i32) (param $1 i32) (param $2 i64) (param $3 i32)
+ (func $_ZN5eosio11multi_indexILy15682348205582843904EN21UnificationFoundation18unification_mother9validappsEJEE6modifyIZNS2_6addnewEyNSt3__112basic_stringIcNS6_11char_traitsIcEENS6_9allocatorIcEEEESC_SC_tE3$_1EEvRKS3_yOT_ (param $0 i32) (param $1 i32) (param $2 i64) (param $3 i32)
   (local $4 i64)
   (local $5 i32)
   (local $6 i32)

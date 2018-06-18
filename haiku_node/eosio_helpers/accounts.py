@@ -225,7 +225,7 @@ class AccountManager:
         ret = self.cleos(['get', 'code', appname])
         return ret.stdout.strip()[len('code hash: '):]
 
-    def validate_with_mother(self, app_config, appname):
+    def add_to_mother(self, app_config, appname):
         contract_hash = self.get_code_hash(appname)
 
         app_conf = app_config[appname]
@@ -244,7 +244,7 @@ class AccountManager:
                 'rpc_server_port': app_conf['rpc_server_port']
             }
             ret = self.cleos(
-            ['push', 'action', 'unif.mother', 'validate', json.dumps(d),
+            ['push', 'action', 'unif.mother', 'addnew', json.dumps(d),
              '-p', 'unif.mother'])
             print(ret.stdout)
 
@@ -372,7 +372,7 @@ def make_default_accounts(
         manager.set_und_rewards(demo_apps, appname)
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
-        manager.validate_with_mother(demo_apps, appname)
+        manager.add_to_mother(demo_apps, appname)
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
         manager.issue_unds(demo_apps, appname)

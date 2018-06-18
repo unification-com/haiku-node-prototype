@@ -21,7 +21,7 @@ namespace UnificationFoundation {
 
     unification_mother::unification_mother(action_name self) : contract(self) {}
 
-    void unification_mother::validate(const account_name acl_contract_acc,
+    void unification_mother::addnew(const account_name acl_contract_acc,
                                       const std::string  schema_vers,
                                       const std::string acl_contract_hash,
                                       const std::string rpc_server_ip,
@@ -30,7 +30,7 @@ namespace UnificationFoundation {
         eosio::print(name{_self}, " Called validate()");
 
         // make sure authorised by unification
-        require_auth(_self);
+        eosio::require_auth(_self);
 
         valapps v_apps(_self, _self);
 
@@ -56,6 +56,23 @@ namespace UnificationFoundation {
                 v_rec.is_valid = 1;
             });
         }
+
+    }
+
+    void unification_mother::validate(const account_name acl_contract_acc) {
+
+        // make sure authorised by unification
+        require_auth(_self);
+
+        valapps v_apps(_self, _self);
+
+        // verify already exist
+        auto itr = v_apps.find(acl_contract_acc);
+        eosio_assert(itr != v_apps.end(), "Address for account not found");
+
+        v_apps.modify(itr, _self /*payer*/, [&](auto &v_rec) {
+            v_rec.is_valid = 1;
+        });
 
     }
 
