@@ -78,7 +78,7 @@ def validate(appname, password):
 
     \b
     :param appname: The app name of the data provider.
-    :param password: The EOS user account's password.
+    :param password: The Mother EOS user account's password.
     """
     click.echo(f"Validating app {bold(appname)} "
                "with MOTHER:")
@@ -102,7 +102,7 @@ def invalidate(appname, password):
 
     \b
     :param appname: The app name of the data provider.
-    :param password: The EOS user account's password.
+    :param password: The Mother EOS user account's password.
     """
     click.echo(f"Invalidating app {bold(appname)} "
                "with MOTHER:")
