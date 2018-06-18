@@ -4,9 +4,6 @@
  */
 
 #include <eosiolib/eosio.hpp>
-#include <eosiolib/action.hpp>
-#include <eosiolib/contract.hpp>
-#include <eosiolib/print.hpp>
 
 namespace UnificationFoundation {
     using namespace eosio;
@@ -15,12 +12,15 @@ namespace UnificationFoundation {
     public:
         explicit unification_mother(action_name self);
 
+        //abi action
+        void addnew(account_name acl_contract_acc,
+                    std::string  schema_vers,
+                    std::string acl_contract_hash,
+                    std::string rpc_server_ip,
+                    uint16_t rpc_server_port);
+
         //@abi action
-        void validate(account_name acl_contract_acc,
-                      std::string  schema_vers,
-                      std::string acl_contract_hash,
-                      std::string rpc_server_ip,
-                      uint16_t rpc_server_port);
+        void validate(account_name acl_contract_acc);
 
         //@abi action
         void invalidate(account_name acl_contract_acc);
@@ -66,5 +66,5 @@ namespace UnificationFoundation {
         typedef eosio::multi_index<N(binhashes), binhashes> bin_hashes;
     };
 
-    EOSIO_ABI(unification_mother, (validate)(invalidate)(isvalid)(getapp))
+    EOSIO_ABI(unification_mother, (addnew)(validate)(invalidate)(isvalid)(getapp))
 }

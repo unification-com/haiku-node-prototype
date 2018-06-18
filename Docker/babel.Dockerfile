@@ -32,6 +32,7 @@ RUN echo "babel permissions user1" >> /root/.bash_history && \
     echo "alias ll='ls -la'" >> /root/.bashrc
 
 COPY bin/babel /usr/bin/babel
+COPY bin/mother /usr/bin/mother
 COPY haiku_node /haiku/haiku_node
 COPY test /haiku/test
 COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
