@@ -16,6 +16,22 @@ For detailed instructions on how to download, configure and run
 the Haiku Node Prototype, please refer to the 
 [Haiku Node Wiki](https://github.com/unification-com/haiku-node-prototype/wiki)
 
+## IMPORTANT
+
+Clone the repo using the `--recurse-submodules`:
+
+```
+git clone --recurse-submodules https://github.com/unification-com/haiku-node-prototype
+```
+
+If you have previously cloned, the run:
+
+```
+cd haiku-node-prototype
+git pull
+git submodule update --init --recursive
+```
+
 
 ## Links
 
