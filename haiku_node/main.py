@@ -1,6 +1,7 @@
 import os
 
 import click
+import xml.dom.minidom
 
 from cryptography.fernet import Fernet
 
@@ -131,7 +132,8 @@ def view(provider, request_hash):
 
     client = HaikuDataClient(keystore)
     data = client.read_data_from_store(provider, requesting_app, req_hash)
-    click.echo(data)
+    xml_obj = xml.dom.minidom.parseString(data)
+    click.echo(xml_obj.toprettyxml())
 
 
 if __name__ == "__main__":
