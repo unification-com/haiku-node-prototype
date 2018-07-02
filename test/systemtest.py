@@ -270,6 +270,11 @@ def wait():
     systest_smart_contract_acl()
     systest_user_permissions()
 
+    # Upload public data
+    log.info('Creating public data...')
+    from create_public import create_public_data
+    create_public_data()
+
     time.sleep(20)
 
     manager = AccountManager(host=False)
