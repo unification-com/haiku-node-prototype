@@ -131,7 +131,7 @@ def view(provider, request_hash):
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    data = client.read_data_from_store(provider, requesting_app, req_hash)
+    data = client.read_data_from_store(provider, req_hash)
     xml_obj = xml.dom.minidom.parseString(data)
     click.echo(xml_obj.toprettyxml())
 

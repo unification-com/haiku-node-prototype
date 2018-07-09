@@ -89,7 +89,7 @@ def systest_ingest(requesting_app, providing_app, user, balances, local=False):
 
     client = HaikuDataClient(keystore)
     client.make_data_request(requesting_app, provider, user, request_hash)
-    client.read_data_from_store(provider, requesting_app, request_hash)
+    client.read_data_from_store(provider, request_hash)
 
     # Update the system test record of the balances
     rewards = lambda app: demo_config['demo_apps'][app]['und_rewards']
