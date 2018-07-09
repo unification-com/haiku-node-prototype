@@ -8,9 +8,10 @@ import logging
 import requests
 
 from haiku_node.blockchain.und_rewards import UndRewards
+from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.validation.validation import UnificationAppScValidation
-from haiku_node.config.config import UnificationConfig
+
 
 log = logging.getLogger(__name__)
 
@@ -69,7 +70,8 @@ class HaikuDataClient:
                             f"NOT valid according to MOTHER")
 
         body = self.transform_request_id(user, request_hash)
-        payload = bundle(requesting_app, providing_app.name, body, 'Success')
+        payload = bundle(
+            self.keystore, requesting_app, providing_app.name, body, 'Success')
 
         base = providing_app.base_url()
         r = requests.post(f"{base}/data_request", json=payload, verify=False)
@@ -78,7 +80,7 @@ class HaikuDataClient:
         if r.status_code != 200:
             raise Exception(d['message'])
 
-        bundle_d = unbundle(providing_app.name, requesting_app, d)
+        bundle_d = unbundle(self.keystore, providing_app.name, d)
         decrypted_body = bundle_d['data']
 
         log.info(f'"In the air" decrypted content is: {decrypted_body}')
@@ -108,7 +110,7 @@ class HaikuDataClient:
 
         d = json.loads(encrypted_body)
 
-        bundle_d = unbundle(providing_app.name, requesting_app, d)
+        bundle_d = unbundle(self.keystore, providing_app.name, d)
         decrypted_body = bundle_d['data']
 
         log.info(f'Decrypted content from persistence store: {decrypted_body}')
