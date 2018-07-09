@@ -7,12 +7,11 @@ import pytest
 from cryptography.exceptions import InvalidSignature
 from cryptography.fernet import InvalidToken
 
-from haiku_node.encryption.payload import bundle, unbundle
+from haiku_node.encryption.payload import __bundle, __unbundle
 from haiku_node.encryption.tools import (
     symmetric_encrypt, symmetric_decrypt, sign_request, verify_request)
 from haiku_node.keystore.keystore import UnificationKeystore
 
-from unittest.mock import patch
 from pathlib import Path
 
 
@@ -71,11 +70,8 @@ def test_symmetric():
     "'¡ooʇ ןnɟǝsn sı uʍop-ǝpısdn unicode ¡ooʇ ןnɟǝsn sı uʍop-ǝpısdn"
 ])
 def test_sign_and_verify(message):
-    get_public_key = mock_get_public_key
-    get_private_key = mock_get_private_key
-
-    private_key = get_private_key('app2')
-    public_key = get_public_key('app2')
+    private_key = mock_get_private_key('app2')
+    public_key = mock_get_public_key('app2')
 
     signature = sign_request(private_key, message)
 
@@ -102,22 +98,27 @@ def test_transfer_over_json(payload_d):
         d[field] = 'unlucky' + d[field][7:]
         return d
 
-    with patch('haiku_node.encryption.payload.get_public_key',
-               mock_get_public_key):
-        sender = 'app1'
-        recipient = 'app2'
+    sender = 'app1'
+    recipient = 'app2'
 
-        message = bundle(sender, recipient, payload_d, 'Success')
-        wire_data = json.dumps(message)
+    sender_priv_key = mock_get_private_key(sender)
+    recipient_pub_key = mock_get_public_key(recipient)
 
-        with pytest.raises(InvalidToken):
-            unbundle(
-                sender, recipient, broken(json.loads(wire_data), 'payload'))
+    sender_pub_key = mock_get_public_key(sender)
+    recipient_priv_key = mock_get_private_key(recipient)
 
-        with pytest.raises(InvalidSignature):
-            unbundle(
-                sender, recipient, broken(json.loads(wire_data), 'signature'))
+    message = __bundle(
+        sender_priv_key, recipient_pub_key, sender, payload_d, 'Success')
+    wire_data = json.dumps(message)
 
-        reload = json.loads(wire_data)
-        reload_d = unbundle(sender, recipient, reload)
-        assert payload_d == reload_d
+    with pytest.raises(InvalidToken):
+        __unbundle(recipient_priv_key, sender_pub_key,
+                   broken(json.loads(wire_data), 'payload'))
+
+    with pytest.raises(InvalidSignature):
+        __unbundle(recipient_priv_key, sender_pub_key,
+                   broken(json.loads(wire_data), 'signature'))
+
+    reload = json.loads(wire_data)
+    reload_d = __unbundle(recipient_priv_key, sender_pub_key, reload)
+    assert payload_d == reload_d

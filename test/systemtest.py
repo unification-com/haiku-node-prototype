@@ -59,7 +59,9 @@ def systest_auth(requesting_app, providing_app, user):
     provider = Provider(
         providing_app, 'https', app_config['rpc_server'], port)
 
-    payload = bundle(requesting_app, provider.name, body, 'Success')
+    encoded_password = demo_config['system'][requesting_app]['password']
+    ks = UnificationKeystore(encoded_password, app_name=requesting_app)
+    payload = bundle(ks, requesting_app, provider.name, body, 'Success')
     payload = broken(payload, 'signature')
 
     base = provider.base_url()
