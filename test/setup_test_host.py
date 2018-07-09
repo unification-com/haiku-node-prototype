@@ -14,10 +14,8 @@ password = password_d[app_name]['password']
 
 print(f"Setting up host for {app_name}")
 
-os.unlink('/haiku/haiku_node/keystore/keys.store')
-
 shutil.copy(
-    f"/haiku/haiku_node/keystore/keys-{app_name}.store",
+    f"/haiku/test/data/keys/keys-{app_name}.store",
     "/haiku/haiku_node/keystore/keys.store")
 
 shutil.copy(

@@ -10,28 +10,35 @@ from cryptography.hazmat.primitives import serialization
 
 class UnificationKeystore:
 
-    def __init__(self, pw, app_name=None):
+    def __init__(self, pw, app_name: str=None, keystore_path: Path=None):
         """
         :param pw: binary encoded password
         :param app_name: optional app specific keystore
+        :param keystore_path: the path where the keys are stored
         """
         self.__is_empty = True
         self.__encrypted_store = ""
         self.__app_name = app_name
+        self.__keystore_path = keystore_path
 
         if len(pw) > 0:
             self.__fern = Fernet(pw)
             self.__load_encrypted_keys()
 
     def key_store_file(self):
-        currentdir = os.path.dirname(
-            os.path.abspath(inspect.getfile(inspect.currentframe())))
-        parentdir = os.path.dirname(currentdir)
+
+        if self.__keystore_path is None:
+            currentdir = os.path.dirname(
+                os.path.abspath(inspect.getfile(inspect.currentframe())))
+            parentdir = os.path.dirname(currentdir)
+            keystore_path = Path(parentdir) / Path('keystore')
+        else:
+            keystore_path = self.__keystore_path
 
         if self.__app_name is None:
-            return Path(parentdir + '/keystore/keys.store')
+            return keystore_path / Path('keys.store')
         else:
-            return Path(parentdir + f"/keystore/keys-{ self.__app_name }.store")
+            return keystore_path / Path(f'keys-{self.__app_name }.store')
 
     def get_rpc_auth_public_key(self):
         if not self.__is_empty:

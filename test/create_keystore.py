@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import click
 
 from cryptography.fernet import Fernet
@@ -25,7 +28,9 @@ def generate_keystore(app_name):
     password = Fernet.generate_key()
     click.echo(password)
 
-    ks = UnificationKeystore(password, app_name=app_name)
+    current_path = Path(os.path.dirname(os.path.abspath(__file__)))
+    ks_path = current_path / Path(f'data/keys')
+    ks = UnificationKeystore(password, app_name=app_name, keystore_path=ks_path)
     pub = keystore[app_name]['public_key']
     priv = keystore[app_name]['private_key']
 

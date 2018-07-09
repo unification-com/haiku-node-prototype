@@ -60,7 +60,9 @@ def systest_auth(requesting_app, providing_app, user):
         providing_app, 'https', app_config['rpc_server'], port)
 
     encoded_password = demo_config['system'][requesting_app]['password']
-    ks = UnificationKeystore(encoded_password, app_name=requesting_app)
+
+    ks = UnificationKeystore(encoded_password, app_name=requesting_app,
+                             keystore_path=Path('data/keys'))
     payload = bundle(ks, requesting_app, provider.name, body, 'Success')
     payload = broken(payload, 'signature')
 
@@ -85,7 +87,8 @@ def systest_ingest(requesting_app, providing_app, user, balances, local=False):
 
     password = demo_config['system'][requesting_app]['password']
     encoded_password = str.encode(password)
-    keystore = UnificationKeystore(encoded_password, app_name=requesting_app)
+    keystore = UnificationKeystore(encoded_password, app_name=requesting_app,
+                                   keystore_path=Path('data/keys'))
 
     client = HaikuDataClient(keystore)
     client.make_data_request(requesting_app, provider, user, request_hash)

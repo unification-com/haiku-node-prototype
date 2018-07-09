@@ -31,14 +31,19 @@ def password_for_app(app_name):
 
 def mock_get_private_key(app_name):
     encoded_password = str.encode(password_for_app(app_name))
-    ks = UnificationKeystore(encoded_password, app_name=app_name)
+    current_path = Path(os.path.dirname(os.path.abspath(__file__)))
+    ks_path = current_path / Path('data/keys')
+    ks = UnificationKeystore(
+        encoded_password, app_name=app_name, keystore_path=ks_path)
     return ks.get_rpc_auth_private_key()
 
 
 def mock_get_public_key(app_name):
     encoded_password = str.encode(password_for_app(app_name))
-
-    ks = UnificationKeystore(encoded_password, app_name=app_name)
+    current_path = Path(os.path.dirname(os.path.abspath(__file__)))
+    ks_path = current_path / Path('data/keys')
+    ks = UnificationKeystore(
+        encoded_password, app_name=app_name, keystore_path=ks_path)
     return ks.get_rpc_auth_public_key()
 
 
