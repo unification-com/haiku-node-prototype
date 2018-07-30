@@ -20,8 +20,6 @@ ENV PATH="/root/.pyenv/versions/3.6.0/bin:${PATH}"
 
 RUN pip install -r requirements.txt
 
-COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
-
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 ENV PYTHONPATH /haiku
