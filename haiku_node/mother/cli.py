@@ -4,8 +4,8 @@ import click
 from eosapi import Client
 
 from haiku_node.config.config import UnificationConfig
-from haiku_node.eosio_helpers import eosio_account
-from haiku_node.eosio_helpers.accounts import AccountManager
+from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.blockchain_helpers.accounts import AccountManager
 
 log = logging.getLogger(__name__)
 

@@ -1,4 +1,4 @@
-from haiku_node.eosio_helpers import eosio_account
+from haiku_node.blockchain_helpers import eosio_account
 
 
 class UnificationMother:

@@ -2,7 +2,7 @@ import os
 import sqlite3
 from pathlib import Path
 
-from haiku_node.eosio_helpers import eosio_account
+from haiku_node.blockchain_helpers import eosio_account
 
 
 def default_db():
