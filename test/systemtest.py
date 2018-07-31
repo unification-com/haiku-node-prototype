@@ -14,8 +14,8 @@ from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle
-from haiku_node.eosio_helpers import eosio_account
-from haiku_node.eosio_helpers.accounts import (
+from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.blockchain_helpers.accounts import (
     AccountManager, make_default_accounts)
 from haiku_node.keystore.keystore import UnificationKeystore
 

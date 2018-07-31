@@ -3,7 +3,7 @@ import sqlite3
 
 from create_lookups import app_sqlite_target
 
-from haiku_node.eosio_helpers import eosio_account
+from haiku_node.blockchain_helpers import eosio_account
 from haiku_node.lookup.eos_lookup import UnificationLookup, default_db
 
 

@@ -8,9 +8,9 @@ from eosapi import Client
 
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.config.config import UnificationConfig
-from haiku_node.eosio_helpers.accounts import AccountManager
+from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.validation.validation import UnificationAppScValidation
-from haiku_node.eosio_helpers import eosio_account
+from haiku_node.blockchain_helpers import eosio_account
 
 log = logging.getLogger(__name__)
 

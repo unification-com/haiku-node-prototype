@@ -6,7 +6,7 @@ import sqlite3
 
 from pathlib import Path
 
-from haiku_node.eosio_helpers.accounts import (
+from haiku_node.blockchain_helpers.accounts import (
     AccountManager, make_default_accounts)
 
 

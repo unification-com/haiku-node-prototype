@@ -1,6 +1,6 @@
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
-from haiku_node.eosio_helpers import eosio_account
+from haiku_node.blockchain_helpers import eosio_account
 
 
 """

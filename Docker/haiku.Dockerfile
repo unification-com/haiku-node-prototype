@@ -18,8 +18,6 @@ WORKDIR /haiku
 
 ENV PATH="/root/.pyenv/versions/3.6.0/bin:${PATH}"
 
-RUN pip install -r requirements.txt
-
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 ENV PYTHONPATH /haiku
@@ -35,5 +33,7 @@ COPY bin/haiku /usr/bin/haiku
 COPY haiku_node /haiku/haiku_node
 COPY test /haiku/test
 COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
+
+RUN pip install -r requirements.txt
 
 CMD ["/haiku/test/bootstrap.sh"]
