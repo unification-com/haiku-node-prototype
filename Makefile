@@ -11,8 +11,5 @@ all:
 	docker build -f Docker/systemtest.Dockerfile -t systemtest .
 	docker build -f Docker/mysql/Dockerfile -t mysql .
 
-haiku:
-	docker build -f Docker/haiku.Dockerfile -t haiku .
-
 pytest:
 	export PYTHONPATH="."; pytest .
