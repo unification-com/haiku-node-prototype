@@ -16,7 +16,7 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle
 from haiku_node.blockchain_helpers import eosio_account
 from haiku_node.blockchain_helpers.accounts import (
-    AccountManager, make_default_accounts)
+    AccountManager, make_default_accounts, create_public_data)
 from haiku_node.keystore.keystore import UnificationKeystore
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
@@ -108,6 +108,9 @@ def systest_accounts():
 
     manager = AccountManager(host=False)
     make_default_accounts(manager, demo_config, appnames, usernames)
+
+    work_dir = Path('data/public')
+    create_public_data(manager, work_dir, appnames)
 
 
 def systest_smart_contract_mother():
@@ -269,11 +272,6 @@ def wait():
     systest_smart_contract_mother()
     systest_smart_contract_acl()
     systest_user_permissions()
-
-    # Upload public data
-    log.info('Creating public data...')
-    from create_public import create_public_data
-    create_public_data()
 
     time.sleep(20)
 
