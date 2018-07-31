@@ -13,6 +13,7 @@ RUN curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/py
 
 RUN mkdir /haiku
 COPY requirements.txt /haiku
+COPY external/ /haiku/external
 
 WORKDIR /haiku
 
@@ -21,6 +22,8 @@ ENV PATH="/root/.pyenv/versions/3.6.0/bin:${PATH}"
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 ENV PYTHONPATH /haiku
+
+RUN pip install -r requirements.txt
 
 RUN echo "babel permissions user1" >> /root/.bash_history && \
     echo "babel grant app2 app3 user1 PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx" >> /root/.bash_history && \
@@ -32,5 +35,3 @@ COPY bin/mother /usr/bin/mother
 COPY haiku_node /haiku/haiku_node
 COPY test /haiku/test
 COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
-
-RUN pip install -r requirements.txt
