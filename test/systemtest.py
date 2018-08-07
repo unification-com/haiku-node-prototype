@@ -16,7 +16,7 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle
 from haiku_node.blockchain_helpers import eosio_account
 from haiku_node.blockchain_helpers.accounts import (
-    AccountManager, make_default_accounts)
+    AccountManager, make_default_accounts, create_public_data)
 from haiku_node.keystore.keystore import UnificationKeystore
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
@@ -59,7 +59,11 @@ def systest_auth(requesting_app, providing_app, user):
     provider = Provider(
         providing_app, 'https', app_config['rpc_server'], port)
 
-    payload = bundle(requesting_app, provider.name, body, 'Success')
+    encoded_password = demo_config['system'][requesting_app]['password']
+
+    ks = UnificationKeystore(encoded_password, app_name=requesting_app,
+                             keystore_path=Path('data/keys'))
+    payload = bundle(ks, requesting_app, provider.name, body, 'Success')
     payload = broken(payload, 'signature')
 
     base = provider.base_url()
@@ -83,11 +87,12 @@ def systest_ingest(requesting_app, providing_app, user, balances, local=False):
 
     password = demo_config['system'][requesting_app]['password']
     encoded_password = str.encode(password)
-    keystore = UnificationKeystore(encoded_password, app_name=requesting_app)
+    keystore = UnificationKeystore(encoded_password, app_name=requesting_app,
+                                   keystore_path=Path('data/keys'))
 
     client = HaikuDataClient(keystore)
     client.make_data_request(requesting_app, provider, user, request_hash)
-    client.read_data_from_store(provider, requesting_app, request_hash)
+    client.read_data_from_store(provider, request_hash)
 
     # Update the system test record of the balances
     rewards = lambda app: demo_config['demo_apps'][app]['und_rewards']
@@ -108,6 +113,9 @@ def systest_accounts():
 
     manager = AccountManager(host=False)
     make_default_accounts(manager, demo_config, appnames, usernames)
+
+    work_dir = Path('data/public')
+    create_public_data(manager, work_dir, appnames)
 
 
 def systest_smart_contract_mother():

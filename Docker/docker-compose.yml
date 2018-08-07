@@ -63,6 +63,13 @@ services:
     volumes:
         - ${HAIKU_ROOT}/data_sources/imageblobs:/data/imageblobs:ro
 
+  ipfs:
+    image: ipfs
+    container_name: ipfs
+    command: ipfs daemon --offline
+    ports:
+    - "5001:5001"
+
   systemtest:
     image: systemtest
     container_name: systemtest
@@ -74,6 +81,7 @@ services:
       - "haiku-app2"
       - "haiku-app3"
       - "db"
+      - "ipfs"
 
   babel:
     image: babel

@@ -3,11 +3,14 @@ import logging
 import subprocess
 import time
 
+from pathlib import Path
+
 import requests
 
 from eosapi import Client
 
 from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain.mother import UnificationMother
 
 
@@ -272,6 +275,14 @@ class AccountManager:
         return self.cleos(
             ['push', 'action', provider, 'grant', json.dumps(d), '-p', user])
 
+    def setexternaldata(self, public_key_hash, provider, user):
+        d = {
+            'requesting_app': provider,
+            'public_key_hash': public_key_hash
+        }
+        return self.cleos(
+            ['push', 'action', provider, 'setexternal', json.dumps(d), '-p', user])
+
     def revoke(self, provider, requester, user):
         d = {
             'user_account': user,
@@ -405,3 +416,13 @@ def make_default_accounts(
         manager.run_test_mother(appname, demo_apps)
         manager.run_test_acl(appname, demo_apps, appnames)
         log.info(f'==========END CONTRACT DUMPS FOR {appname}==========')
+
+
+def create_public_data(manager: AccountManager, data_path, appnames):
+    for appname in appnames:
+        time.sleep(BLOCK_SLEEP)
+        store = IPFSDataStore()
+        public_key_path = data_path / Path(appname) / Path('key.public')
+        h = store.add_file(public_key_path)
+
+        manager.setexternaldata(h, appname, appname)

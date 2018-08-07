@@ -9,6 +9,7 @@ class UnificationACL:
             class will retrieve data from the ACL/Meta Data smart contract
         """
         self.__permission_rec_table = "permrecords"
+        self.__external_data_table = "externaldata"
         self.__db_schema_table = "dataschemas"
         self.__data_sources_table = "datasources"
         self.__und_rewards_table = "undrewards"
@@ -53,6 +54,15 @@ class UnificationACL:
                 revoked.append(int(i['user_account']))
 
         return granted, revoked
+
+    def get_public_key_hash(self, requesting_app):
+        table_data = self.__eosClient.get_table_rows(
+            requesting_app,
+            self.__acl_contract_acc, self.__external_data_table, True, 0, -1,
+            -1)
+
+        rows = table_data['rows']
+        return rows[0]['public_key']
 
     def get_app_und_reward(self):
         return self.__app_und_reward

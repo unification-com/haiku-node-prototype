@@ -49,7 +49,8 @@ def error_request_self():
     }), 418
 
 
-def obtain_data(eos_account_name, eos_client, acl_contract_acc, users):
+def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
+                users):
     """
     :param eos_account_name: The account name of the requesting App.
     :param users: The users to obtain data for.
@@ -60,14 +61,16 @@ def obtain_data(eos_account_name, eos_client, acl_contract_acc, users):
     body = {
         'data': data_factory.get_raw_data()
     }
-    d = bundle(acl_contract_acc, eos_account_name, body, 'Success')
+    d = bundle(keystore, acl_contract_acc, eos_account_name, body, 'Success')
     return flask.jsonify(d), 200
 
 
-def ingest_data(eos_account_name, eos_client, acl_contract_acc, users):
+def ingest_data(keystore, eos_account_name, eos_client, acl_contract_acc,
+                users):
     response_body = {}
 
-    d = bundle(acl_contract_acc, eos_account_name, response_body, 'Success')
+    d = bundle(
+        keystore, acl_contract_acc, eos_account_name, response_body, 'Success')
     return flask.jsonify(d), 200
 
 
@@ -88,7 +91,7 @@ def data_request():
         if sender == recipient:
             return error_request_self()
 
-        bundle_d = unbundle(sender, recipient, d)
+        bundle_d = unbundle(app.keystore, sender, d)
 
         eos_client = Client(
             nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
@@ -110,7 +113,8 @@ def data_request():
             users = bundle_d.get('users')
             # TODO: need to ensure, somewhere, that the requesting app can afford to pay for the data!
             # perhaps pre-calculate how much it'll cost, and throw "CannotAfford" exception (with HTTP 401)
-            return obtain_data(sender, eos_client, conf['acl_contract'], users)
+            return obtain_data(
+                app.keystore, sender, eos_client, conf['acl_contract'], users)
         else:
             return invalid_app()
 
@@ -135,7 +139,7 @@ def data_ingest():
 
         sender = d['eos_account_name']
         recipient = conf['acl_contract']
-        bundle_d = unbundle(sender, recipient, d)
+        bundle_d = unbundle(app.keystore, sender, d)
 
         eos_client = Client(
             nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
@@ -155,7 +159,8 @@ def data_ingest():
         # data
         if v.valid():
             users = bundle_d.get('users')
-            return ingest_data(sender, eos_client, conf['acl_contract'], users)
+            return ingest_data(
+                app.keystore, sender, eos_client, conf['acl_contract'], users)
         else:
             return invalid_app()
 
