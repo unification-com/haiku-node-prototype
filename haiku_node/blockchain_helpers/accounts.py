@@ -435,10 +435,11 @@ def make_default_accounts(
 
         # Permission levels
         print(f"Create account permissions for app {appname}")
-        app_account_perms = ['modschema', 'modperms', 'modreq']
+        app_account_perms = ['modschema', 'modperms', 'modreq', 'modrsakey']
         modschema_actions = ['addschema', 'editschema', 'setvers', 'setschedule', 'setminund', 'setschema']
         modperms_actions = ['modifyperm', 'modifypermsg']
         modreq_actions = ['initreq', 'updatereq']
+        modrsakey_actions = ['setrsakey']
         for app_account_perm in app_account_perms:
             pub_key, priv_key = manager.create_key()
             manager.wallet_import_key(appname, priv_key)
@@ -450,6 +451,8 @@ def make_default_accounts(
                 contract_actions = modperms_actions
             elif app_account_perm == 'modreq':
                 contract_actions = modreq_actions
+            elif app_account_perm == 'modrsakey':
+                contract_actions = modrsakey_actions
             else:
                 contract_actions = []
 
