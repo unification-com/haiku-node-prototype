@@ -454,8 +454,9 @@ def make_default_accounts(
                 contract_actions = []
 
             for contract_action in contract_actions:
-                manager.lock_account_permissions(appname, appname, contract_action, app_account_perm)
-                
+                #Todo: AFTER required code modification for new UApp smart contract
+                #manager.lock_account_permissions(appname, appname, contract_action, app_account_perm)
+
     for username in usernames:
         print("Create account permissions for users")
         pub_key, priv_key = manager.create_key()
