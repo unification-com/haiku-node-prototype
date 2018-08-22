@@ -115,6 +115,34 @@ class AccountManager:
 
         print(ret.stdout)
 
+    def create_account_permissions(self, username, perm_name, public_key):
+        log.info(f"Creating permission {perm_name} for {username} with key {public_key}")
+
+        keys = []
+        k = {
+            "key": public_key,
+            "weight": 1
+        }
+
+        keys.append(k)
+
+        d = {
+            'threshold': 1,
+            'keys': keys
+        }
+
+        ret = self.cleos(
+            ["set", "account", "permission", username, perm_name,
+             json.dumps(d), "active", "-p", "{username}@active"])
+
+        print(ret.stdout)
+
+    def lock_account_permissions(self, username, smart_contract, contract_action, perm_name):
+        log.info(f"Lock permission {perm_name} for {username} to action {contract_action} in contract {smart_contract}")
+        ret = self.cleos(["set", "account", "permission", username, username,
+                          smart_contract, contract_action, perm_name] )
+        print(ret.stdout)
+
     def mother_contract(self, username):
         log.info('Associating mother contracts')
         ret = self.cleos(
@@ -371,6 +399,7 @@ def make_default_accounts(
         manager.wallet_import_key(username, keys[1])
         manager.create_account(username, keys[0])
 
+
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
     manager.mother_contract('unif.mother')
@@ -403,6 +432,36 @@ def make_default_accounts(
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
         manager.issue_unds(demo_apps, appname)
+
+        # Permission levels
+        print("Create account permissions for apps")
+        app_account_perms = ['modschema', 'modperms', 'modreq']
+        modschema_actions = ['addschema', 'editschema', 'setvers', 'setschedule', 'setminund', 'setschema']
+        modperms_actions = ['modifyperm', 'modifypermsg']
+        modreq_actions = ['initreq', 'updatereq']
+        for app_account_perm in app_account_perms:
+            pub_key, priv_key = manager.create_key()
+            manager.wallet_import_key(appname, priv_key)
+            manager.create_account_permissions(appname, app_account_perm, pub_key)
+
+            if app_account_perm == 'modschema':
+                contract_actions = modschema_actions
+            elif app_account_perm == 'modperms':
+                contract_actions = modperms_actions
+            elif app_account_perm == 'modreq':
+                contract_actions = modreq_actions
+            else:
+                contract_actions = []
+
+            for contract_action in contract_actions:
+                manager.lock_account_permissions(appname, appname, contract_action, app_account_perm)
+                
+    for username in usernames:
+        print("Create account permissions for users")
+        pub_key, priv_key = manager.create_key()
+        manager.wallet_import_key(username, priv_key)
+        manager.create_account_permissions(username, 'modperms', pub_key)
+
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
