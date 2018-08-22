@@ -116,7 +116,7 @@ class AccountManager:
         print(ret.stdout)
 
     def create_account_permissions(self, username, perm_name, public_key):
-        log.info(f"Creating permission {perm_name} for {username} with key {public_key}")
+        print(f"Creating permission {perm_name} for {username} with key {public_key}")
 
         keys = []
         k = {
@@ -133,12 +133,12 @@ class AccountManager:
 
         ret = self.cleos(
             ["set", "account", "permission", username, perm_name,
-             json.dumps(d), "active", "-p", "{username}@active"])
+             json.dumps(d), "active", "-p", f"{username}@active"])
 
         print(ret.stdout)
 
     def lock_account_permissions(self, username, smart_contract, contract_action, perm_name):
-        log.info(f"Lock permission {perm_name} for {username} to action {contract_action} in contract {smart_contract}")
+        print(f"Lock permission {perm_name} for {username} to action {contract_action} in contract {smart_contract}")
         ret = self.cleos(["set", "account", "permission", username, username,
                           smart_contract, contract_action, perm_name] )
         print(ret.stdout)
@@ -434,7 +434,7 @@ def make_default_accounts(
         manager.issue_unds(demo_apps, appname)
 
         # Permission levels
-        print("Create account permissions for apps")
+        print(f"Create account permissions for app {appname}")
         app_account_perms = ['modschema', 'modperms', 'modreq']
         modschema_actions = ['addschema', 'editschema', 'setvers', 'setschedule', 'setminund', 'setschema']
         modperms_actions = ['modifyperm', 'modifypermsg']
@@ -453,12 +453,12 @@ def make_default_accounts(
             else:
                 contract_actions = []
 
-            for contract_action in contract_actions:
-                #Todo: AFTER required code modification for new UApp smart contract
+            # Todo: AFTER required code modification for new UApp smart contract
+            #for contract_action in contract_actions:
                 #manager.lock_account_permissions(appname, appname, contract_action, app_account_perm)
 
     for username in usernames:
-        print("Create account permissions for users")
+        print(f"Create account permissions for user {username}")
         pub_key, priv_key = manager.create_key()
         manager.wallet_import_key(username, priv_key)
         manager.create_account_permissions(username, 'modperms', pub_key)
