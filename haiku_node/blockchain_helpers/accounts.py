@@ -458,10 +458,11 @@ def make_default_accounts(
                 #manager.lock_account_permissions(appname, appname, contract_action, app_account_perm)
 
     for username in usernames:
-        print(f"Create account permissions for user {username}")
-        pub_key, priv_key = manager.create_key()
-        manager.wallet_import_key(username, priv_key)
-        manager.create_account_permissions(username, 'modperms', pub_key)
+        if username not in ['unif.mother', 'unif.token']:  # Todo: maybe have sys_users list?
+            print(f"Create account permissions for user {username}")
+            pub_key, priv_key = manager.create_key()
+            manager.wallet_import_key(username, priv_key)
+            manager.create_account_permissions(username, 'modperms', pub_key)
 
 
     print("Wait for transactions to process")
