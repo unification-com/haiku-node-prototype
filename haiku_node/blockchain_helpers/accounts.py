@@ -435,11 +435,15 @@ def make_default_accounts(
 
         # Permission levels
         print(f"Create account permissions for app {appname}")
+        # accoiunt permissions to be created
         app_account_perms = ['modschema', 'modperms', 'modreq', 'modrsakey']
+
+        # smart contract actions the permissions are allowed to use
         modschema_actions = ['addschema', 'editschema', 'setvers', 'setschedule', 'setminund', 'setschema']
         modperms_actions = ['modifyperm', 'modifypermsg']
         modreq_actions = ['initreq', 'updatereq']
         modrsakey_actions = ['setrsakey']
+        
         for app_account_perm in app_account_perms:
             pub_key, priv_key = manager.create_key()
             manager.wallet_import_key(appname, priv_key)
