@@ -88,10 +88,10 @@ class HaikuDataClient:
         # TODO: only pay if data is valid
         und_reward = UndRewards(requesting_app)
 
-        tree = etree.ElementTree(etree.fromstring(decrypted_body))
-        users_to_pay = tree.findall('unification_users/unification_user')
+        json_obj = json.loads(decrypted_body)
+        users_to_pay = json_obj['data']['unification_users']['unification_user']['$t']
         for username in users_to_pay:
-            ret = und_reward.send_reward(username.text)
+            ret = und_reward.send_reward(username)
             log.debug(ret)
 
         log.debug(f"Pay provider {providing_app.name}")
