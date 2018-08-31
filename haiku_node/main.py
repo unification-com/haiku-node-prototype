@@ -3,6 +3,9 @@ import os
 import click
 import xml.dom.minidom
 
+import json, xmljson
+from lxml.etree import fromstring, tostring
+
 from cryptography.fernet import Fernet
 
 from haiku_node.client import HaikuDataClient, Provider
@@ -132,8 +135,32 @@ def view(provider, request_hash):
 
     client = HaikuDataClient(keystore)
     data = client.read_data_from_store(provider, req_hash)
-    xml_obj = xml.dom.minidom.parseString(data)
-    click.echo(xml_obj.toprettyxml())
+    xml_obj = fromstring(data)
+    json_obj = json.loads(json.dumps(xmljson.gdata.data(xml_obj)))
+
+    data_from = json_obj['data']['from']['$t']
+    timestamp = json_obj['data']['timestamp']['$t']
+    user = json_obj['data']['unification_users']['unification_user']['$t']  # temp hack
+    click.echo(f'data from:' f'{data_from}')
+    click.echo(f'timestamp:' f'{timestamp}')
+    click.echo(f'user:' f'{user}')
+
+    column = []
+    for items in json_obj['data']['rows']['row']:
+        for row in range(0, len(items['field'])):
+            if len(column) < len(items['field']):
+                column.append(items['field'][row]['field_name']['$t'])
+
+    print(*column)
+    rows = []
+    for items in json_obj['data']['rows']['row']:
+        cells = []
+        for i in range(0, len(items['field'])):
+            cells.append(items['field'][i]['value']['$t'])
+        rows.append(cells)
+
+    for s in rows:
+        print(*s)
 
 
 if __name__ == "__main__":

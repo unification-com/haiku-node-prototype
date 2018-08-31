@@ -11,3 +11,6 @@ pyopenssl==17.5.0
 pytest==3.5.1
 requests==2.19.0
 SQLAlchemy==1.2.8
+xmljson==0.1.9
+lxml==4.2.4
+pyyaml == 4.2b4
