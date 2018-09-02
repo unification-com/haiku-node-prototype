@@ -8,9 +8,9 @@ schema_3 = "<schema-template><fields><field><name>account_name</name><type>varch
 
 def XMLtoJSON(input):
     xml = fromstring(input)
-    JSON = json.dumps(xmljson.gdata.data(xml))     #this is a string
-    data = json.loads(JSON)                        #this is a dictionary
-    print(JSON)
+    json_str = json.dumps(xmljson.gdata.data(xml))     #this is a string
+    data = json.loads(json_str)                        #this is a dictionary
+    print(json_str)
     print(data)
 
 
