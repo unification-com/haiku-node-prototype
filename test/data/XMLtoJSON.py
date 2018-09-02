@@ -11,10 +11,10 @@ schema_3 = "<schema-template><fields><field><name>account_name</name><type>varch
 
 def xml_to_json(xml_str):
     xml = fromstring(xml_str)
-    json_str = json.dumps(xmljson.gdata.data(xml))     #this is a string
-    data = json.loads(json_str)                        #this is a dictionary
+    json_str = json.dumps(xmljson.gdata.data(xml))
+    d = json.loads(json_str)
     print(json_str)
-    print(data)
+    print(d)
 
 
 xml_to_json(schema_1)
