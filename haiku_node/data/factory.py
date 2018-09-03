@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as etree
 
-import json, xmljson
+import json
+import xmljson
 from lxml.etree import fromstring, tostring
 
 from haiku_node.blockchain.mother import UnificationMother
@@ -82,14 +83,11 @@ class UnificationDataFactory:
         ### 2. convert XML to JSON here
         ### Currently we are going with 2.
 
-        xml = fromstring(db_schema)
-        JSON_gdata_schema = json.dumps(xmljson.gdata.data(xml))
-        print(JSON_gdata_schema)
-        data = json.loads(JSON_gdata_schema)
+        print(db_schema)
 
         cols_to_include = []
         base64_encode_cols = []
-        for items in data['schema-template']['fields']['field']:
+        for items in db_schema['fields']:
             if items['table']['$t'] != 'unification_lookup':
                 print('table.text before:', items['table']['$t'])
                 real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, items['table']['$t'])
@@ -105,7 +103,6 @@ class UnificationDataFactory:
                 cols_to_include.append(real_table_data['user_id_column'])
 
         print(base64_encode_cols)
-        db_schema = JSON_gdata_schema
 
         # print("new db schema")
         # print(db_schema)
