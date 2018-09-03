@@ -1,10 +1,8 @@
 import os
 
 import click
-import xml.dom.minidom
-
 import json, xmljson
-from lxml.etree import fromstring, tostring
+from lxml.etree import fromstring
 
 from cryptography.fernet import Fernet
 
