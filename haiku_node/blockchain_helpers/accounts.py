@@ -209,7 +209,7 @@ class AccountManager:
         for i in app_conf['db_schemas']:
             d = {
                 'schema_name': i['schema_name'],
-                'schema': i['schema'],
+                'schema': json.dumps(i['schema']),
             }
             ret = self.cleos(
                 ['push', 'action', appname, 'setschema', json.dumps(d), '-p',
