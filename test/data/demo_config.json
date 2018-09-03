@@ -1,384 +1,453 @@
 {
-    "system":{
-        "app1":{
-            "password":"rIeT7sz1P31ijrs9lNZiQGmOKlUVqf1WBg8ZSW-3JR8="
-        },
-        "app2":{
-            "password":"I0CtE8uvYOj9bOaQjlymmZT8621iidsInry0Nqepaak="
-        },
-        "app3":{
-            "password":"Lah5Kwt9mziZh9A_Xi6RQ_quqwII5Bhvw5MZ8xE03IA="
-        }
+  "system": {
+    "app1": {
+      "password": "rIeT7sz1P31ijrs9lNZiQGmOKlUVqf1WBg8ZSW-3JR8="
     },
-    "demo_apps":{
-        "app1":{
-            "eos_sc_account":"app1",
-            "rpc_server":"haiku-app1",
-            "rpc_server_port":"8050",
-            "db_schemas":[
-                {
-                    "schema_name":"app1.db1",
-                    "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Heartrate</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>GeoLocation</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>TimeStamp</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>Pulse</name><type>int</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>",
-                    "database":"Heartbit",
-                    "db_platform":"mysql",
-                    "host": "db",
-                    "port": "3306",
-                    "user": "heartbit_user",
-                    "pass": "password",
-                    "table_maps": [
-                      {
-                        "schema_table_id": "users",
-                        "db_table": "Users",
-                        "user_id_column": "ID"
-                      },
-                      {
-                        "schema_table_id": "data_1",
-                        "db_table": "UserData",
-                        "user_id_column": "UserID"
-                      }
-                    ]
-                }
-            ],
-            "data_sources":[
-                {
-                    "source_name":"app1.db1",
-                    "source_type":"database"
-                },
-                {
-                    "source_name":"app2",
-                    "source_type":"contract"
-                },
-                {
-                    "source_name":"app3",
-                    "source_type":"contract"
-                }
-            ],
-            "lookup": {
-              "lookup_meta": {
-                "native_table": "Users",
-                "native_field": "ID",
-                "field_type": "int"
-              },
-              "lookup_users": [
-                {
-                  "native_id": 1,
-                  "eos_account": "user1"
-                },
-                {
-                  "native_id": 2,
-                  "eos_account": "user2"
-                },
-                {
-                  "native_id": 3,
-                  "eos_account": "user3"
-                }
-              ]
-            },
-            "und_rewards": {
-              "user_amt": 1,
-              "app_amt": 10,
-              "start_balance": 1000
-            }
-        },
-        "app2":{
-            "eos_sc_account":"app2",
-            "rpc_server":"haiku-app2",
-            "rpc_server_port":"8050",
-            "db_schemas":[
-                {
-                    "schema_name":"app2.db1",
-                    "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>DataBlob</name><type>binarydata</type><is-null>true</is-null><table>data_1</table></field><field><name>BlobSize</name><type>int</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>",
-                    "database":"Datablobs",
-                    "db_platform":"mysql",
-                    "host": "db",
-                    "port": "3306",
-                    "user": "datablobs_user",
-                    "pass": "password",
-                    "table_maps": [
-                      {
-                        "schema_table_id": "users",
-                        "db_table": "BlobCreator",
-                        "user_id_column": "CID"
-                      },
-                      {
-                        "schema_table_id": "data_1",
-                        "db_table": "BlobData",
-                        "user_id_column": "CreatorID"
-                      }
-                    ]
-                }
-            ],
-            "data_sources":[
-                {
-                    "source_name":"app2.db1",
-                    "source_type":"database"
-                },
-                {
-                    "source_name":"app1",
-                    "source_type":"contract"
-                },
-                {
-                    "source_name":"app3",
-                    "source_type":"contract"
-                }
-            ],
-            "lookup": {
-              "lookup_meta": {
-                "native_table": "BlobCreator",
-                "native_field": "CreatorID",
-                "field_type": "int"
-              },
-              "lookup_users": [
-                {
-                  "native_id": 1,
-                  "eos_account": "user1"
-                },
-                {
-                  "native_id": 2,
-                  "eos_account": "user2"
-                },
-                {
-                  "native_id": 3,
-                  "eos_account": "user3"
-                }
-              ]
-            },
-            "und_rewards": {
-              "user_amt": 1,
-              "app_amt": 10,
-              "start_balance": 1000
-            }
-        },
-        "app3":{
-            "eos_sc_account":"app3",
-            "rpc_server":"haiku-app3",
-            "rpc_server_port":"8050",
-            "db_schemas":[
-                {
-                    "schema_name":"app3.db1",
-                    "schema":"<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Image</name><type>base64_mime_image</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>",
-                    "database":"Imagestorage",
-                    "db_platform":"mysql",
-                    "host": "db",
-                    "port": "3306",
-                    "user": "imgstore_user",
-                    "pass": "password",
-                    "table_maps": [
-                      {
-                        "schema_table_id": "users",
-                        "db_table": "ImageOwners",
-                        "user_id_column": "OID"
-                      },
-                      {
-                        "schema_table_id": "data_1",
-                        "db_table": "ImageData",
-                        "user_id_column": "OwnerID"
-                      }
-                    ]
-                }
-            ],
-            "data_sources":[
-                {
-                    "source_name":"app3.db1",
-                    "source_type":"database"
-                },
-                {
-                    "source_name":"app1",
-                    "source_type":"contract"
-                },
-                {
-                    "source_name":"app2",
-                    "source_type":"contract"
-                }
-            ],
-            "lookup": {
-              "lookup_meta": {
-                "native_table": "ImageOwners",
-                "native_field": "OID",
-                "field_type": "int"
-              },
-              "lookup_users": [
-                {
-                  "native_id": 1,
-                  "eos_account": "user1"
-                },
-                {
-                  "native_id": 2,
-                  "eos_account": "user2"
-                },
-                {
-                  "native_id": 3,
-                  "eos_account": "user3"
-                }
-              ]
-            },
-            "und_rewards": {
-              "user_amt": 2,
-              "app_amt": 15,
-              "start_balance": 1000
-            }
-        }
+    "app2": {
+      "password": "I0CtE8uvYOj9bOaQjlymmZT8621iidsInry0Nqepaak="
     },
-    "demo_permissions":{
-        "permissions":[
-            {
-                "user":"user1",
-                "haiku_nodes":[
-                    {
-                        "app":"app1",
-                        "req_apps":[
-                            {
-                                "account":"app2",
-                                "granted":true
-                            },
-                            {
-                                "account":"app3",
-                                "granted":true
-                            }
-                        ]
-                    },
-                    {
-                        "app":"app2",
-                        "req_apps":[
-                            {
-                                "account":"app1",
-                                "granted":true
-                            },
-                            {
-                                "account":"app3",
-                                "granted":false
-                            }
-                        ]
-                    },
-                    {
-                        "app":"app3",
-                        "req_apps":[
-                            {
-                                "account":"app1",
-                                "granted":true
-                            },
-                            {
-                                "account":"app2",
-                                "granted":true
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "user":"user2",
-                "haiku_nodes":[
-                    {
-                        "app":"app1",
-                        "req_apps":[
-                            {
-                                "account":"app2",
-                                "granted":true
-                            },
-                            {
-                                "account":"app3",
-                                "granted":true
-                            }
-                        ]
-                    },
-                    {
-                        "app":"app2",
-                        "req_apps":[
-                            {
-                                "account":"app1",
-                                "granted":false
-                            },
-                            {
-                                "account":"app3",
-                                "granted":true
-                            }
-                        ]
-                    },
-                    {
-                        "app":"app3",
-                        "req_apps":[
-                            {
-                                "account":"app1",
-                                "granted":true
-                            },
-                            {
-                                "account":"app2",
-                                "granted":true
-                            }
-                        ]
-                    }
-                ]
-            },
-            {
-                "user":"user3",
-                "haiku_nodes":[
-                    {
-                        "app":"app1",
-                        "req_apps":[
-                            {
-                                "account":"app2",
-                                "granted":false
-                            },
-                            {
-                                "account":"app3",
-                                "granted":false
-                            }
-                        ]
-                    },
-                    {
-                        "app":"app2",
-                        "req_apps":[
-                            {
-                                "account":"app1",
-                                "granted":true
-                            },
-                            {
-                                "account":"app3",
-                                "granted":true
-                            }
-                        ]
-                    },
-                    {
-                        "app":"app3",
-                        "req_apps":[
-                            {
-                                "account":"app1",
-                                "granted":true
-                            },
-                            {
-                                "account":"app2",
-                                "granted":true
-                            }
-                        ]
-                    }
-                ]
-            }
-        ]
-    },
-    "wallet_passwords": {
-        "app1": {
-          "wallet_password": "PW5KJb4QW78rwKvqSDpt2of5RjieAECUvAYDYYvbL74U4mJtbGJJZ"
-        },
-        "app2": {
-          "wallet_password": "PW5JhTgUc1A8CXJXi6UFwWBte4tTnpuSJkiwa1MjCkDvsVs3qiNqF"
-        },
-        "app3": {
-          "wallet_password": "PW5JZCZRNKtN7cknyADGzEGTzv6eXaU2cMpSPi49F4Mme5gwrQc7U"
-        },
-        "user1": {
-          "wallet_password": "PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx"
-        },
-        "user2": {
-          "wallet_password": "PW5JRx3hihCz33R9Tm9uTQGPJj7UFA54nUjcgGkq3PYBy5iQXTsCG"
-        },
-        "user3": {
-          "wallet_password": "PW5KfhcoCs5yV7wLTWWh97fZbf9jshHZL7vD9tQARfpCGVnDyA95t"
-        },
-        "unif.mother": {
-          "wallet_password": "PW5JN14rVAQ4oL19PREuJbDjbde6QfrRmWCXsoBq8866KdxvWYJSH"
-        },
-        "unif.token": {
-          "wallet_password": "PW5JwgsjwK7s2b6Eomwfsv6oVoEn2XcykVYj2KsCPnES65y8a3NTA"
-        }
+    "app3": {
+      "password": "Lah5Kwt9mziZh9A_Xi6RQ_quqwII5Bhvw5MZ8xE03IA="
     }
+  },
+  "demo_apps": {
+    "app1": {
+      "eos_sc_account": "app1",
+      "rpc_server": "haiku-app1",
+      "rpc_server_port": "8050",
+      "db_schemas": [
+        {
+          "schema_name": "app1.db1",
+          "schema": {
+            "fields": [
+              {
+                "name": "account_name",
+                "type": "varchar",
+                "is-null": "false",
+                "table": "unification_lookup"
+              },
+              {
+                "name": "Heartrate",
+                "type": "int",
+                "is-null": "true",
+                "table": "data_1"
+              },
+              {
+                "name": "GeoLocation",
+                "type": "int",
+                "is-null": "true",
+                "table": "data_1"
+              },
+              {
+                "name": "TimeStamp",
+                "type": "int",
+                "is-null": "true",
+                "table": "data_1"
+              },
+              {
+                "name": "Pulse",
+                "type": "int",
+                "is-null": "true",
+                "table": "data_1"
+              }
+            ]
+          },
+          "database": "Heartbit",
+          "db_platform": "mysql",
+          "host": "db",
+          "port": "3306",
+          "user": "heartbit_user",
+          "pass": "password",
+          "table_maps": [
+            {
+              "schema_table_id": "users",
+              "db_table": "Users",
+              "user_id_column": "ID"
+            },
+            {
+              "schema_table_id": "data_1",
+              "db_table": "UserData",
+              "user_id_column": "UserID"
+            }
+          ]
+        }
+      ],
+      "data_sources": [
+        {
+          "source_name": "app1.db1",
+          "source_type": "database"
+        },
+        {
+          "source_name": "app2",
+          "source_type": "contract"
+        },
+        {
+          "source_name": "app3",
+          "source_type": "contract"
+        }
+      ],
+      "lookup": {
+        "lookup_meta": {
+          "native_table": "Users",
+          "native_field": "ID",
+          "field_type": "int"
+        },
+        "lookup_users": [
+          {
+            "native_id": 1,
+            "eos_account": "user1"
+          },
+          {
+            "native_id": 2,
+            "eos_account": "user2"
+          },
+          {
+            "native_id": 3,
+            "eos_account": "user3"
+          }
+        ]
+      },
+      "und_rewards": {
+        "user_amt": 1,
+        "app_amt": 10,
+        "start_balance": 1000
+      }
+    },
+    "app2": {
+      "eos_sc_account": "app2",
+      "rpc_server": "haiku-app2",
+      "rpc_server_port": "8050",
+      "db_schemas": [
+        {
+          "schema_name": "app2.db1",
+          "schema": {
+            "fields": [
+              {
+                "name": "account_name",
+                "type": "varchar",
+                "is-null": "false",
+                "table": "unification_lookup"
+              },
+              {
+                "name": "DataBlob",
+                "type": "binarydata",
+                "is-null": "true",
+                "table": "data_1"
+              },
+              {
+                "name": "BlobSize",
+                "type": "int",
+                "is-null": "true",
+                "table": "data_1"
+              }
+            ]
+          },
+          "database": "Datablobs",
+          "db_platform": "mysql",
+          "host": "db",
+          "port": "3306",
+          "user": "datablobs_user",
+          "pass": "password",
+          "table_maps": [
+            {
+              "schema_table_id": "users",
+              "db_table": "BlobCreator",
+              "user_id_column": "CID"
+            },
+            {
+              "schema_table_id": "data_1",
+              "db_table": "BlobData",
+              "user_id_column": "CreatorID"
+            }
+          ]
+        }
+      ],
+      "data_sources": [
+        {
+          "source_name": "app2.db1",
+          "source_type": "database"
+        },
+        {
+          "source_name": "app1",
+          "source_type": "contract"
+        },
+        {
+          "source_name": "app3",
+          "source_type": "contract"
+        }
+      ],
+      "lookup": {
+        "lookup_meta": {
+          "native_table": "BlobCreator",
+          "native_field": "CreatorID",
+          "field_type": "int"
+        },
+        "lookup_users": [
+          {
+            "native_id": 1,
+            "eos_account": "user1"
+          },
+          {
+            "native_id": 2,
+            "eos_account": "user2"
+          },
+          {
+            "native_id": 3,
+            "eos_account": "user3"
+          }
+        ]
+      },
+      "und_rewards": {
+        "user_amt": 1,
+        "app_amt": 10,
+        "start_balance": 1000
+      }
+    },
+    "app3": {
+      "eos_sc_account": "app3",
+      "rpc_server": "haiku-app3",
+      "rpc_server_port": "8050",
+      "db_schemas": [
+        {
+          "schema_name": "app3.db1",
+          "schema": {
+            "fields": [
+              {
+                "name": "account_name",
+                "type": "varchar",
+                "is-null": "false",
+                "table": "unification_lookup"
+              },
+              {
+                "name": "Image",
+                "type": "base64_mime_image",
+                "is-null": "true",
+                "table": "data_1"
+              }
+            ]
+          },
+          "database": "Imagestorage",
+          "db_platform": "mysql",
+          "host": "db",
+          "port": "3306",
+          "user": "imgstore_user",
+          "pass": "password",
+          "table_maps": [
+            {
+              "schema_table_id": "users",
+              "db_table": "ImageOwners",
+              "user_id_column": "OID"
+            },
+            {
+              "schema_table_id": "data_1",
+              "db_table": "ImageData",
+              "user_id_column": "OwnerID"
+            }
+          ]
+        }
+      ],
+      "data_sources": [
+        {
+          "source_name": "app3.db1",
+          "source_type": "database"
+        },
+        {
+          "source_name": "app1",
+          "source_type": "contract"
+        },
+        {
+          "source_name": "app2",
+          "source_type": "contract"
+        }
+      ],
+      "lookup": {
+        "lookup_meta": {
+          "native_table": "ImageOwners",
+          "native_field": "OID",
+          "field_type": "int"
+        },
+        "lookup_users": [
+          {
+            "native_id": 1,
+            "eos_account": "user1"
+          },
+          {
+            "native_id": 2,
+            "eos_account": "user2"
+          },
+          {
+            "native_id": 3,
+            "eos_account": "user3"
+          }
+        ]
+      },
+      "und_rewards": {
+        "user_amt": 2,
+        "app_amt": 15,
+        "start_balance": 1000
+      }
+    }
+  },
+  "demo_permissions": {
+    "permissions": [
+      {
+        "user": "user1",
+        "haiku_nodes": [
+          {
+            "app": "app1",
+            "req_apps": [
+              {
+                "account": "app2",
+                "granted": true
+              },
+              {
+                "account": "app3",
+                "granted": true
+              }
+            ]
+          },
+          {
+            "app": "app2",
+            "req_apps": [
+              {
+                "account": "app1",
+                "granted": true
+              },
+              {
+                "account": "app3",
+                "granted": false
+              }
+            ]
+          },
+          {
+            "app": "app3",
+            "req_apps": [
+              {
+                "account": "app1",
+                "granted": true
+              },
+              {
+                "account": "app2",
+                "granted": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "user": "user2",
+        "haiku_nodes": [
+          {
+            "app": "app1",
+            "req_apps": [
+              {
+                "account": "app2",
+                "granted": true
+              },
+              {
+                "account": "app3",
+                "granted": true
+              }
+            ]
+          },
+          {
+            "app": "app2",
+            "req_apps": [
+              {
+                "account": "app1",
+                "granted": false
+              },
+              {
+                "account": "app3",
+                "granted": true
+              }
+            ]
+          },
+          {
+            "app": "app3",
+            "req_apps": [
+              {
+                "account": "app1",
+                "granted": true
+              },
+              {
+                "account": "app2",
+                "granted": true
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "user": "user3",
+        "haiku_nodes": [
+          {
+            "app": "app1",
+            "req_apps": [
+              {
+                "account": "app2",
+                "granted": false
+              },
+              {
+                "account": "app3",
+                "granted": false
+              }
+            ]
+          },
+          {
+            "app": "app2",
+            "req_apps": [
+              {
+                "account": "app1",
+                "granted": true
+              },
+              {
+                "account": "app3",
+                "granted": true
+              }
+            ]
+          },
+          {
+            "app": "app3",
+            "req_apps": [
+              {
+                "account": "app1",
+                "granted": true
+              },
+              {
+                "account": "app2",
+                "granted": true
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "wallet_passwords": {
+    "app1": {
+      "wallet_password": "PW5KJb4QW78rwKvqSDpt2of5RjieAECUvAYDYYvbL74U4mJtbGJJZ"
+    },
+    "app2": {
+      "wallet_password": "PW5JhTgUc1A8CXJXi6UFwWBte4tTnpuSJkiwa1MjCkDvsVs3qiNqF"
+    },
+    "app3": {
+      "wallet_password": "PW5JZCZRNKtN7cknyADGzEGTzv6eXaU2cMpSPi49F4Mme5gwrQc7U"
+    },
+    "user1": {
+      "wallet_password": "PW5KZ2g5KuwVw2QhjNGn9aBbiSGsf3uq5HTigWohM6P7H767kw3dx"
+    },
+    "user2": {
+      "wallet_password": "PW5JRx3hihCz33R9Tm9uTQGPJj7UFA54nUjcgGkq3PYBy5iQXTsCG"
+    },
+    "user3": {
+      "wallet_password": "PW5KfhcoCs5yV7wLTWWh97fZbf9jshHZL7vD9tQARfpCGVnDyA95t"
+    },
+    "unif.mother": {
+      "wallet_password": "PW5JN14rVAQ4oL19PREuJbDjbde6QfrRmWCXsoBq8866KdxvWYJSH"
+    },
+    "unif.token": {
+      "wallet_password": "PW5JwgsjwK7s2b6Eomwfsv6oVoEn2XcykVYj2KsCPnES65y8a3NTA"
+    }
+  }
 }
