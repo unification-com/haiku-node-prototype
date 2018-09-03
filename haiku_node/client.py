@@ -89,22 +89,23 @@ class HaikuDataClient:
         und_reward = UndRewards(requesting_app)
 
         json_obj = json.loads(decrypted_body)
-        users_to_pay = json_obj['data']['unification_users']
-        print(users_to_pay)
-        if isinstance(users_to_pay, dict):
-            username = users_to_pay['unification_user']
-            print(f'pay {username}')
-            ret = und_reward.send_reward(username)
-            log.debug(ret)
-        else:
-            for username in users_to_pay['unification_user']:
+
+        if 'no-data' not in json_obj:
+            users_to_pay = json_obj['data']['unification_users']
+            if isinstance(users_to_pay, dict):
+                username = users_to_pay['unification_user']
                 print(f'pay {username}')
                 ret = und_reward.send_reward(username)
                 log.debug(ret)
+            else:
+                for username in users_to_pay['unification_user']:
+                    print(f'pay {username}')
+                    ret = und_reward.send_reward(username)
+                    log.debug(ret)
 
-        log.debug(f"Pay provider {providing_app.name}")
-        ret = und_reward.send_reward(providing_app.name, False)
-        log.debug(ret)
+            log.debug(f"Pay provider {providing_app.name}")
+            ret = und_reward.send_reward(providing_app.name, False)
+            log.debug(ret)
 
         return self.persist_data(
             providing_app.name, request_hash, d)

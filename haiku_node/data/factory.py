@@ -154,4 +154,7 @@ class UnificationDataFactory:
 
             #self.__raw_data = data_transform.fetch_user_data()
         else:
-            self.__raw_data = "<no-data></no-data>"  # temp dummy message for no users granting perms
+            d = {
+                "no-data": True
+            }
+            self.__raw_data = json.dumps(d)  # temp dummy message for no users granting perms
