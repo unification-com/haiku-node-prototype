@@ -1,6 +1,5 @@
 import json
 import tempfile
-import xml.etree.ElementTree as etree
 from pathlib import Path
 from eosapi import Client
 
