@@ -1,8 +1,6 @@
-import xml.etree.ElementTree as etree
-
 import json
 from xmljson import parker, Parker
-from lxml.etree import fromstring, tostring
+from lxml.etree import fromstring
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
