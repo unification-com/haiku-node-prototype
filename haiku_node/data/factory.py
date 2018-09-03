@@ -63,6 +63,8 @@ class UnificationDataFactory:
                 if user_acc_uint64 in self.__granted:
                     native_user_ids.append(self.__my_lookup.get_native_user_id(u))
 
+        print("native_user_ids")
+        print(native_user_ids)
         return native_user_ids
 
     def __generate_data(self):
@@ -130,7 +132,8 @@ class UnificationDataFactory:
         }
 
         # TEMP FOR TESTING
-        # print("data_source_parms")
+        print("data_source_parms")
+        print(data_source_parms)
         # pp = pprint.PrettyPrinter(indent=4)
         # pp.pprint(data_source_parms)
         # print("native User IDs for Query")
