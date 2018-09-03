@@ -1,7 +1,7 @@
 import xml.etree.ElementTree as etree
 
 import json
-import xmljson
+from xmljson import parker, Parker
 from lxml.etree import fromstring, tostring
 
 from haiku_node.blockchain.mother import UnificationMother
@@ -88,18 +88,18 @@ class UnificationDataFactory:
         cols_to_include = []
         base64_encode_cols = []
         for items in db_schema['fields']:
-            if items['table']['$t'] != 'unification_lookup':
-                print('table.text before:', items['table']['$t'])
-                real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, items['table']['$t'])
+            if items['table'] != 'unification_lookup':
+                print('table.text before:', items['table'])
+                real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, items['table'])
                 print(real_table_data)
-                items['table']['$t'] = real_table_data['real_table_name']
-                print('table text after:', items['table']['$t'])
-                cols_to_include.append(items['name']['$t'])
-                if items['type']['$t'] == 'base64_mime_image':
-                    base64_encode_cols.append(items['name']['$t'])
+                items['table'] = real_table_data['real_table_name']
+                print('table text after:', items['table'])
+                cols_to_include.append(items['name'])
+                if items['type'] == 'base64_mime_image':
+                    base64_encode_cols.append(items['name'])
             else:
                 real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, 'data_1')
-                items['table']['$t'] = real_table_data['real_table_name']
+                items['table'] = real_table_data['real_table_name']
                 cols_to_include.append(real_table_data['user_id_column'])
 
         print(base64_encode_cols)
@@ -147,7 +147,7 @@ class UnificationDataFactory:
             #### transforms xml data to json dictionary (string)
 
             xml = fromstring(data_transform.fetch_user_data())
-            self.__raw_data = json.dumps(xmljson.gdata.data(xml))
+            self.__raw_data = json.dumps(parker.data(xml, preserve_root=True))
 
             #self.__raw_data = data_transform.fetch_user_data()
         else:
