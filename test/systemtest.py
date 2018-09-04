@@ -10,7 +10,7 @@ import click
 import requests
 
 from haiku_node.blockchain.mother import UnificationMother
-from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle
@@ -133,8 +133,6 @@ def systest_smart_contract_mother():
         log.info(f"Contacting MOTHER for {app_data['eos_sc_account']}")
         mother = UnificationMother(eos_client, app_data['eos_sc_account'])
 
-        acl = UnificationACL(eos_client, app_data['eos_sc_account'])
-
         log.info("App is Valid")
         log.info("Expecting: True")
         log.info(f"Actual - MOTHER: {mother.valid_app()}")
@@ -162,13 +160,13 @@ def systest_smart_contract_mother():
         assert (int(app_data['rpc_server_port']) == int(
             mother.get_haiku_rpc_port())) is True
 
-        log.info("Valid DB Schemas exist in ACL/Meta Smart Contract")
-        valid_schemas = mother.get_valid_db_schemas()
-        for sch_n, vers in valid_schemas.items():
-            log.info(f'Schema {sch_n} version {vers}')
-            schema = acl.get_current_valid_schema(sch_n, vers)
-            log.info(schema)
-            assert schema is not False
+        # log.info("Valid DB Schemas exist in ACL/Meta Smart Contract")
+        # valid_schemas = mother.get_valid_db_schemas()
+        # for sch_n, vers in valid_schemas.items():
+        #     log.info(f'Schema {sch_n} version {vers}')
+        #     schema = acl.get_current_valid_schema(sch_n, vers)
+        #     log.info(schema)
+        #     assert schema is not False
 
         log.info("------------------------------------------")
 
@@ -187,7 +185,7 @@ def systest_smart_contract_acl():
         log.info("------------------------------------------")
         app_data = d_apps[appname]
         conf_db_schemas = app_data['db_schemas']
-        acl = UnificationACL(eos_client, app_data['eos_sc_account'])
+        uapp_sc = UnificationUapp(eos_client, app_data['eos_sc_account'])
         log.info("Check DB Schemas are correctly configured")
 
         for schema_obj in conf_db_schemas:
@@ -197,8 +195,7 @@ def systest_smart_contract_acl():
 
             # version set to 1, since that's the hard coded version used in
             # accounts.validate_with_mother
-            acl_contract_schema = acl.get_current_valid_schema(
-                schema_obj['schema_name'], 1)
+            acl_contract_schema = uapp_sc.get_db_schema_by_pkey(0)
             log.info(f"Actual - ACL/Meta Data Smart Contract: "
                      f"{acl_contract_schema['schema']}")
             assert (conf_schema == acl_contract_schema['schema']) is True
@@ -218,12 +215,12 @@ def systest_user_permissions():
 
         for haiku in user_perms['haiku_nodes']:
             app = haiku['app']
-            acl = UnificationACL(eos_client, app)
+            uapp_sc = UnificationUapp(eos_client, app)
             for req_app in haiku['req_apps']:
                 log.info(
                     f"Check {user} permissions granted for {req_app} in {app}")
                 config_granted = req_app['granted']
-                acl_granted, acl_revoked = acl.get_perms_for_req_app(
+                acl_granted, acl_revoked = uapp_sc.get_perms_for_req_app(
                     req_app['account'])
                 acl_perm = False
                 if user_acc_uint64 in acl_granted:
