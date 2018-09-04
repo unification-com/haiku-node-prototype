@@ -1,14 +1,9 @@
 import json
 import logging
-import subprocess
 import time
 
 from pathlib import Path
-
-import requests
-
 from eosapi import Client
-
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain.mother import UnificationMother
