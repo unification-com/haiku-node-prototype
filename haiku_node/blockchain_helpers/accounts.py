@@ -1,24 +1,14 @@
 import json
 import logging
-import subprocess
 import time
 
 from pathlib import Path
-
-import requests
-
 from eosapi import Client
-
 from haiku_node.blockchain.acl import UnificationACL
 from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain.mother import UnificationMother
+from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
-
-KEOS_IP = 'keosd'
-KEOS_PORT = 8889
-
-NODEOS_IP = 'nodeosd'
-NODEOS_PORT = 8888
 
 BLOCK_SLEEP = 0.5
 
@@ -32,64 +22,11 @@ class AccountManager:
         :param host: Set to True if not operating from a Docker container (
         i.e. from the host machine)
         """
-        self.host = host
-        if host:
-            self.nodeos = f"http://{NODEOS_IP}:{NODEOS_PORT}"
-            self.keosd = f"http://127.0.0.1:{KEOS_PORT}"
-            self.nodeos_ip = '127.0.0.1'
-
-        else:
-            self.nodeos = f"http://{NODEOS_IP}:{NODEOS_PORT}"
-            self.keosd = f"http://{KEOS_IP}:{KEOS_PORT}"
-            self.nodeos_ip = NODEOS_IP
-
-    def keos_url(self):
-        return self.keosd
-
-    def request_keos(self, endpoint):
-        return f"{self.keosd}/{endpoint}"
-
-    def cleos(self, subcommands):
-        if self.host:
-            pre = ["/usr/local/bin/docker", "exec", "keosd",
-                   "/opt/eosio/bin/cleos", "--url", self.nodeos,
-                   "--wallet-url", self.keosd]
-        else:
-            pre = ["/opt/eosio/bin/cleos", "--url", self.nodeos,
-                   "--wallet-url", self.keosd]
-
-        cmd = pre + subcommands
-
-        log.debug(f"cleos command: {cmd}")
-
-        result = subprocess.run(
-            cmd, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, universal_newlines=True)
-
-        log.debug(result.stdout)
-        if result.returncode != 0:
-            log.warning(result.stdout)
-            log.debug(result.stdout)
-            log.debug(result.stderr)
-            log.debug(' '.join(cmd))
-
-        return result
-
-    def open_wallet(self, username):
-        """
-        Wallets need to be opened.
-        """
-        log.info('Opening wallet')
-        r = requests.post(self.request_keos('v1/wallet/list_wallets'))
-        current_users = [x.strip(' *') for x in r.json()]
-        if username not in current_users:
-            url = f"{self.keos_url()}/v1/wallet/open"
-            r = requests.post(url, data=f""" "{username}" """)
-            assert r.status_code == 200
+        self.cleos = EosioCleos(host)
 
     def create_key(self):
         log.info('Generating a key')
-        ret = self.cleos(["create", "key"])
+        ret = self.cleos.run(["create", "key"])
 
         s = ret.stdout.split('\n')
         private_key = s[0][len('Private key: '):]
@@ -97,27 +34,48 @@ class AccountManager:
 
         return public_key, private_key
 
-    def lock_wallet(self, username):
-        return self.cleos(["wallet", "lock", "--name", username])
-
-    def unlock_wallet(self, username, password):
-        return self.cleos(
-            ["wallet", "unlock", "--name", username, "--password", password])
-
     def wallet_import_key(self, username, private_key):
         log.info(f"Importing account for {username}")
-        self.cleos(["wallet", "import", "-n", username, private_key])
+        self.cleos.run(["wallet", "import", "-n", username, private_key])
 
     def create_account(self, username, public_key):
         log.info(f"Creating account for {username}")
-        ret = self.cleos(
+        ret = self.cleos.run(
             ["create", "account", "eosio", username, public_key, public_key])
 
         print(ret.stdout)
 
+    def create_account_permissions(self, username, perm_name, public_key):
+        print(f"Creating permission {perm_name} for {username} with key {public_key}")
+
+        keys = []
+        k = {
+            "key": public_key,
+            "weight": 1
+        }
+
+        keys.append(k)
+
+        d = {
+            'threshold': 1,
+            'keys': keys
+        }
+
+        ret = self.cleos.run(
+            ["set", "account", "permission", username, perm_name,
+             json.dumps(d), "active", "-p", f"{username}@active"])
+
+        print(ret.stdout)
+
+    def lock_account_permissions(self, username, smart_contract, contract_action, perm_name):
+        print(f"Lock permission {perm_name} for {username} to action {contract_action} in contract {smart_contract}")
+        ret = self.cleos.run(["set", "account", "permission", username, username,
+                          smart_contract, contract_action, perm_name] )
+        print(ret.stdout)
+
     def mother_contract(self, username):
         log.info('Associating mother contracts')
-        ret = self.cleos(
+        ret = self.cleos.run(
             ["set", "contract", username,
              "/eos/contracts/unification_mother",
              "/eos/contracts/unification_mother/unification_mother.wast",
@@ -128,7 +86,7 @@ class AccountManager:
 
     def token_contract(self, username):
         log.info('Associating token contract')
-        ret = self.cleos(
+        ret = self.cleos.run(
             ["set", "contract", username,
              "/eos/contracts/eosio.token",
              "/eos/contracts/eosio.token/eosio.token.wast",
@@ -144,7 +102,7 @@ class AccountManager:
             'issuer': 'eosio',
             'maximum_supply': '1000000000.0000 UND'
         }
-        ret = self.cleos(
+        ret = self.cleos.run(
             ['push', 'action', 'unif.token', 'create', json.dumps(d), '-p',
              'unif.token'])
 
@@ -161,7 +119,7 @@ class AccountManager:
             'quantity': f'{quantity} UND',
             'memo': 'memo'
         }
-        ret = self.cleos(
+        ret = self.cleos.run(
             ['push', 'action', 'unif.token', 'issue', json.dumps(d), '-p',
              'eosio'])
 
@@ -169,7 +127,7 @@ class AccountManager:
 
     def associate_contracts(self, username):
         log.info('Associating acl contracts')
-        ret = self.cleos(["set", "contract", username,
+        ret = self.cleos.run(["set", "contract", username,
                           "/eos/contracts/unification_acl",
                           "/eos/contracts/unification_acl/unification_acl.wast",
                           "/eos/contracts/unification_acl/unification_acl.abi",
@@ -181,9 +139,9 @@ class AccountManager:
         for i in app_conf['db_schemas']:
             d = {
                 'schema_name': i['schema_name'],
-                'schema': i['schema'],
+                'schema': json.dumps(i['schema']),
             }
-            ret = self.cleos(
+            ret = self.cleos.run(
                 ['push', 'action', appname, 'setschema', json.dumps(d), '-p',
                  appname])
             print(ret.stdout)
@@ -195,7 +153,7 @@ class AccountManager:
                 'source_name': i['source_name'],
                 'source_type': i['source_type'],
             }
-            ret = self.cleos(
+            ret = self.cleos.run(
                 ['push', 'action', appname, 'setsource', json.dumps(d), '-p',
                  appname])
             print(ret.stdout)
@@ -206,13 +164,13 @@ class AccountManager:
             'user_amt': app_conf['und_rewards']['user_amt'],
             'app_amt': app_conf['und_rewards']['app_amt'],
         }
-        ret = self.cleos(
+        ret = self.cleos.run(
             ['push', 'action', appname, 'setrewards', json.dumps(d), '-p',
              appname])
         print(ret.stdout)
 
     def get_und_rewards(self, appname : str) -> float:
-        ret = self.cleos(
+        ret = self.cleos.run(
             ['get', 'currency', 'balance', 'unif.token', appname, 'UND'])
         stripped = ret.stdout.strip()
 
@@ -225,7 +183,7 @@ class AccountManager:
         return float(stripped)
 
     def get_code_hash(self, appname):
-        ret = self.cleos(['get', 'code', appname])
+        ret = self.cleos.run(['get', 'code', appname])
         return ret.stdout.strip()[len('code hash: '):]
 
     def add_to_mother(self, app_config, appname):
@@ -246,7 +204,7 @@ class AccountManager:
                 'rpc_server_ip': app_conf['rpc_server'],
                 'rpc_server_port': app_conf['rpc_server_port']
             }
-            ret = self.cleos(
+            ret = self.cleos.run(
             ['push', 'action', 'unif.mother', 'addnew', json.dumps(d),
              '-p', 'unif.mother'])
             print(ret.stdout)
@@ -255,7 +213,7 @@ class AccountManager:
         d = {
             'acl_contract_acc': appname
         }
-        return self.cleos(
+        return self.cleos.run(
             ['push', 'action', 'unif.mother', 'validate', json.dumps(d),
              '-p', 'unif.mother'])
 
@@ -263,7 +221,7 @@ class AccountManager:
         d = {
             'acl_contract_acc': appname
         }
-        return self.cleos(
+        return self.cleos.run(
             ['push', 'action', 'unif.mother', 'invalidate', json.dumps(d),
              '-p', 'unif.mother'])
 
@@ -272,7 +230,7 @@ class AccountManager:
             'user_account': user,
             'requesting_app': requester,
         }
-        return self.cleos(
+        return self.cleos.run(
             ['push', 'action', provider, 'grant', json.dumps(d), '-p', user])
 
     def setexternaldata(self, public_key_hash, provider, user):
@@ -280,7 +238,7 @@ class AccountManager:
             'requesting_app': provider,
             'public_key_hash': public_key_hash
         }
-        return self.cleos(
+        return self.cleos.run(
             ['push', 'action', provider, 'setexternal', json.dumps(d), '-p', user])
 
     def revoke(self, provider, requester, user):
@@ -288,7 +246,7 @@ class AccountManager:
             'user_account': user,
             'requesting_app': requester,
         }
-        return self.cleos(
+        return self.cleos.run(
             ['push', 'action', provider, 'revoke', json.dumps(d), '-p', user])
 
     def set_permissions(self, demo_permissions):
@@ -308,7 +266,7 @@ class AccountManager:
     def run_test_mother(self, app, demo_apps):
         print("Contacting MOTHER FOR: ", app)
 
-        eos_client = Client(nodes=[f"http://{self.nodeos_ip}:{NODEOS_PORT}"])
+        eos_client = Client(nodes=[self.cleos.get_nodeos_url()])
         um = UnificationMother(eos_client, app)
         print("Valid app: ", um.valid_app())
         assert um.valid_app() is True
@@ -335,7 +293,7 @@ class AccountManager:
     def run_test_acl(self, app, demo_apps, appnames):
         print("Loading ACL/Meta Contract for: ", app)
 
-        eosClient = Client(nodes=[f"http://{self.nodeos_ip}:{NODEOS_PORT}"])
+        eosClient = Client(nodes=[self.cleos.get_nodeos_url()])
         u_acl = UnificationACL(eosClient, app)
 
         print("Data Schemas:")
@@ -361,15 +319,16 @@ def make_default_accounts(
     demo_permissions = demo_config['demo_permissions']
 
     for username in usernames + appnames:
-        manager.open_wallet(username)
+        manager.cleos.open_wallet(username)
         password = demo_config['wallet_passwords'][username]['wallet_password']
-        manager.unlock_wallet(username, password)
+        manager.cleos.unlock_wallet(username, password)
 
     keys = [manager.create_key() for x in range(len(usernames + appnames))]
 
     for username, keys in zip(usernames + appnames, keys):
         manager.wallet_import_key(username, keys[1])
         manager.create_account(username, keys[0])
+
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
@@ -403,6 +362,45 @@ def make_default_accounts(
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
         manager.issue_unds(demo_apps, appname)
+
+        # Permission levels
+        print(f"Create account permissions for app {appname}")
+        # accoiunt permissions to be created
+        app_account_perms = ['modschema', 'modperms', 'modreq', 'modrsakey']
+
+        # smart contract actions the permissions are allowed to use
+        modschema_actions = ['addschema', 'editschema', 'setvers', 'setschedule', 'setminund', 'setschema']
+        modperms_actions = ['modifyperm', 'modifypermsg']
+        modreq_actions = ['initreq', 'updatereq']
+        modrsakey_actions = ['setrsakey']
+        
+        for app_account_perm in app_account_perms:
+            pub_key, priv_key = manager.create_key()
+            manager.wallet_import_key(appname, priv_key)
+            manager.create_account_permissions(appname, app_account_perm, pub_key)
+
+            if app_account_perm == 'modschema':
+                contract_actions = modschema_actions
+            elif app_account_perm == 'modperms':
+                contract_actions = modperms_actions
+            elif app_account_perm == 'modreq':
+                contract_actions = modreq_actions
+            elif app_account_perm == 'modrsakey':
+                contract_actions = modrsakey_actions
+            else:
+                contract_actions = []
+
+            # Todo: AFTER required code modification for new UApp smart contract
+            #for contract_action in contract_actions:
+                #manager.lock_account_permissions(appname, appname, contract_action, app_account_perm)
+
+    for username in usernames:
+        if username not in ['unif.mother', 'unif.token']:  # Todo: maybe have sys_users list?
+            print(f"Create account permissions for user {username}")
+            pub_key, priv_key = manager.create_key()
+            manager.wallet_import_key(username, priv_key)
+            manager.create_account_permissions(username, 'modperms', pub_key)
+
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)

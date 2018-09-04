@@ -1,3 +1,6 @@
+import json
+
+
 class UnificationACL:
     """
     Loads data from ACL/Meta Smart Contract for a Haiku node's app
@@ -82,7 +85,7 @@ class UnificationACL:
                 'schema_name': i['schema_name'],
                 'schema_name_str': i['schema_name_str'],
                 'schema_vers': i['schema_vers'],
-                'schema': i['schema']
+                'schema': json.loads(i['schema'])
             }
             self.__db_schemas[key] = d
 

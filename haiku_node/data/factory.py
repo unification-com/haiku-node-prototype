@@ -1,4 +1,6 @@
-import xml.etree.ElementTree as etree
+import json
+from xmljson import parker, Parker
+from lxml.etree import fromstring
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.acl import UnificationACL
@@ -59,6 +61,8 @@ class UnificationDataFactory:
                 if user_acc_uint64 in self.__granted:
                     native_user_ids.append(self.__my_lookup.get_native_user_id(u))
 
+        print("native_user_ids")
+        print(native_user_ids)
         return native_user_ids
 
     def __generate_data(self):
@@ -74,35 +78,31 @@ class UnificationDataFactory:
 
         # FOR TESTING
         # db_schema = "<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Heartrate</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>GeoLocation</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>TimeStamp</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>Pulse</name><type>int</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>"
-        tree = etree.ElementTree(etree.fromstring(db_schema))
+        ###(Refer to the comment in Asana)
+        ### 1. have the schema in JSON from the beginning
+        ### 2. convert XML to JSON here
+        ### Currently we are going with 2.
 
-        fields = tree.findall('fields/field')
+        print(db_schema)
 
         cols_to_include = []
         base64_encode_cols = []
-
-        for field in fields:
-            table = field.find('table')
-            col = field.find('name')
-            col_type = field.find('type')
-            if table.text != 'unification_lookup':
-                print("table.text before:", table.text)
-                real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, table.text)
+        for items in db_schema['fields']:
+            if items['table'] != 'unification_lookup':
+                print('table.text before:', items['table'])
+                real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, items['table'])
                 print(real_table_data)
-                table.text = real_table_data['real_table_name']
-                print("table.text after:", table.text)
-                cols_to_include.append(col.text)
-                if col_type.text == 'base64_mime_image':
-                    base64_encode_cols.append(col.text)
+                items['table'] = real_table_data['real_table_name']
+                print('table text after:', items['table'])
+                cols_to_include.append(items['name'])
+                if items['type'] == 'base64_mime_image':
+                    base64_encode_cols.append(items['name'])
             else:
-                # temp hack to transform unification_lookup to native user table/col
                 real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, 'data_1')
-                table.text = real_table_data['real_table_name']
+                items['table'] = real_table_data['real_table_name']
                 cols_to_include.append(real_table_data['user_id_column'])
 
         print(base64_encode_cols)
-        root = tree.getroot()
-        db_schema = etree.tostring(root)
 
         # print("new db schema")
         # print(db_schema)
@@ -130,7 +130,8 @@ class UnificationDataFactory:
         }
 
         # TEMP FOR TESTING
-        # print("data_source_parms")
+        print("data_source_parms")
+        print(data_source_parms)
         # pp = pprint.PrettyPrinter(indent=4)
         # pp.pprint(data_source_parms)
         # print("native User IDs for Query")
@@ -144,6 +145,14 @@ class UnificationDataFactory:
             
             data_source_parms['unification_ids'] = unification_ids
             data_transform = TransformData(data_source_parms)
-            self.__raw_data = data_transform.fetch_user_data()
+            #### transforms xml data to json dictionary (string)
+
+            xml = fromstring(data_transform.fetch_user_data())
+            self.__raw_data = json.dumps(parker.data(xml, preserve_root=True))
+
+            #self.__raw_data = data_transform.fetch_user_data()
         else:
-            self.__raw_data = "<no-data></no-data>"  # temp dummy message for no users granting perms
+            d = {
+                "no-data": True
+            }
+            self.__raw_data = json.dumps(d)  # temp dummy message for no users granting perms
