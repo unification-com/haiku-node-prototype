@@ -229,15 +229,18 @@ class AccountManager:
             'rsa_key': public_key_hash
         }
         return self.cleos.run(
-            ['push', 'action', provider, 'setrsakey', json.dumps(d), '-p', f'{provider}@modrsakey'])
+            ['push', 'action', provider, 'setrsakey', json.dumps(d), '-p', provider])
+        # return self.cleos.run(
+        #     ['push', 'action', provider, 'setrsakey', json.dumps(d), '-p', f'{provider}@modrsakey'])
 
     def revoke(self, provider, requester, user):
         d = {
             'user_account': user,
             'requesting_app': requester,
+            'level': 0
         }
         return self.cleos.run(
-            ['push', 'action', provider, 'revoke', json.dumps(d), '-p', user])
+            ['push', 'action', provider, 'modifyperm', json.dumps(d), '-p', user])
 
     def set_permissions(self, demo_permissions):
         print("set_permissions")
@@ -261,8 +264,8 @@ class AccountManager:
         print("Valid app: ", um.valid_app())
         assert um.valid_app() is True
 
-        print("ACL Hash in MOTHER: ", um.get_hash_in_mother())
-        print("Deployed ACL Contract hash: ", um.get_deployed_contract_hash())
+        print("UApp SC Hash in MOTHER: ", um.get_hash_in_mother())
+        print("Deployed UApp SC Contract hash: ", um.get_deployed_contract_hash())
         assert um.get_hash_in_mother() == um.get_deployed_contract_hash()
 
         print("Valid Code: ", um.valid_code())
@@ -281,7 +284,7 @@ class AccountManager:
         print("-----------------------------------")
 
     def run_test_uapp(self, app, demo_apps, appnames):
-        print("Loading ACL/Meta Contract for: ", app)
+        print("Loading UApp Contract for: ", app)
 
         eosClient = Client(nodes=[self.cleos.get_nodeos_url()])
         u_uapp = UnificationUapp(eosClient, app)
