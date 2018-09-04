@@ -1,5 +1,6 @@
 import json
 
+from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
 class UnificationUapp:
     """
@@ -7,7 +8,7 @@ class UnificationUapp:
      - Calls actions in UApp Smart Contract to add/modify data
     """
 
-    def __init__(self, eos_client, acl_contract_acc):
+    def __init__(self, eos_rpc_client, acl_contract_acc):
         """
         :param acl_contract_acc: the eos account name of the app for which the
             class will retrieve data from the UApp smart contract
@@ -18,11 +19,15 @@ class UnificationUapp:
         self.__data_requests_table = "datareqs"
 
         self.__acl_contract_acc = acl_contract_acc
-        self.__eosClient = eos_client
+        self.__eos_rpc_client = eos_rpc_client
+
+        self.__cleos = EosioCleos(host=False)
 
     def get_all_db_schemas(self):
         db_schemas = {}
-        table_data = self.__eosClient.get_table_rows(
+
+        # Todo: pagination
+        table_data = self.__eos_rpc_client.get_table_rows(
             self.__acl_contract_acc,
             self.__acl_contract_acc, self.__db_schema_table, True, 0, -1, -1)
 
@@ -42,7 +47,7 @@ class UnificationUapp:
 
     def get_db_schema_by_pkey(self, pkey: int):
         db_schema = {}
-        table_data = self.__eosClient.get_table_rows(
+        table_data = self.__eos_rpc_client.get_table_rows(
             self.__acl_contract_acc,
             self.__acl_contract_acc, self.__db_schema_table, True, pkey, pkey + 1, 1)
 
@@ -60,8 +65,8 @@ class UnificationUapp:
         return db_schema
 
     def get_perms_for_req_app(self, requesting_app):
-        # TODO: run in loop and check JSON result for "more" value
-        table_data = self.__eosClient.get_table_rows(
+        # TODO: run in loop and check JSON result for "more" value/pagination
+        table_data = self.__eos_rpc_client.get_table_rows(
             requesting_app,
             self.__acl_contract_acc, self.__permission_rec_table, True, 0, -1,
             -1)
@@ -78,7 +83,7 @@ class UnificationUapp:
         return granted, revoked
 
     def get_public_key_hash(self, requesting_app):
-        table_data = self.__eosClient.get_table_rows(
+        table_data = self.__eos_rpc_client.get_table_rows(
             requesting_app,
             self.__acl_contract_acc, self.__rsa_pub_key_table, True, 0, -1,
             -1)
@@ -88,7 +93,7 @@ class UnificationUapp:
 
     def get_all_data_requests(self):
         data_requests = {}
-        table_data = self.__eosClient.get_table_rows(
+        table_data = self.__eos_rpc_client.get_table_rows(
             self.__acl_contract_acc,
             self.__acl_contract_acc, self.__data_requests_table, True, 0, -1, -1)
 
@@ -110,7 +115,7 @@ class UnificationUapp:
 
     def get_data_request_by_pkey(self, pkey: int):
         data_request = {}
-        table_data = self.__eosClient.get_table_rows(
+        table_data = self.__eos_rpc_client.get_table_rows(
             self.__acl_contract_acc,
             self.__acl_contract_acc, self.__data_requests_table, True, pkey, pkey + 1, 1)
 
@@ -129,7 +134,7 @@ class UnificationUapp:
 
         return data_request
 
-    def add_schema(self, schema: str, schema_vers: int, schedule: int, price_sched: int, price_adhoc: int):
+    def add_schema(self, schema, schema_vers: int, schedule: int, price_sched: int, price_adhoc: int):
 
         d = {
             'schema': json.dumps(schema),
@@ -138,8 +143,143 @@ class UnificationUapp:
             'price_sched': price_sched,
             'price_adhoc': price_adhoc
         }
-        ret = self.cleos(
+        ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'addschema', json.dumps(d), '-p',
              f'{self.__acl_contract_acc}@modschema'])
+
         print(ret.stdout)
+
+        return ret
+
+    def edit_schema(self, pkey: int, schema: str, schema_vers: int, schedule: int, price_sched: int, price_adhoc: int):
+
+        d = {
+            'pkey': pkey,
+            'schema': json.dumps(schema),
+            'schema_vers': schema_vers,
+            'schedule': schedule,
+            'price_sched': price_sched,
+            'price_adhoc': price_adhoc
+        }
+        ret = self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'editschema', json.dumps(d), '-p',
+             f'{self.__acl_contract_acc}@modschema'])
+
+        print(ret.stdout)
+
+        return ret
+
+    def set_schema_version(self, pkey: int, schema_vers: int):
+
+        d = {
+            'pkey': pkey,
+            'schema_vers': schema_vers
+        }
+        ret = self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'setvers', json.dumps(d), '-p',
+             f'{self.__acl_contract_acc}@modschema'])
+
+        print(ret.stdout)
+
+        return ret
+
+    def set_schema_schedule(self, pkey: int, schedule: int):
+
+        d = {
+            'pkey': pkey,
+            'schedule': schedule
+        }
+        ret = self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'setschedule', json.dumps(d), '-p',
+             f'{self.__acl_contract_acc}@modschema'])
+
+        print(ret.stdout)
+
+        return ret
+
+    def set_schema_price_schedule(self, pkey: int, price_sched: int):
+
+        d = {
+            'pkey': pkey,
+            'price_sched': price_sched
+        }
+        ret = self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'setpricesch', json.dumps(d), '-p',
+             f'{self.__acl_contract_acc}@modschema'])
+
+        print(ret.stdout)
+
+        return ret
+
+    def set_schema_price_adhoc(self, pkey: int, price_adhoc: int):
+
+        d = {
+            'pkey': pkey,
+            'price_sched': price_adhoc
+        }
+        ret = self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'setpriceadh', json.dumps(d), '-p',
+             f'{self.__acl_contract_acc}@modschema'])
+
+        print(ret.stdout)
+
+        return ret
+
+    def set_schema(self, pkey: int, schema):
+
+        d = {
+            'pkey': pkey,
+            'schema': json.dumps(schema)
+        }
+        ret = self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'setchema', json.dumps(d), '-p',
+             f'{self.__acl_contract_acc}@modschema'])
+
+        print(ret.stdout)
+
+        return ret
+
+    def set_rsa_public_key_hash(self, rsa_public_key_hash: str):
+        d = {
+            'rsa_key': rsa_public_key_hash
+        }
+
+        ret = self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'setrsakey', json.dumps(d), '-p',
+             f'{self.__acl_contract_acc}@modrsakey'])
+
+        print(ret.stdout)
+
+        return ret
+
+    def init_data_request(self, provider_name, schema_id, req_type, query, price):
+        d = {
+            'provider_name': provider_name,
+            'schema_id': schema_id,
+            'req_type': req_type,
+            'query': query,
+            'price': price
+        }
+        ret = self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'initreq', json.dumps(d), '-p',
+             f'{self.__acl_contract_acc}@modreq'])
+
+        print(ret.stdout)
+
+        return ret
+
+    def update_data_request(self, pkey, provider_name, hash, aggr):
+        d = {
+            'provider_name': provider_name,
+            'pkey': pkey,
+            'hash': hash,
+            'aggr': aggr
+        }
+        ret = self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'updatereq', json.dumps(d), '-p',
+             f'{provider_name}@modreq'])
+
+        print(ret.stdout)
+
+        return ret
 
