@@ -4,7 +4,7 @@ import time
 
 from pathlib import Path
 from eosapi import Client
-from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
@@ -126,11 +126,11 @@ class AccountManager:
         print(ret.stdout)
 
     def associate_contracts(self, username):
-        log.info('Associating acl contracts')
+        log.info('Associating UApp contracts')
         ret = self.cleos.run(["set", "contract", username,
-                          "/eos/contracts/unification_acl",
-                          "/eos/contracts/unification_acl/unification_acl.wast",
-                          "/eos/contracts/unification_acl/unification_acl.abi",
+                          "/eos/contracts/unification_uapp",
+                          "/eos/contracts/unification_uapp/unification_uapp.wast",
+                          "/eos/contracts/unification_uapp/unification_uapp.abi",
                           "-p", username])
         print(ret.stdout)
 
