@@ -5,7 +5,7 @@ COPY --from=unification-base /usr/local/lib/* /usr/local/lib/
 COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
 COPY --from=unification-base /tmp/build/contracts /contracts
 COPY --from=unification-base /eos/Docker/config.ini /
-COPY --from=unification-contracts /eos/contracts/unification_acl /eos/contracts/unification_acl
+COPY --from=unification-contracts /eos/contracts/unification_uapp /eos/contracts/unification_uapp
 COPY --from=unification-contracts /eos/contracts/unification_mother /eos/contracts/unification_mother
 COPY Docker/nodeosd.sh /opt/eosio/bin/nodeosd.sh
 ENV EOSIO_ROOT=/opt/eosio
