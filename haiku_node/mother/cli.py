@@ -6,6 +6,7 @@ from eosapi import Client
 from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain_helpers import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
+from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
 log = logging.getLogger(__name__)
 
@@ -83,10 +84,11 @@ def validate(appname, password):
     click.echo(f"Validating app {bold(appname)} "
                "with MOTHER:")
 
+    cleos = EosioCleos()
     accounts = AccountManager()
-    accounts.unlock_wallet('unif.mother', password)
+    cleos.unlock_wallet('unif.mother', password)
     result = accounts.validate_with_mother(appname)
-    accounts.lock_wallet('unif.mother')
+    cleos.lock_wallet('unif.mother')
     if result.returncode == 0:
         click.echo(bold('Validation succeeded'))
     else:
@@ -107,10 +109,11 @@ def invalidate(appname, password):
     click.echo(f"Invalidating app {bold(appname)} "
                "with MOTHER:")
 
+    cleos = EosioCleos()
     accounts = AccountManager()
-    accounts.unlock_wallet('unif.mother', password)
+    cleos.unlock_wallet('unif.mother', password)
     result = accounts.invalidate_with_mother(appname)
-    accounts.lock_wallet('unif.mother')
+    cleos.lock_wallet('unif.mother')
     if result.returncode == 0:
         click.echo(bold('Invalidation succeeded'))
     else:
