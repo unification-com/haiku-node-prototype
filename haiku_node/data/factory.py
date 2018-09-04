@@ -3,7 +3,7 @@ from xmljson import parker, Parker
 from lxml.etree import fromstring
 
 from haiku_node.blockchain.mother import UnificationMother
-from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.config.config import UnificationConfig
 from haiku_node.data.transform_data import TransformData
 from haiku_node.blockchain_helpers import eosio_account
@@ -23,7 +23,7 @@ class UnificationDataFactory:
         self.__haiku_conf = UnificationConfig()
 
         self.__my_mother = UnificationMother(eos_client, acl_contract_acc)
-        self.__my_acl = UnificationACL(eos_client, acl_contract_acc)
+        self.__my_uapp_sc = UnificationUapp(eos_client, acl_contract_acc)
         self.__my_lookup = UnificationLookup(default_db())
         self.__users = None if len(users) == 0 else users
 

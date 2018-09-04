@@ -11,6 +11,7 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.validation.validation import UnificationAppScValidation
 from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
 log = logging.getLogger(__name__)
 
@@ -107,10 +108,11 @@ def grant(provider, requester, user, password):
     click.echo(f"{bold(user)} is granting {bold(requester)} "
                f"access to their data held in {bold(provider)}:")
 
+    cleos = EosioCleos()
     accounts = AccountManager()
-    accounts.unlock_wallet(user, password)
+    cleos.unlock_wallet(user, password)
     result = accounts.grant(provider, requester, user)
-    accounts.lock_wallet(user)
+    cleos.lock_wallet(user)
     if result.returncode == 0:
         click.echo(bold('Grant succeeded'))
     else:
@@ -134,10 +136,11 @@ def revoke(provider, requester, user, password):
     """
     click.echo(f"{bold(user)} is revoking access from {bold(requester)} "
                f"to their data in held {bold(provider)}:")
+    cleos = EosioCleos()
     accounts = AccountManager()
-    accounts.unlock_wallet(user, password)
+    cleos.unlock_wallet(user, password)
     result = accounts.revoke(provider, requester, user)
-    accounts.lock_wallet(user)
+    cleos.lock_wallet(user)
     if result.returncode == 0:
         click.echo(bold('Revoke succeeded'))
     else:
@@ -155,10 +158,10 @@ def balance(user, password):
     :param user: The EOS user account name.
     :param password: The EOS user account's wallet password.
     """
-    accounts = AccountManager()
-    accounts.unlock_wallet(user, password)
+    cleos = EosioCleos()
+    cleos.unlock_wallet(user, password)
     my_balance = get_balance(user)
-    accounts.lock_wallet(user)
+    cleos.lock_wallet(user)
 
     click.echo(bold(f'{user} Balance: {my_balance}'))
 
@@ -190,8 +193,8 @@ def transfer(from_acc, to_acc, amount, password):
     their_balance = get_balance(to_acc)
     click.echo(bold(f'{to_acc} Old Balance: {their_balance}'))
 
-    accounts = AccountManager()
-    accounts.unlock_wallet(from_acc, password)
+    cleos = EosioCleos()
+    cleos.unlock_wallet(from_acc, password)
 
     conf = UnificationConfig()
     d = {
@@ -209,7 +212,7 @@ def transfer(from_acc, to_acc, amount, password):
         cmd, stdout=subprocess.PIPE,
         stderr=subprocess.PIPE, universal_newlines=True)
 
-    accounts.lock_wallet(from_acc)
+    cleos.lock_wallet(from_acc)
 
     stripped = ret.stdout.strip()
     click.echo(bold(f'Transfer result: {stripped}'))
