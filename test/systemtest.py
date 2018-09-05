@@ -300,7 +300,7 @@ def wait():
     time.sleep(1)
     for app, balance in balances.items():
         log.info(f"App {app} has a balance of {balance} UND")
-        # assert manager.get_und_rewards(app) == balance
+        assert manager.get_und_rewards(app) == balance
 
     # The User3 has denied access to for app2 to access data on app 1
     balances = systest_ingest('app2', 'app1', 'user3', balances)
