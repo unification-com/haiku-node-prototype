@@ -5,9 +5,12 @@ import subprocess
 from eosapi import Client
 
 from haiku_node.config.config import UnificationConfig
-from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.blockchain.uapp import UnificationUapp
 
 log = logging.getLogger(__name__)
+UNIF = 0.05
+DATA_PROVIDER = 0.65
+END_USERS = 0.3
 
 
 class UndRewards:
@@ -24,18 +27,24 @@ class UndRewards:
         eos_client = Client(
             nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
-        acl = UnificationACL(eos_client, self.__my_acl_acc)
+        uapp_sc = UnificationUapp(eos_client, self.__my_acl_acc)
 
-        self.__user_und_reward = acl.get_user_und_reward()
-        self.__app_und_reward = acl.get_app_und_reward()
+        schemas = uapp_sc.get_all_db_schemas()
+        # Todo: get correct price for schema being used. Temporary solution since only 1 schema per app in prototype
+        self.__und_scheduled = schemas[0]['price_sched']
+        self.__und_adhoc = schemas[0]['price_adhoc']
 
-    def send_reward(self, to, is_user=True):
-        reward = self.__user_und_reward if is_user else self.__app_und_reward
+    def send_reward(self, to, is_user=True, num_users=1):
+
+        if(is_user):
+            reward = float("{0:.4f}".format((self.__und_scheduled * END_USERS) / num_users))
+        else:
+            reward = float("{0:.4f}".format(self.__user_und_reward * DATA_PROVIDER))
 
         d = {
             'from': self.__my_acl_acc,
             'to': to,
-            'quantity': f'{reward}.0000 UND',  # TODO - need to fix precision
+            'quantity': f'{reward} UND',
             'memo': 'UND Reward'
         }
         # cleos push action eosio.token transfer '[ "app3", "user1", "1.0000 UND", "m" ]' -p app3

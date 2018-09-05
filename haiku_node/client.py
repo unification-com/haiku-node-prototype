@@ -94,12 +94,13 @@ class HaikuDataClient:
             if isinstance(users_to_pay, dict):
                 username = users_to_pay['unification_user']
                 print(f'pay {username}')
-                ret = und_reward.send_reward(username)
+                ret = und_reward.send_reward(username, is_user=True, num_users=1)
                 log.debug(ret)
             else:
+                num_users = len(users_to_pay['unification_user'])
                 for username in users_to_pay['unification_user']:
                     print(f'pay {username}')
-                    ret = und_reward.send_reward(username)
+                    ret = und_reward.send_reward(username, is_user=True, num_users=num_users)
                     log.debug(ret)
 
             log.debug(f"Pay provider {providing_app.name}")
