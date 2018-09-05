@@ -24,12 +24,6 @@ def run_test(app):
     print("App UND Reward:")
     print(u_acl.get_app_und_reward())
 
-
-    print("Current VALID Schema(s), as per MOTHER:")
-    um = UnificationMother(eos_client, app)
-    for sn, sv in um.get_valid_db_schemas().items():
-        print(u_acl.get_current_valid_schema(sn, sv))
-
     print("Check Permissions")
     for req_app in apps_to_test:
         print("Check perms for Requesting App: ", req_app)
