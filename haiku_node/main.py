@@ -1,8 +1,7 @@
 import os
 
 import click
-import json, xmljson
-from lxml.etree import fromstring
+import json
 
 from cryptography.fernet import Fernet
 
