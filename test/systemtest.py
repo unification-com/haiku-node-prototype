@@ -166,14 +166,6 @@ def systest_smart_contract_mother():
         assert (int(app_data['rpc_server_port']) == int(
             mother.get_haiku_rpc_port())) is True
 
-        # log.info("Valid DB Schemas exist in ACL/Meta Smart Contract")
-        # valid_schemas = mother.get_valid_db_schemas()
-        # for sch_n, vers in valid_schemas.items():
-        #     log.info(f'Schema {sch_n} version {vers}')
-        #     schema = acl.get_current_valid_schema(sch_n, vers)
-        #     log.info(schema)
-        #     assert schema is not False
-
         log.info("------------------------------------------")
 
 

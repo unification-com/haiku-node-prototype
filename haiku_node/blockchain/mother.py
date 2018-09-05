@@ -18,7 +18,6 @@ class UnificationMother:
         self.__is_valid_app = False
         self.__is_valid_code = False
         self.__deployed_contract_hash = ""  # the actual deployed contract
-        self.__valid_db_schemas = {}
         self.__acl_contract_hash_in_mother = ""  # hash held in MOTHER
         self.__haiku_rpc_server_ip = None
         self.__haiku_rpc_server_port = None
@@ -36,9 +35,6 @@ class UnificationMother:
 
     def get_deployed_contract_hash(self):
         return self.__deployed_contract_hash
-
-    def get_valid_db_schemas(self):
-        return self.__valid_db_schemas
 
     def get_haiku_rpc_server(self):
         return f'https://{self.__haiku_rpc_server_ip}:' \
@@ -65,8 +61,6 @@ class UnificationMother:
 
         req_app_uint64 = eosio_account.string_to_name(self.__acl_contract_acc)
 
-        db_schemas = ""
-
         for i in table_data['rows']:
 
             if int(i['acl_contract_acc']) == req_app_uint64:
@@ -77,14 +71,7 @@ class UnificationMother:
                 self.__acl_contract_hash_in_mother = i['acl_contract_hash']
                 self.__haiku_rpc_server_ip = i['rpc_server_ip']
                 self.__haiku_rpc_server_port = i['rpc_server_port']
-                db_schemas = i['schema_vers']
                 break
-
-        if len(db_schemas) > 0:
-            schemas_vers = db_schemas.split(",")
-            for sv in schemas_vers:
-                schema, vers = sv.split(":")
-                self.__valid_db_schemas[schema] = vers
 
     def __run(self):
         self.__call_mother()
