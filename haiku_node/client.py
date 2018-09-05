@@ -109,6 +109,11 @@ class HaikuDataClient:
             ret = und_reward.send_reward(providing_app.name, False)
             log.debug(ret)
 
+            log.debug(f"Pay Unification")
+            ret = und_reward.pay_unif()
+            log.debug(ret)
+
+
         return self.persist_data(
             providing_app.name, request_hash, d)
 

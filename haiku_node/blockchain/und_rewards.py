@@ -8,9 +8,9 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain.uapp import UnificationUapp
 
 log = logging.getLogger(__name__)
-UNIF = 0.05
-DATA_PROVIDER = 0.65
-END_USERS = 0.3
+UNIF = 0.03
+DATA_PROVIDER = 0.3
+END_USERS = 0.67
 
 
 class UndRewards:
@@ -49,6 +49,35 @@ class UndRewards:
             'memo': 'UND Reward'
         }
         # cleos push action eosio.token transfer '[ "app3", "user1", "1.0000 UND", "m" ]' -p app3
+        subcommands = ["push", "action", "unif.token", "transfer", json.dumps(d), "-p", self.__my_acl_acc]
+
+        cmd = self.__eos_client_pre + subcommands
+
+        log.debug(f"cleos command: {cmd}")
+
+        result = subprocess.run(
+            cmd, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, universal_newlines=True)
+
+        log.debug(result.stdout)
+        if result.returncode != 0:
+            log.warning(result.stdout)
+            log.debug(result.stdout)
+            log.debug(result.stderr)
+            log.debug(' '.join(cmd))
+
+        return result
+
+    def pay_unif(self):
+        und = "{0:.4f}".format(round(float(self.__und_scheduled * UNIF), 4))
+
+        d = {
+            'from': self.__my_acl_acc,
+            'to': 'unif.mother',
+            'quantity': f'{und} UND',
+            'memo': 'UND Reward'
+        }
+
         subcommands = ["push", "action", "unif.token", "transfer", json.dumps(d), "-p", self.__my_acl_acc]
 
         cmd = self.__eos_client_pre + subcommands
