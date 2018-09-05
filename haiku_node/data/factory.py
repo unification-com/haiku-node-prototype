@@ -27,7 +27,6 @@ class UnificationDataFactory:
         self.__my_lookup = UnificationLookup(default_db())
         self.__users = None if len(users) == 0 else users
 
-        self.__valid_db_schemas = self.__my_mother.get_valid_db_schemas()
         self.__my_db_schemas = self.__my_uapp_sc.get_all_db_schemas()
         self.__db_schema_maps = {}
         self.__granted = []
