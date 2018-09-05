@@ -279,8 +279,6 @@ class AccountManager:
             demo_apps[app]['rpc_server_port'])
 
         print("RPC Server: ", um.get_haiku_rpc_server())
-        print("Valid DB Schemas: ")
-        print(um.get_valid_db_schemas())
         print("-----------------------------------")
 
     def run_test_uapp(self, app, demo_apps, appnames):
