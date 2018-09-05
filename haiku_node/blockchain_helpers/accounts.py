@@ -1,7 +1,6 @@
 import json
 import logging
 import time
-import subprocess
 
 from pathlib import Path
 from eosapi import Client
@@ -74,24 +73,6 @@ class AccountManager:
                           smart_contract, contract_action, perm_name])
 
         print(ret.stdout)
-
-        # cmd = [f'/opt/eosio/bin/cleos',  f'--url http://nodeosd:8888 --wallet-url http://keosd:8889 ' \
-        #        f'set account permission {username} {smart_contract} {contract_action} {perm_name}']
-        #
-        # log.debug(f"cleos command: {cmd}")
-        #
-        # result = subprocess.run(
-        #     cmd, stdout=subprocess.PIPE,
-        #     stderr=subprocess.PIPE, universal_newlines=True)
-        #
-        # log.debug(result.stdout)
-        # if result.returncode != 0:
-        #     log.warning(result.stdout)
-        #     log.debug(result.stdout)
-        #     log.debug(result.stderr)
-        #     log.debug(' '.join(cmd))
-        #
-        # print(result.stdout)
 
     def mother_contract(self, username):
         log.info('Associating mother contracts')
