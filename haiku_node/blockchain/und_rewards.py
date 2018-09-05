@@ -36,10 +36,11 @@ class UndRewards:
 
     def send_reward(self, to, is_user=True, num_users=1):
 
-        if(is_user):
-            reward = float("{0:.4f}".format((self.__und_scheduled * END_USERS) / num_users))
+        # Todo: migrate to Token smart contract
+        if is_user:
+            reward = "{0:.4f}".format(round(float((self.__und_scheduled * END_USERS) / num_users), 4))
         else:
-            reward = float("{0:.4f}".format(self.__user_und_reward * DATA_PROVIDER))
+            reward = "{0:.4f}".format(round(float(self.__und_scheduled * DATA_PROVIDER), 4))
 
         d = {
             'from': self.__my_acl_acc,
@@ -74,4 +75,3 @@ class UndRewards:
             reward = float("{0:.4f}".format(self.__user_und_reward * DATA_PROVIDER))
 
         return reward
-
