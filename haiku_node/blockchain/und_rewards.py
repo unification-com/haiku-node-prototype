@@ -66,3 +66,12 @@ class UndRewards:
             log.debug(' '.join(cmd))
 
         return result
+
+    def calculate_reward(self, is_user=True, num_users=1):
+        if (is_user):
+            reward = float("{0:.4f}".format((self.__und_scheduled * END_USERS) / num_users))
+        else:
+            reward = float("{0:.4f}".format(self.__user_und_reward * DATA_PROVIDER))
+
+        return reward
+
