@@ -37,8 +37,6 @@ def run_test(app):
     assert int(um.get_haiku_rpc_port()) == int(demo_apps[app]['rpc_server_port'])
 
     print("RPC Server: ", um.get_haiku_rpc_server())
-    print("Valid DB Schemas: ")
-    print(um.get_valid_db_schemas())
     print("-----------------------------------")
 
 
