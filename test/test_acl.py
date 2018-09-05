@@ -1,7 +1,6 @@
 from eosapi import Client
 
-from haiku_node.blockchain.acl import UnificationACL
-from haiku_node.blockchain.mother import UnificationMother
+from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.config.config import UnificationConfig
 
 apps_to_test = ['app1', 'app2', 'app3']
@@ -13,21 +12,15 @@ def run_test(app):
 
     eos_client = Client(
         nodes=[f"http://{config['eos_rpc_ip']}:{config['eos_rpc_port']}"])
-    u_acl = UnificationACL(eos_client, app)
+    uapp_sc = UnificationUapp(eos_client, app)
 
     print("Data Schemas in Contract:")
-    print(u_acl.get_db_schemas())
-    print("Data Sources:")
-    print(u_acl.get_data_sources())
-    print("User UND Reward:")
-    print(u_acl.get_user_und_reward())
-    print("App UND Reward:")
-    print(u_acl.get_app_und_reward())
+    print(uapp_sc.get_all_db_schemas())
 
     print("Check Permissions")
     for req_app in apps_to_test:
         print("Check perms for Requesting App: ", req_app)
-        granted, revoked = u_acl.get_perms_for_req_app(req_app)
+        granted, revoked = uapp_sc.get_perms_for_req_app(req_app)
         print("Users who Granted:")
         print(granted)
         print("Users who Revoked:")
