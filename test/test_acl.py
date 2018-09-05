@@ -8,7 +8,7 @@ config = UnificationConfig()
 
 
 def run_test(app):
-    print("Loading ACL/Meta Contract for: ", app)
+    print("Loading UApp Smart Contract for: ", app)
 
     eos_client = Client(
         nodes=[f"http://{config['eos_rpc_ip']}:{config['eos_rpc_port']}"])

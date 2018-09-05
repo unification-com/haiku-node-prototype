@@ -35,9 +35,11 @@ class UnificationDataFactory:
 
         self.__native_user_meta = self.__my_lookup.get_native_user_meta()
 
-        for db_schema in self.__my_db_schemas:
-            schema_map = self.__my_lookup.get_schema_map(db_schema['pkey'])
-            self.__db_schema_maps[db_schema['pkey']] = schema_map
+        for pkey, db_schema in self.__my_db_schemas.items():
+            print("DB_SCHEMA_TEST")
+            print(db_schema)
+            schema_map = self.__my_lookup.get_schema_map(pkey)
+            self.__db_schema_maps[pkey] = schema_map
 
         self.__generate_data()
 
@@ -69,10 +71,10 @@ class UnificationDataFactory:
         native_user_ids = self.__generate_user_list()
 
         # temporary hack - there's only 1 db schema per app at the moment....
-        sc_schema_pkey = self.__my_db_schemas[0]['sc_schema_pkey']
+        sc_schema_pkey = self.__my_db_schemas[0]['pkey']
         db_schema = self.__my_db_schemas[0]['schema']
         db_schema_map = self.__db_schema_maps[sc_schema_pkey]
-        db_connection = self.__haiku_conf['db_conn'][sc_schema_pkey]
+        db_connection = self.__haiku_conf['db_conn']["0"]
 
         # FOR TESTING
         # db_schema = "<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Heartrate</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>GeoLocation</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>TimeStamp</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>Pulse</name><type>int</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>"
