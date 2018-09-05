@@ -60,15 +60,15 @@ class UnificationLookup:
 
         return dt
 
-    def get_schema_map(self, schema_name):
+    def get_schema_map(self, sc_schema_pkey):
         self.__open_con()
-        t = (schema_name,)
-        self.__c.execute('SELECT * FROM schema_map WHERE sc_schema_name=?', t)
+        t = (sc_schema_pkey,)
+        self.__c.execute('SELECT * FROM schema_map WHERE sc_schema_pkey=?', t)
 
         res = self.__c.fetchone()
 
         dt = {
-            'sc_schema_name': res[0],
+            'sc_schema_pkey': res[0],
             'db_name': res[1],
             'db_platform': res[2]
         }
@@ -77,16 +77,16 @@ class UnificationLookup:
 
         return dt
 
-    def get_real_table_info(self, schema_name, sc_table_name):
+    def get_real_table_info(self, sc_schema_pkey, sc_table_name):
         self.__open_con()
-        t = (schema_name, sc_table_name)
-        self.__c.execute('SELECT * FROM table_maps WHERE sc_schema_name=? AND '
+        t = (sc_schema_pkey, sc_table_name)
+        self.__c.execute('SELECT * FROM table_maps WHERE sc_schema_pkey=? AND '
                          'sc_table_name=?', t)
 
         res = self.__c.fetchone()
 
         dt = {
-            'sc_schema_name': res[0],
+            'sc_schema_pkey': res[0],
             'sc_table_name': res[1],
             'real_table_name': res[2],
             'user_id_column': res[3]
