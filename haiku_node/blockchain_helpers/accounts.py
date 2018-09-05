@@ -172,6 +172,19 @@ class AccountManager:
                  appname])
             print(ret.stdout)
 
+    def get_und_rewards(self, appname : str) -> float:
+        ret = self.cleos.run(
+            ['get', 'currency', 'balance', 'unif.token', appname, 'UND'])
+        stripped = ret.stdout.strip()
+
+        embed_postfix = ' UND'
+        if stripped.endswith(embed_postfix):
+            stripped = stripped[:-(len(embed_postfix))]
+        else:
+            raise Exception(f"Unexpected postfix: {stripped}")
+
+        return float(stripped)
+
     def get_code_hash(self, appname):
         ret = self.cleos.run(['get', 'code', appname])
         return ret.stdout.strip()[len('code hash: '):]
