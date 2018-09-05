@@ -69,9 +69,9 @@ class UndRewards:
         return result
 
     def calculate_reward(self, is_user=True, num_users=1):
-        if (is_user):
-            reward = float("{0:.4f}".format((self.__und_scheduled * END_USERS) / num_users))
+        if is_user:
+            reward = round(float((self.__und_scheduled * END_USERS) / num_users), 4)
         else:
-            reward = float("{0:.4f}".format(self.__user_und_reward * DATA_PROVIDER))
+            reward = round(float(self.__und_scheduled * DATA_PROVIDER), 4)
 
         return reward

@@ -11,6 +11,7 @@ import requests
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.uapp import UnificationUapp
+from haiku_node.blockchain.und_rewards import UndRewards
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle
@@ -95,12 +96,17 @@ def systest_ingest(requesting_app, providing_app, user, balances, local=False):
     client.read_data_from_store(provider, request_hash)
 
     # Update the system test record of the balances
-    rewards = lambda app: demo_config['demo_apps'][app]['und_rewards']
-    balances[requesting_app] = balances[requesting_app] - (
-            rewards(requesting_app)['app_amt'] +
-            rewards(requesting_app)['user_amt'])
-    balances[providing_app] = (
-            balances[providing_app] + rewards(requesting_app)['app_amt'])
+    price_sched = demo_config['demo_apps'][providing_app]['db_schemas'][0]['price_sched']
+    balances[requesting_app] = balances[requesting_app] - price_sched
+    und_rewards = UndRewards(providing_app)
+    balances[providing_app] = balances[providing_app] + und_rewards.calculate_reward(is_user=False)
+
+    # rewards = lambda app: demo_config['demo_apps'][app]['und_rewards']
+    # balances[requesting_app] = balances[requesting_app] - (
+    #         rewards(requesting_app)['app_amt'] +
+    #         rewards(requesting_app)['user_amt'])
+    # balances[providing_app] = (
+    #         balances[providing_app] + rewards(requesting_app)['app_amt'])
     return balances
 
 

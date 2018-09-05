@@ -161,8 +161,8 @@ class AccountManager:
                 'schema': json.dumps(i['schema']),
                 'schema_vers': 1,
                 'schedule': 1,
-                'price_sched': 10,
-                'price_adhoc': 15
+                'price_sched': i['price_sched'],
+                'price_adhoc': i['price_adhoc']
             }
             # ret = self.cleos.run(
             #     ['push', 'action', appname, 'addschema', json.dumps(d), '-p',
