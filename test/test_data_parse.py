@@ -1,11 +1,9 @@
 import os
-from pathlib import Path
-
+import json
 import sqlite3
-
 import pytest
 
-import json
+from pathlib import Path
 
 
 def target_file(db_name):
