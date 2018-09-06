@@ -83,7 +83,6 @@ def schemas(app_name):
         click.echo(schema['schema'])
 
 
-
 @main.command()
 @click.argument('provider')
 @click.argument('requester')
