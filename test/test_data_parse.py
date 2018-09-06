@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import sqlite3
-from sqlite3 import Error
 
 import pytest
 
@@ -45,10 +44,6 @@ def test_database_read(db_name):
     :return: Connection object or None
     """
     target = target_file(db_name)
-    try:
-        conn = sqlite3.connect(str(target))
-        j = to_json(conn)
-        print(j)
-
-    except Error as e:
-        print(e)
+    conn = sqlite3.connect(str(target))
+    j = to_json(conn)
+    print(j)
