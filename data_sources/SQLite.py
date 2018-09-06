@@ -42,6 +42,7 @@ def create_table_heartbit():
                  'PRIMARY KEY (DataID),'
                  'FOREIGN KEY (UserID) REFERENCES Users(ID))'.format(current_date1))
 
+
 def insert_value_heartbit():
     curr.execute("INSERT INTO Users(ID,LastName,FirstName,Email) VALUES (1,'McLean','Shawn','syonara@hotmail.com'),(2,'Hodge','Paul','paul@hotmail.com'),(3,'Ney','Ma','neyma@hotmail.com')")
     curr.execute("INSERT INTO UserData (DataID,Heartrate,GeoLocation,Pulse,UserID)"
@@ -80,6 +81,7 @@ def insert_value_heartbit():
     conn.commit()
     curr.close()
     conn.close()
+
 
 create_table_heartbit()
 insert_value_heartbit()
@@ -221,7 +223,5 @@ def insert_value_imagestorage():
 
 create_table_imagestorage()
 insert_value_imagestorage()
-
-
 
 
