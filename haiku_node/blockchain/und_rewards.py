@@ -8,6 +8,7 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain.uapp import UnificationUapp
 
 log = logging.getLogger(__name__)
+
 UNIF = 0.03
 DATA_PROVIDER = 0.3
 END_USERS = 0.67
@@ -21,8 +22,11 @@ class UndRewards:
         """
         self.__my_acl_acc = acl_acc
         conf = UnificationConfig()
-        self.__eos_client_pre = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
-                                 "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}"]
+        self.__eos_client_pre = [
+            "/opt/eosio/bin/cleos", "--url",
+            f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
+            "--wallet-url",
+            f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}"]
 
         eos_client = Client(
             nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
@@ -30,7 +34,8 @@ class UndRewards:
         uapp_sc = UnificationUapp(eos_client, self.__my_acl_acc)
 
         schemas = uapp_sc.get_all_db_schemas()
-        # Todo: get correct price for schema being used. Temporary solution since only 1 schema per app in prototype
+        # TODO: get correct price for schema being used.
+        # Temporary solution since only 1 schema per app in prototype
         self.__und_scheduled = schemas[0]['price_sched']
         self.__und_adhoc = schemas[0]['price_adhoc']
 
@@ -38,9 +43,11 @@ class UndRewards:
 
         # Todo: migrate to Token smart contract
         if is_user:
-            reward = "{0:.4f}".format(round(float((self.__und_scheduled * END_USERS) / num_users), 4))
+            reward = "{0:.4f}".format(
+                round(float((self.__und_scheduled * END_USERS) / num_users), 4))
         else:
-            reward = "{0:.4f}".format(round(float(self.__und_scheduled * DATA_PROVIDER), 4))
+            reward = "{0:.4f}".format(
+                round(float(self.__und_scheduled * DATA_PROVIDER), 4))
 
         d = {
             'from': self.__my_acl_acc,
@@ -49,7 +56,9 @@ class UndRewards:
             'memo': 'UND Reward'
         }
         # cleos push action eosio.token transfer '[ "app3", "user1", "1.0000 UND", "m" ]' -p app3
-        subcommands = ["push", "action", "unif.token", "transfer", json.dumps(d), "-p", self.__my_acl_acc]
+        subcommands = [
+            "push", "action", "unif.token", "transfer",
+            json.dumps(d), "-p", self.__my_acl_acc]
 
         cmd = self.__eos_client_pre + subcommands
 
@@ -78,7 +87,9 @@ class UndRewards:
             'memo': 'UND Reward'
         }
 
-        subcommands = ["push", "action", "unif.token", "transfer", json.dumps(d), "-p", self.__my_acl_acc]
+        subcommands = [
+            "push", "action", "unif.token", "transfer", json.dumps(d),
+            "-p", self.__my_acl_acc]
 
         cmd = self.__eos_client_pre + subcommands
 
@@ -99,7 +110,8 @@ class UndRewards:
 
     def calculate_reward(self, is_user=True, num_users=1):
         if is_user:
-            reward = round(float((self.__und_scheduled * END_USERS) / num_users), 4)
+            reward = round(
+                float((self.__und_scheduled * END_USERS) / num_users), 4)
         else:
             reward = round(float(self.__und_scheduled * DATA_PROVIDER), 4)
 
