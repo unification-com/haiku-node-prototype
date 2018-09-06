@@ -44,4 +44,5 @@ def test_database_read(db_name):
     target = target_file(db_name)
     conn = sqlite3.connect(str(target))
     j = to_json(conn)
+    conn.close()
     print(j)
