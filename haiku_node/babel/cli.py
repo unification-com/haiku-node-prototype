@@ -74,11 +74,10 @@ def schemas(app_name):
         nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
     uapp_sc = UnificationUapp(eos_client, app_name)
-    schemas = uapp_sc.get_all_db_schemas()
 
     click.echo(f"{app_name} has the following Schemas:\n")
 
-    for schema in schemas:
+    for schema in uapp_sc.get_all_db_schemas():
         click.echo(f"Schema ID {schema['pkey']}:")
         click.echo(schema['schema'])
 
