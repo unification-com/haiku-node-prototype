@@ -6,6 +6,11 @@ from sqlite3 import Error
 
 import pytest
 
+from datetime import datetime
+import json
+
+import json
+
 import csv
 
 
@@ -57,20 +62,25 @@ def test_database_read(db_name):
 
 
 
-connection = test_database_read('imagestorage.db')
-#tables = show_tables(connection)
+connection = test_database_read('heartbit.db')
 
-def to_csv(conn):
+def get_tables(cursor):
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    return [r[0] for r in cursor.fetchall()]
+
+
+def to_json(conn):
     curr = conn.cursor()
-    curr.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    tables = curr.fetchall()
-    for t in tables:
-        curr.execute("SELECT * FROM `{}`".format(t[0]))
-        tempcsv = 'data/sqlite/{}_data.csv'.format(t[0])
-        with open(tempcsv, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow([i[0] for i in curr.description])   # COLUMN HEADERS
-            for row in curr.fetchall():
-                writer.writerow(row)
-        csvfile.close()
-to_csv(connection)
+    dump = {}
+    for t in get_tables(curr):
+        curr.execute("SELECT * FROM `{}`".format(t))
+        dump[t] = get_rows_as_dicts(curr,t)
+    print(json.dumps(dump))
+
+
+def get_rows_as_dicts(cursor, table):
+    cursor.execute("SELECT * FROM `{}`".format(table))
+    columns = [d[0] for d in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+
+to_json(connection)
