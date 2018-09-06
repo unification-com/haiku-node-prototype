@@ -18,6 +18,11 @@ def get_tables(cursor):
 
 
 def to_json(conn):
+    """
+
+    :param conn: An open SQLite connection
+    :return: A JSON representation of the contents
+    """
     curr = conn.cursor()
     dump = {}
     for t in get_tables(curr):
