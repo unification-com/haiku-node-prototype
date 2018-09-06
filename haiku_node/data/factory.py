@@ -1,5 +1,6 @@
 import json
-from xmljson import parker, Parker
+
+from xmljson import parker
 from lxml.etree import fromstring
 
 from haiku_node.blockchain.uapp import UnificationUapp
