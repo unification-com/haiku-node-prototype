@@ -15,26 +15,6 @@ def target_file(db_name):
     return p / db_name
 
 
-@pytest.mark.parametrize(
-    "db_name", ["datablob.db", "heartbit.db", "imagestorage.db"])
-def test_database_read(db_name):
-    """ create a database connection to the SQLite database
-        specified by the db_name
-
-    :param db_file: database file
-    :return: Connection object or None
-    """
-    target = target_file(db_name)
-    try:
-        conn = sqlite3.connect(str(target))
-        return conn
-    except Error as e:
-        print(e)
-
-
-connection = test_database_read('heartbit.db')
-
-
 def get_tables(cursor):
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
     return [r[0] for r in cursor.fetchall()]
@@ -45,7 +25,7 @@ def to_json(conn):
     dump = {}
     for t in get_tables(curr):
         curr.execute("SELECT * FROM `{}`".format(t))
-        dump[t] = get_rows_as_dicts(curr,t)
+        dump[t] = get_rows_as_dicts(curr, t)
     return json.dumps(dump)
 
 
@@ -55,4 +35,20 @@ def get_rows_as_dicts(cursor, table):
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
-print(to_json(connection))
+@pytest.mark.parametrize(
+    "db_name", ["datablob.db", "heartbit.db", "imagestorage.db"])
+def test_database_read(db_name):
+    """ create a database connection to the SQLite database
+        specified by the db_name
+
+    :param db_name: database file
+    :return: Connection object or None
+    """
+    target = target_file(db_name)
+    try:
+        conn = sqlite3.connect(str(target))
+        j = to_json(conn)
+        print(j)
+
+    except Error as e:
+        print(e)
