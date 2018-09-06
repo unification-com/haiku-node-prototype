@@ -1,11 +1,28 @@
+import os
+from pathlib import Path
+
 import sqlite3
 
 from datetime import datetime
 
 
-conn = sqlite3.connect('/haiku-core/prototype/test/data/sqlite/heartbit.db')
+def target_file(db_name):
+    current_directory = Path(os.path.dirname(os.path.abspath(__file__)))
+    p = current_directory.parent / 'test/data/sqlite'
+    return p / db_name
+
+
+heartbit = target_file('heartbit.db')
+if not heartbit.parent.exists():
+    heartbit.parent.mkdir(parents=True)
+if heartbit.exists():
+    heartbit.unlink()
+
+conn = sqlite3.connect(str(heartbit))
 curr = conn.cursor()
 current_date1 = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+
+
 def create_table_heartbit():
     curr.execute('CREATE TABLE IF NOT EXISTS Users('
                  'ID int NOT NULL,'
@@ -67,9 +84,16 @@ def insert_value_heartbit():
 create_table_heartbit()
 insert_value_heartbit()
 
-conn = sqlite3.connect('/haiku-core/prototype/test/data/sqlite/datablob.db')
+datablob = target_file('datablob.db')
+if not datablob.parent.exists():
+    datablob.parent.mkdir(parents=True)
+if datablob.exists():
+    datablob.unlink()
+
+conn = sqlite3.connect(str(datablob))
 curr = conn.cursor()
 current_date2 = datetime.now().strftime('%m/%d/%Y')
+
 
 def create_table_Blob():
     curr.execute('CREATE TABLE IF NOT EXISTS BlobCreator ('
@@ -84,6 +108,8 @@ def create_table_Blob():
                  'CreatorID int,'
                  'PRIMARY KEY (BlobID),'
                  'FOREIGN KEY (CreatorID) REFERENCES BlobCreator(CID))'.format(current_date2))
+
+
 def insert_value_blob():
     curr.execute('INSERT INTO BlobCreator'
                  '(CID,Name)'
@@ -119,10 +145,17 @@ def insert_value_blob():
 create_table_Blob()
 insert_value_blob()
 
-conn = sqlite3.connect('/haiku-core/prototype/test/data/sqlite/imagestorage.db')
+imagestorage = target_file('imagestorage.db')
+if not imagestorage.parent.exists():
+    imagestorage.parent.mkdir(parents=True)
+if imagestorage.exists():
+    imagestorage.unlink()
+
+conn = sqlite3.connect(str(imagestorage))
 curr = conn.cursor()
 
 current_date3 = datetime.now().strftime('%Y-%m-%d')
+
 
 def create_table_imagestorage():
     curr.execute('CREATE TABLE IF NOT EXISTS ImageOwners ('
