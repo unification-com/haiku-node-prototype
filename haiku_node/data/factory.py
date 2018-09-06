@@ -2,11 +2,11 @@ import json
 from xmljson import parker, Parker
 from lxml.etree import fromstring
 
-from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.uapp import UnificationUapp
+from haiku_node.blockchain.mother import UnificationMother
+from haiku_node.blockchain_helpers import eosio_account
 from haiku_node.config.config import UnificationConfig
 from haiku_node.data.transform_data import TransformData
-from haiku_node.blockchain_helpers import eosio_account
 from haiku_node.lookup.eos_lookup import UnificationLookup, default_db
 
 
