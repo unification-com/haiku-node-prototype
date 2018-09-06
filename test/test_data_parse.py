@@ -75,7 +75,7 @@ def to_json(conn):
     for t in get_tables(curr):
         curr.execute("SELECT * FROM `{}`".format(t))
         dump[t] = get_rows_as_dicts(curr,t)
-    print(json.dumps(dump))
+    return json.dumps(dump)
 
 
 def get_rows_as_dicts(cursor, table):
@@ -83,4 +83,4 @@ def get_rows_as_dicts(cursor, table):
     columns = [d[0] for d in cursor.description]
     return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-to_json(connection)
+print(to_json(connection))
