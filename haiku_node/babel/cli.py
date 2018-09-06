@@ -77,7 +77,7 @@ def schemas(app_name):
 
     click.echo(f"{app_name} has the following Schemas:\n")
 
-    for schema in uapp_sc.get_all_db_schemas():
+    for key, schema in uapp_sc.get_all_db_schemas().items():
         click.echo(f"Schema ID {schema['pkey']}:")
         click.echo(schema['schema'])
 
