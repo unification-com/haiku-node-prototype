@@ -220,8 +220,12 @@ def transfer(from_acc, to_acc, amount, password):
 @click.argument('password')
 def store(consumer, password):
     """
-        Display a list of valid apps, and their schemas.
-        Allow option to initiate a data transfer
+    Display a list of valid apps, and their schemas.
+    Allow option to initiate a data transfer
+    \b
+
+    :param consumer: The app name of the data consumer.
+    :param password: The data consumer's wallet password.
     """
     click.echo(bold("UApp Store"))
 
