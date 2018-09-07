@@ -56,11 +56,8 @@
             ]
           },
           "database": "Heartbit",
-          "db_platform": "mysql",
-          "host": "db",
-          "port": "3306",
-          "user": "heartbit_user",
-          "pass": "password",
+          "db_platform": "sqlite",
+          "filename": "~/haiku-core/prototype/test/data/sqlite/app1.db",
           "table_maps": [
             {
               "schema_table_id": "users",
@@ -149,11 +146,8 @@
             ]
           },
           "database": "Datablobs",
-          "db_platform": "mysql",
-          "host": "db",
-          "port": "3306",
-          "user": "datablobs_user",
-          "pass": "password",
+          "db_platform": "sqlite",
+          "filename": "~/haiku-core/prototype/test/data/sqlite/app2.db",
           "table_maps": [
             {
               "schema_table_id": "users",
@@ -236,11 +230,8 @@
             ]
           },
           "database": "Imagestorage",
-          "db_platform": "mysql",
-          "host": "db",
-          "port": "3306",
-          "user": "imgstore_user",
-          "pass": "password",
+          "db_platform": "sqlite",
+          "filename": "~/haiku-core/prototype/test/data/sqlite/app3.db",
           "table_maps": [
             {
               "schema_table_id": "users",
