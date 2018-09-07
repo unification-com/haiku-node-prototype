@@ -88,8 +88,9 @@ class HaikuDataClient:
 
         log.info(f'"In the air" decrypted content is: {decrypted_body}')
 
-        # TODO: only pay if data is valid
-        und_reward = UndRewards(requesting_app)
+        uapp_sc = UnificationUapp(eos_client, providing_app.name)
+        db_schema = uapp_sc.get_db_schema_by_pkey(0)  # tmp - only 1 schema
+        und_reward = UndRewards(requesting_app, db_schema['price_sched'])
 
         json_obj = json.loads(decrypted_body)
 
@@ -170,7 +171,7 @@ class HaikuDataClient:
         data_request = uapp_sc.get_data_request_by_pkey(request_id)
         if data_request['hash'] == data_hash:
             print("Checksums match.")
-            und_reward = UndRewards(requesting_app)
+            und_reward = UndRewards(requesting_app, data_request['price'])
 
             json_obj = json.loads(decrypted_body)
 
