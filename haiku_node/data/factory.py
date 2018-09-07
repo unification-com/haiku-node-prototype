@@ -114,12 +114,9 @@ class UnificationDataFactory:
         
         # generate db params for ETL
         data_source_parms = {
-            'odbc': 'mysql+mysqlconnector',  # TODO: set/get from db schema/conn/config
+            'odbc': 'SQLite3 ODBC Driver',  # TODO: set/get from db schema/conn/config
             'database': db_schema_map['db_name'],
-            'host': db_connection['host'],
-            'port': db_connection['port'],
-            'user': db_connection['user'],
-            'pass': db_connection['pass'],
+            'filename': db_connection['filename']
             'userTable': user_table_info['real_table_name'],  # temp hack
             'dataTable': data_table_info['real_table_name'],  # temp hack
             'userIdentifier': user_table_info['user_id_column'],  # temp hack
