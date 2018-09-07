@@ -146,7 +146,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'addschema', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -164,7 +164,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'editschema', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -178,7 +178,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setvers', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -192,7 +192,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setschedule', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -206,7 +206,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setpricesch', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -220,7 +220,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setpriceadh', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -234,7 +234,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setchema', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -247,7 +247,7 @@ class UnificationUapp:
 
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setrsakey', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modrsakey'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -263,7 +263,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'initreq', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modreq'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -278,7 +278,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'updatereq', json.dumps(d), '-p',
-             f'{provider_name}@modreq'])
+             f'{provider_name}'])
 
         print(ret.stdout)
 
