@@ -3,7 +3,7 @@ from xmljson import parker, Parker
 from lxml.etree import fromstring
 
 from haiku_node.blockchain.mother import UnificationMother
-from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.config.config import UnificationConfig
 from haiku_node.data.transform_data import TransformData
 from haiku_node.blockchain_helpers import eosio_account
@@ -23,12 +23,11 @@ class UnificationDataFactory:
         self.__haiku_conf = UnificationConfig()
 
         self.__my_mother = UnificationMother(eos_client, acl_contract_acc)
-        self.__my_acl = UnificationACL(eos_client, acl_contract_acc)
+        self.__my_uapp_sc = UnificationUapp(eos_client, acl_contract_acc)
         self.__my_lookup = UnificationLookup(default_db())
         self.__users = None if len(users) == 0 else users
 
-        self.__valid_db_schemas = self.__my_mother.get_valid_db_schemas()
-        self.__my_db_schemas = []
+        self.__my_db_schemas = self.__my_uapp_sc.get_all_db_schemas()
         self.__db_schema_maps = {}
         self.__granted = []
         self.__revoked = []
@@ -36,10 +35,11 @@ class UnificationDataFactory:
 
         self.__native_user_meta = self.__my_lookup.get_native_user_meta()
 
-        for schema, vers in self.__valid_db_schemas.items():
-            self.__my_db_schemas.append(self.__my_acl.get_current_valid_schema(schema, vers))
-            schema_map = self.__my_lookup.get_schema_map(schema)
-            self.__db_schema_maps[schema] = schema_map
+        for pkey, db_schema in self.__my_db_schemas.items():
+            print("DB_SCHEMA_TEST")
+            print(db_schema)
+            schema_map = self.__my_lookup.get_schema_map(pkey)
+            self.__db_schema_maps[pkey] = schema_map
 
         self.__generate_data()
 
@@ -66,15 +66,15 @@ class UnificationDataFactory:
         return native_user_ids
 
     def __generate_data(self):
-        self.__granted, self.__revoked = self.__my_acl.get_perms_for_req_app(self.__requesting_app)
+        self.__granted, self.__revoked = self.__my_uapp_sc.get_perms_for_req_app(self.__requesting_app)
 
         native_user_ids = self.__generate_user_list()
 
         # temporary hack - there's only 1 db schema per app at the moment....
-        db_schema_name = self.__my_db_schemas[0]['schema_name_str']
+        sc_schema_pkey = self.__my_db_schemas[0]['pkey']
         db_schema = self.__my_db_schemas[0]['schema']
-        db_schema_map = self.__db_schema_maps[db_schema_name]
-        db_connection = self.__haiku_conf['db_conn'][db_schema_name]
+        db_schema_map = self.__db_schema_maps[sc_schema_pkey]
+        db_connection = self.__haiku_conf['db_conn']["0"]
 
         # FOR TESTING
         # db_schema = "<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Heartrate</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>GeoLocation</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>TimeStamp</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>Pulse</name><type>int</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>"
@@ -90,7 +90,7 @@ class UnificationDataFactory:
         for items in db_schema['fields']:
             if items['table'] != 'unification_lookup':
                 print('table.text before:', items['table'])
-                real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, items['table'])
+                real_table_data = self.__my_lookup.get_real_table_info(sc_schema_pkey, items['table'])
                 print(real_table_data)
                 items['table'] = real_table_data['real_table_name']
                 print('table text after:', items['table'])
@@ -98,7 +98,7 @@ class UnificationDataFactory:
                 if items['type'] == 'base64_mime_image':
                     base64_encode_cols.append(items['name'])
             else:
-                real_table_data = self.__my_lookup.get_real_table_info(db_schema_name, 'data_1')
+                real_table_data = self.__my_lookup.get_real_table_info(sc_schema_pkey, 'data_1')
                 items['table'] = real_table_data['real_table_name']
                 cols_to_include.append(real_table_data['user_id_column'])
 
@@ -108,8 +108,8 @@ class UnificationDataFactory:
         # print(db_schema)
 
         # temp hack
-        user_table_info = self.__my_lookup.get_real_table_info(db_schema_name, 'users')
-        data_table_info = self.__my_lookup.get_real_table_info(db_schema_name, 'data_1')
+        user_table_info = self.__my_lookup.get_real_table_info(sc_schema_pkey, 'users')
+        data_table_info = self.__my_lookup.get_real_table_info(sc_schema_pkey, 'data_1')
         
         # generate db params for ETL
         data_source_parms = {

@@ -90,21 +90,29 @@ class HaikuDataClient:
         json_obj = json.loads(decrypted_body)
 
         if 'no-data' not in json_obj:
-            users_to_pay = json_obj['data']['unification_users']
-            if isinstance(users_to_pay, dict):
-                username = users_to_pay['unification_user']
-                print(f'pay {username}')
-                ret = und_reward.send_reward(username)
-                log.debug(ret)
-            else:
-                for username in users_to_pay['unification_user']:
+            users_to_pay = json_obj['data']['unification_users']['unification_user']
+            print("users_to_pay")
+            print(users_to_pay)
+            if isinstance(users_to_pay, list):
+                num_users = len(users_to_pay)
+                print(f"Pay {num_users} users")
+                for username in users_to_pay:
                     print(f'pay {username}')
-                    ret = und_reward.send_reward(username)
+                    ret = und_reward.send_reward(username, is_user=True, num_users=num_users)
                     log.debug(ret)
+            else:
+                print(f'pay single user {users_to_pay}')
+                ret = und_reward.send_reward(users_to_pay, is_user=True, num_users=1)
+                log.debug(ret)
 
             log.debug(f"Pay provider {providing_app.name}")
             ret = und_reward.send_reward(providing_app.name, False)
             log.debug(ret)
+
+            log.debug(f"Pay Unification")
+            ret = und_reward.pay_unif()
+            log.debug(ret)
+
 
         return self.persist_data(
             providing_app.name, request_hash, d)

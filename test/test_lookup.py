@@ -72,13 +72,13 @@ def user_lookup(ul: UnificationLookup):
     print("Meta data:")
     print(meta_data)
 
-    schema_map = ul.get_schema_map('app1.db1')
-    print("Schema map for app1.db1:")
+    schema_map = ul.get_schema_map('0')
+    print("Schema map for app1 schema_id 0:")
 
     print(schema_map)
 
-    real_table = ul.get_real_table_info('app1.db1', 'data_1')
-    print("real table data for app1.db1, data_1:")
+    real_table = ul.get_real_table_info('0', 'data_1')
+    print("real table data for app1 schema_id 0, data_1:")
     print(real_table)
 
 

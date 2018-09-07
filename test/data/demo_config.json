@@ -18,6 +18,9 @@
       "db_schemas": [
         {
           "schema_name": "app1.db1",
+          "sc_schema_pkey": "0",
+          "price_sched": 10,
+          "price_adhoc": 15,
           "schema": {
             "fields": [
               {
@@ -120,6 +123,9 @@
       "db_schemas": [
         {
           "schema_name": "app2.db1",
+          "sc_schema_pkey": "0",
+          "price_sched": 10,
+          "price_adhoc": 15,
           "schema": {
             "fields": [
               {
@@ -210,6 +216,9 @@
       "db_schemas": [
         {
           "schema_name": "app3.db1",
+          "sc_schema_pkey": "0",
+          "price_sched": 10,
+          "price_adhoc": 15,
           "schema": {
             "fields": [
               {

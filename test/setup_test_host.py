@@ -37,7 +37,7 @@ for schemas in demo_config['demo_apps'][app_name]['db_schemas']:
         'user': schemas['user'],
         'pass': schemas['pass']
     }
-    dbs[schemas['schema_name']] = db
+    dbs[schemas['sc_schema_pkey']] = db
 
 uc['db_conn'] = dbs
 

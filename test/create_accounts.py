@@ -48,10 +48,10 @@ def create_lookup_db(app, demo_apps):
                                      (native_table text, native_field text, field_type text)''')
 
     c.execute('''CREATE TABLE schema_map
-                                         (sc_schema_name text, native_db text, native_db_platform text)''')
+                                         (sc_schema_pkey text, native_db text, native_db_platform text)''')
 
     c.execute('''CREATE TABLE table_maps
-                                         (sc_schema_name text, sc_table_name text, real_table_name text, user_id_column text)''')
+                                         (sc_schema_pkey text, sc_table_name text, real_table_name text, user_id_column text)''')
 
     c.execute(f"INSERT INTO lookup_meta VALUES ('{app_conf['lookup']['lookup_meta']['native_table']}', "
               f"'{app_conf['lookup']['lookup_meta']['native_field']}', "
@@ -61,11 +61,11 @@ def create_lookup_db(app, demo_apps):
         c.execute(f"INSERT INTO lookup VALUES ('{u['native_id']}', '{u['eos_account']}')")
 
     for sc in app_conf['db_schemas']:
-        c.execute(f"INSERT INTO schema_map VALUES ('{sc['schema_name']}', '{sc['database']}', '{sc['db_platform']}')")
+        c.execute(f"INSERT INTO schema_map VALUES ('{sc['sc_schema_pkey']}', '{sc['database']}', '{sc['db_platform']}')")
 
         for tm in sc['table_maps']:
             c.execute(
-                f"INSERT INTO table_maps VALUES ('{sc['schema_name']}', '{tm['schema_table_id']}', "
+                f"INSERT INTO table_maps VALUES ('{sc['sc_schema_pkey']}', '{tm['schema_table_id']}', "
                 f"'{tm['db_table']}', '{tm['user_id_column']}')")
 
     conn.commit()

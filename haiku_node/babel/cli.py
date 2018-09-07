@@ -6,7 +6,7 @@ from itertools import product
 import click
 from eosapi import Client
 
-from haiku_node.blockchain.acl import UnificationACL
+from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.validation.validation import UnificationAppScValidation
@@ -61,7 +61,7 @@ def permissions(user):
 
 @main.command()
 @click.argument('app_name')
-def sources(app_name):
+def schemas(app_name):
     """
     Obtain data source information about an App.
 
@@ -72,22 +72,15 @@ def sources(app_name):
     eos_client = Client(
         nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
-    acl = UnificationACL(eos_client, app_name)
-    datasources = acl.get_data_sources()
+    uapp_sc = UnificationUapp(eos_client, app_name)
+    schemas = uapp_sc.get_all_db_schemas()
 
-    click.echo(f"{app_name} has the following datasources:\n")
+    click.echo(f"{app_name} has the following Schemas:\n")
 
-    schemas = {}
-    for k, d in acl.get_db_schemas().items():
-        schemas[d['schema_name_str']] = d['schema']
+    for schema in schemas:
+        click.echo(f"Schema ID {schema['pkey']}:")
+        click.echo(schema['schema'])
 
-    for k, d in datasources.items():
-        click.echo(f"A {bold(d['source_type'])} source from "
-                   f"{d['source_name_str']}")
-        if d['source_type'] == 'database':
-            click.echo(
-                f"The schema for {d['source_name_str']} is "
-                f"{schemas[d['source_name_str']]}")
 
 
 @main.command()
