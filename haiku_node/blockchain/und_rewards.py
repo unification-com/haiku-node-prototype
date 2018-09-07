@@ -2,10 +2,7 @@ import json
 import logging
 import subprocess
 
-from eosapi import Client
-
 from haiku_node.config.config import UnificationConfig
-from haiku_node.blockchain.uapp import UnificationUapp
 
 log = logging.getLogger(__name__)
 
