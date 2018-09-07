@@ -54,8 +54,13 @@ def error_request_self():
 def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
                 users, client_type, request_id=None):
     """
-    :param eos_account_name: The account name of the requesting App.
-    :param users: The users to obtain data for.
+    :param eos_account_name: The account name of the requesting App (Data Consumer).
+    :param eos_client: EOS RPC Client
+    :param acl_contract_acc: The account name of the providing App (Data Provider).
+    :param users: The users to obtain data for. None to get all available users
+    :param client_type: enterprise: Direct data requests not initiated via BABEL UApp Store
+                        standard: Data requests initiated via the BABEL UApp store
+    :param request_id: Primary Key for the data request held in the Consumer's UApp smart contract
     """
 
     data_factory = UnificationDataFactory(
@@ -125,8 +130,6 @@ def data_request():
             users = bundle_d.get('users')
             client_type = bundle_d.get('client_type')
             request_id = bundle_d.get('request_id')
-            # TODO: need to ensure, somewhere, that the requesting app can afford to pay for the data!
-            # perhaps pre-calculate how much it'll cost, and throw "CannotAfford" exception (with HTTP 401)
             return obtain_data(
                 app.keystore, sender, eos_client, conf['acl_contract'],
                 users, client_type, request_id)

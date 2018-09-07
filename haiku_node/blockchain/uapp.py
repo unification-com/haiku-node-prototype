@@ -11,8 +11,10 @@ class UnificationUapp:
 
     def __init__(self, eos_rpc_client, acl_contract_acc):
         """
+        :param eos_rpc_client: EOS RPC Client
         :param acl_contract_acc: the eos account name of the app for which the
-            class will retrieve data from the UApp smart contract
+               class will retrieve data from the UApp smart contract
+
         """
         self.__permission_rec_table = "permrecords"
         self.__rsa_pub_key_table = "rsapubkey"
@@ -47,6 +49,11 @@ class UnificationUapp:
         return db_schemas
 
     def get_db_schema_by_pkey(self, pkey: int):
+        """
+
+        :param pkey: Primary Key for the schema table in the smart contract
+        :return: db_schema object containing data from the Smart Contract table
+        """
         db_schema = {}
         table_data = self.__eos_rpc_client.get_table_rows(
             self.__acl_contract_acc,

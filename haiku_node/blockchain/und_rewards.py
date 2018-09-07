@@ -16,6 +16,7 @@ class UndRewards:
         """
 
         :param acl_acc: The account name of the payer.
+        :param und_amt: The amount of UND to be processed
         """
         self.__my_acl_acc = acl_acc
         conf = UnificationConfig()

@@ -57,7 +57,8 @@ class HaikuDataClient:
             self, requesting_app, providing_app: Provider, user, request_hash,
             client_type='enterprise', request_id=None):
         """
-        Make a data request from one App to another.
+        Make a data request from one Haiku Node to another,
+        or receive request from UApp Store
         """
 
         # Check if the providing app is valid according to MOTHER

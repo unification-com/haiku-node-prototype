@@ -107,6 +107,8 @@ def fetch(provider, request_hash, user):
     data_path = client.make_data_request(
         requesting_app, provider, user, req_hash)
     click.echo(f'Data written to {data_path}')
+    click.echo(f'View using:')
+    click.echo(f"haiku view {provider.name} {request_hash}")
 
 
 @main.command()
@@ -145,11 +147,8 @@ def view(provider, request_hash):
 def uapp_store():
     """
     Display a list of valid apps, and their schemas.
-    Allow option to initiate a data transfer
+    Allow option to initiate and process a data transfer
     \b
-
-    :param consumer: The app name of the data consumer.
-    :param password: The data consumer's wallet password.
     """
 
     requesting_app = os.environ['app_name']
@@ -191,7 +190,7 @@ def uapp_store():
                 uapp_store[store_key] = d
                 store_key += 1
 
-    request_id = int(input(f"Select option 1 - {(store_key - 1)} to initialise a data request, or '0' to exit:"))
+    request_id = int(input(f"Select option 1 - {(store_key - 1)} to generate a data request, or '0' to exit:"))
     if request_id > 0 and request_id <= store_key:
         data_request = uapp_store[request_id]
         __request_from_uapp_store(data_request)
@@ -200,18 +199,25 @@ def uapp_store():
 
 
 def __request_from_uapp_store(data_request):
+    """
+    Receives a data request from the UApp Store, and
+    processes the request
+
+    \b
+    :param data_request: Dict containing request parameters
+    """
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
-    click.echo("Processing request:")
+    click.echo("Processing request from UApp Store:")
     click.echo(data_request)
 
     conf = UnificationConfig()
     eos_client = Client(
         nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
+    # Write the data request to the Consumer's smart contract
     uapp_sc = UnificationUapp(eos_client, requesting_app)
-
     latest_req_id = uapp_sc.init_data_request(data_request['provider'], data_request['schema_pkey'], "0",
                                               data_request['price'])
 
@@ -229,6 +235,8 @@ def __request_from_uapp_store(data_request):
     data_path = client.make_data_request(
         requesting_app, provider, None, req_hash, 'standard', latest_req_id)
     click.echo(f'Data written to {data_path}')
+    click.echo(f'View using:')
+    click.echo(f"haiku view {provider.name} {request_hash}")
 
 
 if __name__ == "__main__":
