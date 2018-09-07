@@ -253,12 +253,12 @@ class UnificationUapp:
 
         return ret
 
-    def init_data_request(self, provider_name, schema_id, req_type, query, price):
+    def init_data_request(self, provider_name, schema_id, req_type, price, query=None):
         d = {
             'provider_name': provider_name,
             'schema_id': schema_id,
             'req_type': req_type,
-            'query': query,
+            'query': 'test',
             'price': price
         }
         ret = self.__cleos.run(

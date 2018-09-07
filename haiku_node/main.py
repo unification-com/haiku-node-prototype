@@ -9,6 +9,10 @@ from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import app
+from eosapi import Client
+from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.blockchain.uapp import UnificationUapp
+from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
 PORT = 8050
 
@@ -136,6 +140,95 @@ def view(provider, request_hash):
     json_obj = json.loads(data)
 
     print(json_obj)
+
+
+@main.command()
+def uapp_store():
+    """
+    Display a list of valid apps, and their schemas.
+    Allow option to initiate a data transfer
+    \b
+
+    :param consumer: The app name of the data consumer.
+    :param password: The data consumer's wallet password.
+    """
+
+    requesting_app = os.environ['app_name']
+
+    click.echo(bold("UApp Store"))
+
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+
+    valid_apps = eos_client.get_table_rows(
+        "unif.mother", "unif.mother", "validapps", True, 0, -1,
+        -1)
+
+    uapp_store = {}
+    store_key = 1
+
+    for va in valid_apps['rows']:
+        data_provider = eosio_account.name_to_string(int(va['acl_contract_acc']))
+        if int(va['is_valid']) == 1 and data_provider != requesting_app:
+            uapp_sc = UnificationUapp(eos_client, data_provider)
+            db_schemas = uapp_sc.get_all_db_schemas()
+            click.echo(bold(f"Data Provider: {data_provider}"))
+            for pkey, db_schema in db_schemas.items():
+                schema = db_schema['schema']
+                click.echo(bold(f"Option {store_key}:"))
+                click.echo("    Data available:")
+                for field in schema['fields']:
+                    click.echo(f"        {field['name']}, {field['type']}")
+                click.echo(f"    Scheduled Price: {db_schema['price_sched']} UND")
+                click.echo(f"    Ad-hoc Price: {db_schema['price_adhoc']} UND")
+                click.echo("    Availability: daily")
+
+                d = {
+                    'provider': data_provider,
+                    'pkey': pkey,
+                    'price': db_schema['price_sched']
+                }
+                uapp_store[store_key] = d
+                store_key += 1
+
+    request_id = int(input(f"Select option 1 - {(store_key - 1)} to initialise a data request, or '0' to exit:"))
+    if request_id > 0 and request_id <= store_key:
+        data_request = uapp_store[request_id]
+        __request_from_uapp_store(data_request)
+    else:
+        click.echo("Exit Uapp Store")
+
+
+def __request_from_uapp_store(data_request):
+    requesting_app = os.environ['app_name']
+    password = os.environ['keystore']
+
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+
+    request_hash = f"{data_request['provider']}-{data_request['pkey']}.dat"
+
+    cleos = EosioCleos()
+    cleos.unlock_wallet(requesting_app, password)
+
+    click.echo("Processing request:")
+    click.echo(data_request)
+
+    provider = Provider(data_request['provider'], 'https', f"haiku-{data_request['provider']}", PORT)
+    req_hash = f'request-{request_hash}'
+
+    click.echo(f'App {requesting_app} is requesting data from {provider.name}')
+
+    encoded_password = str.encode(password)
+    keystore = UnificationKeystore(encoded_password)
+
+    uapp_sc = UnificationUapp(eos_client, requesting_app)
+
+    uapp_sc.init_data_request(data_request['provider'], data_request['pkey'], "0", data_request['price'])
+
+    cleos.lock_wallet(requesting_app)
 
 
 if __name__ == "__main__":
