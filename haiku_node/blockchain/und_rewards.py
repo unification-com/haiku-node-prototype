@@ -43,7 +43,7 @@ class UndRewards:
             'quantity': f'{reward} UND',
             'memo': 'UND Reward'
         }
-        # cleos push action eosio.token transfer '[ "app3", "user1", "1.0000 UND", "m" ]' -p app3
+
         subcommands = [
             "push", "action", "unif.token", "transfer",
             json.dumps(d), "-p", self.__my_acl_acc]
