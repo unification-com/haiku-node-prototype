@@ -98,7 +98,7 @@ def systest_ingest(requesting_app, providing_app, user, balances, local=False):
     # Update the system test record of the balances
     price_sched = demo_config['demo_apps'][providing_app]['db_schemas'][0]['price_sched']
     balances[requesting_app] = balances[requesting_app] - price_sched
-    und_rewards = UndRewards(providing_app)
+    und_rewards = UndRewards(providing_app, price_sched)
     balances[providing_app] = balances[providing_app] + und_rewards.calculate_reward(is_user=False)
 
     # rewards = lambda app: demo_config['demo_apps'][app]['und_rewards']
