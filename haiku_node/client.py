@@ -41,8 +41,8 @@ class HaikuDataClient:
         return {
             'users': [] if user is None else [user],
             'data_id': request_hash,
-            'request_id': request_id,
-            'client_type': client_type
+            'client_type': client_type,
+            'request_id': request_id
         }
 
     def persist_data(self, providing_app_name: str, request_hash, data: dict):
@@ -54,7 +54,8 @@ class HaikuDataClient:
         return tp
 
     def make_data_request(
-            self, requesting_app, providing_app: Provider, user, request_hash):
+            self, requesting_app, providing_app: Provider, user, request_hash,
+            client_type='enterprise', request_id=None):
         """
         Make a data request from one App to another.
         """
@@ -72,7 +73,7 @@ class HaikuDataClient:
             raise Exception(f"Providing App {providing_app.name} is "
                             f"NOT valid according to MOTHER")
 
-        body = self.transform_request_id(user, request_hash, 'enterprise')
+        body = self.transform_request_id(user, request_hash, client_type, request_id)
         payload = bundle(
             self.keystore, requesting_app, providing_app.name, body, 'Success')
 
@@ -86,15 +87,28 @@ class HaikuDataClient:
         bundle_d = unbundle(self.keystore, providing_app.name, d)
         decrypted_body = bundle_d['data']
 
-        log.info(f'"In the air" decrypted content is: {decrypted_body}')
+        # log.info(f'"In the air" decrypted content is: {decrypted_body}')
 
-        uapp_sc = UnificationUapp(eos_client, providing_app.name)
-        db_schema = uapp_sc.get_db_schema_by_pkey(0)  # tmp - only 1 schema
-        und_reward = UndRewards(requesting_app, db_schema['price_sched'])
+        checksum_ok = False
+
+        if client_type == 'standard':
+            # Computationally validate the received data the checksum of the payload
+            data_hash = hashlib.sha224(b"{d['payload']}").hexdigest()
+
+            uapp_sc = UnificationUapp(eos_client, requesting_app)
+            data_request = uapp_sc.get_data_request_by_pkey(request_id)
+            und_reward = UndRewards(requesting_app, data_request['price'])
+            if data_request['hash'] == data_hash:
+                checksum_ok = True
+        else:
+            uapp_sc = UnificationUapp(eos_client, providing_app.name)
+            db_schema = uapp_sc.get_db_schema_by_pkey(0)  # tmp - only 1 schema
+            und_reward = UndRewards(requesting_app, db_schema['price_sched'])
+            checksum_ok = True  # temporary
 
         json_obj = json.loads(decrypted_body)
 
-        if 'no-data' not in json_obj:
+        if 'no-data' not in json_obj and checksum_ok:
             users_to_pay = json_obj['data']['unification_users']['unification_user']
             print("users_to_pay")
             print(users_to_pay)
@@ -136,68 +150,3 @@ class HaikuDataClient:
         log.info(f'Decrypted content from persistence store: {decrypted_body}')
         return decrypted_body
 
-    def make_data_request_uapp_store(self, requesting_app, providing_app: Provider, request_id, request_hash):
-        # Check if the providing app is valid according to MOTHER
-        conf = UnificationConfig()
-        eos_client = Client(
-            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
-
-        v = UnificationAppScValidation(
-            eos_client, conf['acl_contract'], providing_app.name,
-            get_perms=True)
-
-        if not v.valid():
-            raise Exception(f"Providing App {providing_app.name} is "
-                            f"NOT valid according to MOTHER")
-
-        body = self.transform_request_id(None, request_hash, 'standard', request_id)
-        payload = bundle(
-            self.keystore, requesting_app, providing_app.name, body, 'Success')
-
-        base = providing_app.base_url()
-        r = requests.post(f"{base}/data_request", json=payload, verify=False)
-        d = r.json()
-
-        if r.status_code != 200:
-            raise Exception(d['message'])
-
-        bundle_d = unbundle(self.keystore, providing_app.name, d)
-        decrypted_body = bundle_d['data']
-
-        # Computationally validate the received data the checksum of the payload
-        data_hash = hashlib.sha224(b"{d['payload']}").hexdigest()
-
-        uapp_sc = UnificationUapp(eos_client, requesting_app)
-        data_request = uapp_sc.get_data_request_by_pkey(request_id)
-        if data_request['hash'] == data_hash:
-            print("Checksums match.")
-            und_reward = UndRewards(requesting_app, data_request['price'])
-
-            json_obj = json.loads(decrypted_body)
-
-            if 'no-data' not in json_obj:
-                users_to_pay = json_obj['data']['unification_users']['unification_user']
-                print("users_to_pay")
-                print(users_to_pay)
-                if isinstance(users_to_pay, list):
-                    num_users = len(users_to_pay)
-                    print(f"Pay {num_users} users")
-                    for username in users_to_pay:
-                        print(f'pay {username}')
-                        ret = und_reward.send_reward(username, is_user=True, num_users=num_users)
-                        log.debug(ret)
-                else:
-                    print(f'pay single user {users_to_pay}')
-                    ret = und_reward.send_reward(users_to_pay, is_user=True, num_users=1)
-                    log.debug(ret)
-
-                log.debug(f"Pay provider {providing_app.name}")
-                ret = und_reward.send_reward(providing_app.name, False)
-                log.debug(ret)
-
-                log.debug(f"Pay Unification")
-                ret = und_reward.pay_unif()
-                log.debug(ret)
-
-        return self.persist_data(
-            providing_app.name, request_hash, d)

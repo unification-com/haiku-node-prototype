@@ -226,8 +226,8 @@ def __request_from_uapp_store(data_request):
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    data_path = client.make_data_request_uapp_store(
-        requesting_app, provider, latest_req_id, req_hash)
+    data_path = client.make_data_request(
+        requesting_app, provider, None, req_hash, 'standard', latest_req_id)
     click.echo(f'Data written to {data_path}')
 
 
