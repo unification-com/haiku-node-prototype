@@ -12,7 +12,6 @@ from haiku_node.rpc import app
 from eosapi import Client
 from haiku_node.blockchain_helpers import eosio_account
 from haiku_node.blockchain.uapp import UnificationUapp
-from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
 PORT = 8050
 
