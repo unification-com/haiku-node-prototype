@@ -38,7 +38,7 @@ def get_rows_as_dicts(cursor, table):
 
 
 @pytest.mark.parametrize(
-    "db_name", ["datablob.db", "heartbit.db", "imagestorage.db"])
+    "db_name", ["app1.db", "app2.db", "app3.db"])
 def test_database_read(db_name):
     """ create a database connection to the SQLite database
         specified by the db_name

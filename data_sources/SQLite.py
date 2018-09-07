@@ -12,7 +12,7 @@ def target_file(db_name):
     return p / db_name
 
 
-heartbit = target_file('heartbit.db')
+heartbit = target_file('app1.db')
 if not heartbit.parent.exists():
     heartbit.parent.mkdir(parents=True)
 if heartbit.exists():
@@ -86,7 +86,7 @@ def insert_value_heartbit():
 create_table_heartbit()
 insert_value_heartbit()
 
-datablob = target_file('datablob.db')
+datablob = target_file('app2.db')
 if not datablob.parent.exists():
     datablob.parent.mkdir(parents=True)
 if datablob.exists():
@@ -147,7 +147,7 @@ def insert_value_blob():
 create_table_Blob()
 insert_value_blob()
 
-imagestorage = target_file('imagestorage.db')
+imagestorage = target_file('app3.db')
 if not imagestorage.parent.exists():
     imagestorage.parent.mkdir(parents=True)
 if imagestorage.exists():
