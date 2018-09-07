@@ -174,7 +174,7 @@ def uapp_store():
             uapp_sc = UnificationUapp(eos_client, data_provider)
             db_schemas = uapp_sc.get_all_db_schemas()
             click.echo(bold(f"Data Provider: {data_provider}"))
-            for pkey, db_schema in db_schemas.items():
+            for schema_pkey, db_schema in db_schemas.items():
                 schema = db_schema['schema']
                 click.echo(bold(f"Option {store_key}:"))
                 click.echo("    Data available:")
@@ -186,7 +186,7 @@ def uapp_store():
 
                 d = {
                     'provider': data_provider,
-                    'pkey': pkey,
+                    'schema_pkey': schema_pkey,
                     'price': db_schema['price_sched']
                 }
                 uapp_store[store_key] = d
@@ -202,33 +202,28 @@ def uapp_store():
 
 def __request_from_uapp_store(data_request):
     requesting_app = os.environ['app_name']
-    password = os.environ['keystore']
+
+    click.echo("Processing request:")
+    click.echo(data_request)
 
     conf = UnificationConfig()
     eos_client = Client(
         nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
-    request_hash = f"{data_request['provider']}-{data_request['pkey']}.dat"
+    uapp_sc = UnificationUapp(eos_client, requesting_app)
 
-    cleos = EosioCleos()
-    cleos.unlock_wallet(requesting_app, password)
+    latest_req_id = uapp_sc.init_data_request(data_request['provider'], data_request['schema_pkey'], "0",
+                                              data_request['price'])
 
-    click.echo("Processing request:")
-    click.echo(data_request)
+    request_hash = f"{data_request['provider']}-{data_request['schema_pkey']}-{latest_req_id}.dat"
 
     provider = Provider(data_request['provider'], 'https', f"haiku-{data_request['provider']}", PORT)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is requesting data from {provider.name}')
 
-    encoded_password = str.encode(password)
-    keystore = UnificationKeystore(encoded_password)
+    
 
-    uapp_sc = UnificationUapp(eos_client, requesting_app)
-
-    uapp_sc.init_data_request(data_request['provider'], data_request['pkey'], "0", data_request['price'])
-
-    cleos.lock_wallet(requesting_app)
 
 
 if __name__ == "__main__":

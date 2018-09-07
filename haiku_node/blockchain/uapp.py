@@ -265,9 +265,10 @@ class UnificationUapp:
             ['push', 'action', self.__acl_contract_acc, 'initreq', json.dumps(d), '-p',
              f'{self.__acl_contract_acc}'])
 
-        print(ret.stdout)
+        data_requests = self.get_all_data_requests()
+        latest_req_id = list(data_requests.keys())[-1]
 
-        return ret
+        return latest_req_id
 
     def update_data_request(self, pkey, provider_name, hash, aggr):
         d = {
