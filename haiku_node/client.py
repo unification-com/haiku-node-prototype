@@ -1,5 +1,6 @@
 import json
 import tempfile
+import hashlib
 from pathlib import Path
 from eosapi import Client
 
@@ -10,6 +11,7 @@ from haiku_node.blockchain.und_rewards import UndRewards
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.validation.validation import UnificationAppScValidation
+from haiku_node.blockchain.uapp import UnificationUapp
 
 
 log = logging.getLogger(__name__)
@@ -115,7 +117,6 @@ class HaikuDataClient:
             ret = und_reward.pay_unif()
             log.debug(ret)
 
-
         return self.persist_data(
             providing_app.name, request_hash, d)
 
@@ -162,7 +163,40 @@ class HaikuDataClient:
         bundle_d = unbundle(self.keystore, providing_app.name, d)
         decrypted_body = bundle_d['data']
 
-        print(f'"In the air" decrypted content is: {decrypted_body}')
+        # Computationally validate the received data the checksum of the payload
+        data_hash = hashlib.sha224(b"{d['payload']}").hexdigest()
+
+        uapp_sc = UnificationUapp(eos_client, requesting_app)
+        data_request = uapp_sc.get_data_request_by_pkey(request_id)
+        if data_request['hash'] == data_hash:
+            print("Checksums match.")
+            und_reward = UndRewards(requesting_app)
+
+            json_obj = json.loads(decrypted_body)
+
+            if 'no-data' not in json_obj:
+                users_to_pay = json_obj['data']['unification_users']['unification_user']
+                print("users_to_pay")
+                print(users_to_pay)
+                if isinstance(users_to_pay, list):
+                    num_users = len(users_to_pay)
+                    print(f"Pay {num_users} users")
+                    for username in users_to_pay:
+                        print(f'pay {username}')
+                        ret = und_reward.send_reward(username, is_user=True, num_users=num_users)
+                        log.debug(ret)
+                else:
+                    print(f'pay single user {users_to_pay}')
+                    ret = und_reward.send_reward(users_to_pay, is_user=True, num_users=1)
+                    log.debug(ret)
+
+                log.debug(f"Pay provider {providing_app.name}")
+                ret = und_reward.send_reward(providing_app.name, False)
+                log.debug(ret)
+
+                log.debug(f"Pay Unification")
+                ret = und_reward.pay_unif()
+                log.debug(ret)
 
         return self.persist_data(
             providing_app.name, request_hash, d)
