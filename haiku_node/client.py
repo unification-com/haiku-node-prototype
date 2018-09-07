@@ -32,13 +32,15 @@ class HaikuDataClient:
         self.local = local
         self.protocol = protocol
 
-    def transform_request_id(self, user, request_hash):
+    def transform_request_id(self, user, request_hash, client_type, request_id=None):
         """
         # TODO: Convert to a particular request body
         """
         return {
             'users': [] if user is None else [user],
-            'data_id': request_hash
+            'data_id': request_hash,
+            'request_id': request_id,
+            'client_type': client_type
         }
 
     def persist_data(self, providing_app_name: str, request_hash, data: dict):
@@ -68,7 +70,7 @@ class HaikuDataClient:
             raise Exception(f"Providing App {providing_app.name} is "
                             f"NOT valid according to MOTHER")
 
-        body = self.transform_request_id(user, request_hash)
+        body = self.transform_request_id(user, request_hash, 'enterprise')
         payload = bundle(
             self.keystore, requesting_app, providing_app.name, body, 'Success')
 
@@ -131,3 +133,36 @@ class HaikuDataClient:
 
         log.info(f'Decrypted content from persistence store: {decrypted_body}')
         return decrypted_body
+
+    def make_data_request_uapp_store(self, requesting_app, providing_app: Provider, request_id, request_hash):
+        # Check if the providing app is valid according to MOTHER
+        conf = UnificationConfig()
+        eos_client = Client(
+            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+
+        v = UnificationAppScValidation(
+            eos_client, conf['acl_contract'], providing_app.name,
+            get_perms=True)
+
+        if not v.valid():
+            raise Exception(f"Providing App {providing_app.name} is "
+                            f"NOT valid according to MOTHER")
+
+        body = self.transform_request_id(None, request_hash, 'standard', request_id)
+        payload = bundle(
+            self.keystore, requesting_app, providing_app.name, body, 'Success')
+
+        base = providing_app.base_url()
+        r = requests.post(f"{base}/data_request", json=payload, verify=False)
+        d = r.json()
+
+        if r.status_code != 200:
+            raise Exception(d['message'])
+
+        bundle_d = unbundle(self.keystore, providing_app.name, d)
+        decrypted_body = bundle_d['data']
+
+        print(f'"In the air" decrypted content is: {decrypted_body}')
+
+        return self.persist_data(
+            providing_app.name, request_hash, d)

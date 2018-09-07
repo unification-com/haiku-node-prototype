@@ -1,9 +1,11 @@
 import flask
+import hashlib
 
 from cryptography.exceptions import InvalidSignature
 from eosapi import Client
 
 from haiku_node.data.factory import UnificationDataFactory
+from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.encryption.payload import unbundle, bundle
 from haiku_node.validation.validation import UnificationAppScValidation
 
@@ -50,7 +52,7 @@ def error_request_self():
 
 
 def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
-                users):
+                users, client_type, request_id=None):
     """
     :param eos_account_name: The account name of the requesting App.
     :param users: The users to obtain data for.
@@ -61,7 +63,17 @@ def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
     body = {
         'data': data_factory.get_raw_data()
     }
+
     d = bundle(keystore, acl_contract_acc, eos_account_name, body, 'Success')
+
+    if client_type == 'standard':
+        # load UApp SC for requesting app
+        uapp_sc = UnificationUapp(eos_client, eos_account_name)
+        # generate checksum
+        data_hash = hashlib.sha224(b"{d['payload']}").hexdigest()
+        # write to Consumer's smart contract
+        uapp_sc.update_data_request(request_id, acl_contract_acc, data_hash, "test")
+
     return flask.jsonify(d), 200
 
 
@@ -111,10 +123,13 @@ def data_request():
         # data
         if v.valid():
             users = bundle_d.get('users')
+            client_type = bundle_d.get('client_type')
+            request_id = bundle_d.get('request_id')
             # TODO: need to ensure, somewhere, that the requesting app can afford to pay for the data!
             # perhaps pre-calculate how much it'll cost, and throw "CannotAfford" exception (with HTTP 401)
             return obtain_data(
-                app.keystore, sender, eos_client, conf['acl_contract'], users)
+                app.keystore, sender, eos_client, conf['acl_contract'],
+                users, client_type, request_id)
         else:
             return invalid_app()
 

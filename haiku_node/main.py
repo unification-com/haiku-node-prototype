@@ -202,6 +202,7 @@ def uapp_store():
 
 def __request_from_uapp_store(data_request):
     requesting_app = os.environ['app_name']
+    password = os.environ['keystore']
 
     click.echo("Processing request:")
     click.echo(data_request)
@@ -222,8 +223,13 @@ def __request_from_uapp_store(data_request):
 
     click.echo(f'App {requesting_app} is requesting data from {provider.name}')
 
-    
+    encoded_password = str.encode(password)
+    keystore = UnificationKeystore(encoded_password)
 
+    client = HaikuDataClient(keystore)
+    data_path = client.make_data_request_uapp_store(
+        requesting_app, provider, latest_req_id, req_hash)
+    click.echo(f'Data written to {data_path}')
 
 
 if __name__ == "__main__":
