@@ -15,7 +15,7 @@ END_USERS = 0.67
 
 
 class UndRewards:
-    def __init__(self, acl_acc: str):
+    def __init__(self, acl_acc: str, und_amt: int):
         """
 
         :param acl_acc: The account name of the payer.
@@ -28,26 +28,17 @@ class UndRewards:
             "--wallet-url",
             f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}"]
 
-        eos_client = Client(
-            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
-
-        uapp_sc = UnificationUapp(eos_client, self.__my_acl_acc)
-
-        schemas = uapp_sc.get_all_db_schemas()
-        # TODO: get correct price for schema being used.
-        # Temporary solution since only 1 schema per app in prototype
-        self.__und_scheduled = schemas[0]['price_sched']
-        self.__und_adhoc = schemas[0]['price_adhoc']
+        self.__und_amt = und_amt
 
     def send_reward(self, to, is_user=True, num_users=1):
 
         # Todo: migrate to Token smart contract
         if is_user:
             reward = "{0:.4f}".format(
-                round(float((self.__und_scheduled * END_USERS) / num_users), 4))
+                round(float((self.__und_amt * END_USERS) / num_users), 4))
         else:
             reward = "{0:.4f}".format(
-                round(float(self.__und_scheduled * DATA_PROVIDER), 4))
+                round(float(self.__und_amt * DATA_PROVIDER), 4))
 
         d = {
             'from': self.__my_acl_acc,
@@ -78,7 +69,7 @@ class UndRewards:
         return result
 
     def pay_unif(self):
-        und = "{0:.4f}".format(round(float(self.__und_scheduled * UNIF), 4))
+        und = "{0:.4f}".format(round(float(self.__und_amt * UNIF), 4))
 
         d = {
             'from': self.__my_acl_acc,
@@ -111,8 +102,8 @@ class UndRewards:
     def calculate_reward(self, is_user=True, num_users=1):
         if is_user:
             reward = round(
-                float((self.__und_scheduled * END_USERS) / num_users), 4)
+                float((self.__und_amt * END_USERS) / num_users), 4)
         else:
-            reward = round(float(self.__und_scheduled * DATA_PROVIDER), 4)
+            reward = round(float(self.__und_amt * DATA_PROVIDER), 4)
 
         return reward
