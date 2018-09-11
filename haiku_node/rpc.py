@@ -1,5 +1,6 @@
 import flask
 import hashlib
+import time
 
 from cryptography.exceptions import InvalidSignature
 from eosapi import Client
@@ -79,7 +80,14 @@ def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
         # write to Consumer's smart contract
         uapp_sc.update_data_request(request_id, acl_contract_acc, data_hash, "test")
 
-    return flask.jsonify(d), 200
+        # check data_hash has been written to the DC's contract before sending the data
+        time.sleep(1) # wait for blockchain transaction to complete
+        req_data = uapp_sc.get_data_request_by_pkey(request_id)
+        if req_data['hash'] == data_hash:
+            return flask.jsonify(d), 200
+        # Todo - deal with transaction failure
+    else:
+        return flask.jsonify(d), 200
 
 
 def ingest_data(keystore, eos_account_name, eos_client, acl_contract_acc,
