@@ -89,7 +89,7 @@ class TransformData:
 
 
     def assemble_connection_string(self):
-        connString = '{odbc}://{filename}' \
+        connString = '{obdc}:////{filename}' \
             .format(
                 odbc=self.__data_source_parms['odbc'],
                 filename=self.__data_source_parms['filename'],)
