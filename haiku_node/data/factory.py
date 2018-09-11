@@ -93,7 +93,7 @@ class UnificationDataFactory:
         
         # generate db params for ETL
         data_source_parms = {
-            'odbc': 'SQLite3 ODBC Driver',  # TODO: set/get from db schema/conn/config
+            'odbc': 'sqlite',  # TODO: set/get from db schema/conn/config
             'database': db_schema_map['db_name'],
             'filename': db_connection['filename'],
             'userTable': user_table_info['real_table_name'],  # temp hack
