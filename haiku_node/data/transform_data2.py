@@ -31,7 +31,7 @@ class TransformDataJSON:
 
         #TODO: Get these unification users from somewhere
         unification_users = []
-        for unification_id_key in self.unification_users:
+        for unification_id_key in unification_users:
             dump['unification users'].append(
                 {'unification user': unification_users[unification_id_key]})
 
