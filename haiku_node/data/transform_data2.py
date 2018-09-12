@@ -51,12 +51,12 @@ class TransformDataJSON:
         return json.dumps(dump)
 
     def fetch_json_data(self):
-        connString = '{obdc}:///{filename}' \
-            .format(
-            odbc=self.__data_source_parms['odbc'],
-            filename=self.__data_source_parms['filename'], )
+        # connString = '{obdc}:///{filename}' \
+        #     .format(
+        #     odbc=self.__data_source_parms['odbc'],
+        #     filename=self.__data_source_parms['filename'], )
 
-        conn = sqlite3.connect(connString)
+        conn = sqlite3.connect(self.__data_source_parms['filename'])
         j = self.to_json(conn)
         conn.close()
 
