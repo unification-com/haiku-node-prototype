@@ -23,7 +23,7 @@ def test_database_read(db_name):
     """
     target = target_file(db_name)
 
-    transformer = TransformDataJSON(str(target), [])
+    transformer = TransformDataJSON(str(target), {'1': 'user1'})
     j = transformer.fetch_json_data()
 
     print(j)
