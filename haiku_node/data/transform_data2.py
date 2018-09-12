@@ -29,13 +29,14 @@ class TransformDataJSON:
             curr.execute("SELECT * FROM `{}`".format(t))
             dump[t] = self.get_rows_as_dicts(curr, t)
 
-        #TODO: Get these unification users from somewhere
-        unification_users = []
-        for unification_id_key in unification_users:
-            dump['unification users'].append(
-                {'unification user': unification_users[unification_id_key]})
+        ret = {}
+        ret['data'] = dump
+        ret['data']['unification_users'] = {}
 
-        return json.dumps(dump)
+        for key, value in self.unification_ids.items():
+            ret['data']['unification_users']['unification_user'] = value
+
+        return json.dumps(ret)
 
     def fetch_json_data(self):
         conn = sqlite3.connect(self.sqlite_file)
