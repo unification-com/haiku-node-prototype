@@ -56,14 +56,6 @@ class TransformDataJSON:
             odbc=self.__data_source_parms['odbc'],
             filename=self.__data_source_parms['filename'], )
 
-        # engine = create_engine(connString)
-        #
-        # Base.metadata.bind = engine
-        # DBSession = sessionmaker(bind=engine)
-
-        # session = DBSession()
-
-
         conn = sqlite3.connect(connString)
         j = self.to_json(conn)
         conn.close()
