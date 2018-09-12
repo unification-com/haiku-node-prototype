@@ -10,21 +10,22 @@ from sqlalchemy.orm import sessionmaker
 
 import sqlite3
 
+
 class TransformDataJSON:
 
     def __init__(self, data_source_parms):
         self.__data_source_parms = data_source_parms
 
-    def get_rows_as_dicts(cursor):
+    def get_rows_as_dicts(self, cursor):
         cursor.execute(assemble_query_string())
         columns = [d[0] for d in cursor.description]
         return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-    def get_tables(cursor):
+    def get_tables(self, cursor):
         cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
         return [r[0] for r in cursor.fetchall()]
 
-    def to_json(conn):
+    def to_json(self, conn):
         """
 
         :param conn: An open SQLite connection
@@ -49,7 +50,6 @@ class TransformDataJSON:
 
         return json.dumps(dump)
 
-
     def fetch_json_data(self):
         connString = '{obdc}:///{filename}' \
             .format(
@@ -65,15 +65,7 @@ class TransformDataJSON:
 
 
         conn = sqlite3.connect(connString)
-        j = to_json(conn)
+        j = self.to_json(conn)
         conn.close()
 
         return j
-
-
-
-
-
-
-
-
