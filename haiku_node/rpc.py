@@ -78,12 +78,10 @@ def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
         # generate checksum
         data_hash = hashlib.sha224(b"{d['payload']}").hexdigest()
         # write to Consumer's smart contract
-        uapp_sc.update_data_request(request_id, acl_contract_acc, data_hash, "test")
+        transaction_id = uapp_sc.update_data_request(request_id, acl_contract_acc, data_hash, "test")
 
-        # check data_hash has been written to the DC's contract before sending the data
-        time.sleep(1) # wait for blockchain transaction to complete
-        req_data = uapp_sc.get_data_request_by_pkey(request_id)
-        if req_data['hash'] == data_hash:
+        # check transaction has been processed
+        if transaction_id is not None:
             return flask.jsonify(d), 200
         # Todo - deal with transaction failure
     else:

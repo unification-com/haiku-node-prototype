@@ -1,7 +1,9 @@
 import json
+import logging
 
 from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
+log = logging.getLogger('haiku_node')
 
 class UnificationUapp:
     """
@@ -16,6 +18,14 @@ class UnificationUapp:
                class will retrieve data from the UApp smart contract
 
         """
+        log.setLevel(logging.DEBUG)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        log.addHandler(ch)
+
         self.__permission_rec_table = "permrecords"
         self.__rsa_pub_key_table = "rsapubkey"
         self.__db_schema_table = "dataschemas"
@@ -24,6 +34,7 @@ class UnificationUapp:
         self.__acl_contract_acc = acl_contract_acc
         self.__eos_rpc_client = eos_rpc_client
 
+        # Todo: Migrate from cleos command line to EOS RPC API
         self.__cleos = EosioCleos(host=False)
 
     def get_all_db_schemas(self):
@@ -288,7 +299,12 @@ class UnificationUapp:
             ['push', 'action', self.__acl_contract_acc, 'updatereq', json.dumps(d), '-p',
              f'{provider_name}'])
 
-        print(ret.stdout)
+        # Todo: Once migrated to EOS RPC API, wait for transaction confirmation
+        if ret.stderr.find("executed transaction") != -1:
+            ret_list = ret.stderr.split(' ')
+            transaction_id = ret_list[3]
+            log.info(f'Transaction ID: {transaction_id}')
+            return transaction_id
 
-        return ret
+        return None
 
