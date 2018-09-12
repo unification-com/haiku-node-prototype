@@ -1,40 +1,15 @@
 import os
-import json
-import sqlite3
 import pytest
 
 from pathlib import Path
+
+from haiku_node.data.transform_data2 import TransformDataJSON
 
 
 def target_file(db_name):
     current_directory = Path(os.path.dirname(os.path.abspath(__file__)))
     p = current_directory / 'data/sqlite'
     return p / db_name
-
-
-def get_tables(cursor):
-    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-    return [r[0] for r in cursor.fetchall()]
-
-
-def to_json(conn):
-    """
-
-    :param conn: An open SQLite connection
-    :return: A JSON representation of the contents
-    """
-    curr = conn.cursor()
-    dump = {}
-    for t in get_tables(curr):
-        curr.execute("SELECT * FROM `{}`".format(t))
-        dump[t] = get_rows_as_dicts(curr, t)
-    return json.dumps(dump)
-
-
-def get_rows_as_dicts(cursor, table):
-    cursor.execute("SELECT * FROM `{}`".format(table))
-    columns = [d[0] for d in cursor.description]
-    return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 
 @pytest.mark.parametrize(
@@ -47,7 +22,8 @@ def test_database_read(db_name):
     :return: Connection object or None
     """
     target = target_file(db_name)
-    conn = sqlite3.connect(str(target))
-    j = to_json(conn)
-    conn.close()
+
+    transformer = TransformDataJSON(str(target), [])
+    j = transformer.fetch_json_data()
+
     print(j)
