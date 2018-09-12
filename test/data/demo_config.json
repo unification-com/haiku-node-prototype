@@ -57,7 +57,7 @@
           },
           "database": "Heartbit",
           "db_platform": "sqlite",
-          "filename": "Data.db",
+          "filename": "/haiku/haiku_node/data/Data.db",
           "table_maps": [
             {
               "schema_table_id": "users",
@@ -147,7 +147,7 @@
           },
           "database": "Datablobs",
           "db_platform": "sqlite",
-          "filename": "Data.db",
+          "filename": "/haiku/haiku_node/data/Data.db",
           "table_maps": [
             {
               "schema_table_id": "users",
@@ -231,7 +231,7 @@
           },
           "database": "Imagestorage",
           "db_platform": "sqlite",
-          "filename": "Data.db",
+          "filename": "/haiku/haiku_node/data/Data.db",
           "table_maps": [
             {
               "schema_table_id": "users",
