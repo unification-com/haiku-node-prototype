@@ -1,14 +1,14 @@
 import json
-
-from xmljson import parker
-from lxml.etree import fromstring
+import logging
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.blockchain_helpers import eosio_account
 from haiku_node.config.config import UnificationConfig
-from haiku_node.data.transform_data import TransformData
+from haiku_node.data.transform_data2 import TransformDataJSON
 from haiku_node.lookup.eos_lookup import UnificationLookup, default_db
+
+log = logging.getLogger(__name__)
 
 
 class UnificationDataFactory:
@@ -113,11 +113,12 @@ class UnificationDataFactory:
                 unification_ids[id] = self.__my_lookup.get_eos_account(id)
             
             data_source_parms['unification_ids'] = unification_ids
-            data_transform = TransformData(data_source_parms)
-            # transforms xml data to json dictionary (string)
+            data_transform_json = TransformDataJSON(
+                data_source_parms['filename'], unification_ids)
 
-            xml = fromstring(data_transform.fetch_user_data())
-            self.__raw_data = json.dumps(parker.data(xml, preserve_root=True))
+            j = data_transform_json.fetch_json_data()
+            self.__raw_data = j
+
         else:
             d = {
                 "no-data": True
