@@ -2,15 +2,6 @@ version: '3'
 
 services:
 
-  db:
-    image: mysql
-    environment:
-      MYSQL_USER: admin
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_PASSWORD: password
-    ports:
-    - "3306:3306"
-
   nodeosd:
     image: unification-node
     container_name: nodeosd
@@ -36,8 +27,6 @@ services:
     - keystore=rIeT7sz1P31ijrs9lNZiQGmOKlUVqf1WBg8ZSW-3JR8=
     ports:
     - "8851:8050"
-    depends_on:
-      - "db"
 
   haiku-app2:
     image: haiku
@@ -47,8 +36,6 @@ services:
     - keystore=I0CtE8uvYOj9bOaQjlymmZT8621iidsInry0Nqepaak=
     ports:
     - "8852:8050"
-    depends_on:
-      - "db"
 
   haiku-app3:
     image: haiku
@@ -58,8 +45,6 @@ services:
     - keystore=Lah5Kwt9mziZh9A_Xi6RQ_quqwII5Bhvw5MZ8xE03IA=
     ports:
     - "8853:8050"
-    depends_on:
-      - "db"
     volumes:
         - ${HAIKU_ROOT}/data_sources/imageblobs:/data/imageblobs:ro
 
@@ -80,7 +65,6 @@ services:
       - "haiku-app1"
       - "haiku-app2"
       - "haiku-app3"
-      - "db"
       - "ipfs"
 
   babel:
