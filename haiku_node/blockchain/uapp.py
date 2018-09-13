@@ -10,8 +10,10 @@ class UnificationUapp:
 
     def __init__(self, eos_rpc_client, acl_contract_acc):
         """
+        :param eos_rpc_client: EOS RPC Client
         :param acl_contract_acc: the eos account name of the app for which the
-            class will retrieve data from the UApp smart contract
+               class will retrieve data from the UApp smart contract
+
         """
         self.__permission_rec_table = "permrecords"
         self.__rsa_pub_key_table = "rsapubkey"
@@ -21,6 +23,7 @@ class UnificationUapp:
         self.__acl_contract_acc = acl_contract_acc
         self.__eos_rpc_client = eos_rpc_client
 
+        # Todo: Migrate from cleos command line to EOS RPC API
         self.__cleos = EosioCleos(host=False)
 
     def get_all_db_schemas(self):
@@ -46,6 +49,11 @@ class UnificationUapp:
         return db_schemas
 
     def get_db_schema_by_pkey(self, pkey: int):
+        """
+
+        :param pkey: Primary Key for the schema table in the smart contract
+        :return: db_schema object containing data from the Smart Contract table
+        """
         db_schema = {}
         table_data = self.__eos_rpc_client.get_table_rows(
             self.__acl_contract_acc,
@@ -145,7 +153,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'addschema', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -163,7 +171,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'editschema', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -177,7 +185,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setvers', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -191,7 +199,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setschedule', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -205,7 +213,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setpricesch', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -219,7 +227,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setpriceadh', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -233,7 +241,7 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setchema', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modschema'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
@@ -246,27 +254,28 @@ class UnificationUapp:
 
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'setrsakey', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modrsakey'])
+             f'{self.__acl_contract_acc}'])
 
         print(ret.stdout)
 
         return ret
 
-    def init_data_request(self, provider_name, schema_id, req_type, query, price):
+    def init_data_request(self, provider_name, schema_id, req_type, price, query=None):
         d = {
             'provider_name': provider_name,
             'schema_id': schema_id,
             'req_type': req_type,
-            'query': query,
+            'query': 'test',
             'price': price
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'initreq', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modreq'])
+             f'{self.__acl_contract_acc}'])
 
-        print(ret.stdout)
+        data_requests = self.get_all_data_requests()
+        latest_req_id = list(data_requests.keys())[-1]
 
-        return ret
+        return latest_req_id
 
     def update_data_request(self, pkey, provider_name, hash, aggr):
         d = {
@@ -277,9 +286,13 @@ class UnificationUapp:
         }
         ret = self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'updatereq', json.dumps(d), '-p',
-             f'{provider_name}@modreq'])
+             f'{provider_name}'])
 
-        print(ret.stdout)
+        # Todo: Once migrated to EOS RPC API, wait for transaction confirmation
+        if ret.stderr.find("executed transaction") != -1:
+            ret_list = ret.stderr.split(' ')
+            transaction_id = ret_list[3]
+            return transaction_id
 
-        return ret
+        return None
 

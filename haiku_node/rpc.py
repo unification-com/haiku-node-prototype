@@ -1,9 +1,12 @@
 import flask
+import hashlib
+import time
 
 from cryptography.exceptions import InvalidSignature
 from eosapi import Client
 
 from haiku_node.data.factory import UnificationDataFactory
+from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.encryption.payload import unbundle, bundle
 from haiku_node.validation.validation import UnificationAppScValidation
 
@@ -49,11 +52,23 @@ def error_request_self():
     }), 418
 
 
+def bc_transaction_error():
+    return flask.jsonify({
+        'success': False,
+        'message': 'Failed to write transaction to blockchain',
+        'signature': None,
+        'body': None
+    }), 500
+
+
 def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
-                users):
+                users, request_id=None):
     """
-    :param eos_account_name: The account name of the requesting App.
-    :param users: The users to obtain data for.
+    :param eos_account_name: The account name of the requesting App (Data Consumer).
+    :param eos_client: EOS RPC Client
+    :param acl_contract_acc: The account name of the providing App (Data Provider).
+    :param users: The users to obtain data for. None to get all available users
+    :param request_id: Primary Key for the data request held in the Consumer's UApp smart contract
     """
 
     data_factory = UnificationDataFactory(
@@ -61,8 +76,21 @@ def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
     body = {
         'data': data_factory.get_raw_data()
     }
+
     d = bundle(keystore, acl_contract_acc, eos_account_name, body, 'Success')
-    return flask.jsonify(d), 200
+
+    # load UApp SC for requesting app
+    uapp_sc = UnificationUapp(eos_client, eos_account_name)
+    # generate checksum
+    data_hash = hashlib.sha224(str(d['payload']).encode('utf-8')).hexdigest()
+    # write to Consumer's smart contract
+    transaction_id = uapp_sc.update_data_request(request_id, acl_contract_acc, data_hash, "test")
+
+    # check transaction has been processed
+    if transaction_id is not None:
+        return flask.jsonify(d), 200
+    else:
+        return bc_transaction_error()
 
 
 def ingest_data(keystore, eos_account_name, eos_client, acl_contract_acc,
@@ -111,10 +139,10 @@ def data_request():
         # data
         if v.valid():
             users = bundle_d.get('users')
-            # TODO: need to ensure, somewhere, that the requesting app can afford to pay for the data!
-            # perhaps pre-calculate how much it'll cost, and throw "CannotAfford" exception (with HTTP 401)
+            request_id = bundle_d.get('request_id')
             return obtain_data(
-                app.keystore, sender, eos_client, conf['acl_contract'], users)
+                app.keystore, sender, eos_client, conf['acl_contract'],
+                users, request_id)
         else:
             return invalid_app()
 

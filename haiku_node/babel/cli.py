@@ -6,12 +6,13 @@ from itertools import product
 import click
 from eosapi import Client
 
-from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.config.config import UnificationConfig
-from haiku_node.blockchain_helpers.accounts import AccountManager
-from haiku_node.validation.validation import UnificationAppScValidation
+from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
+from haiku_node.validation.validation import UnificationAppScValidation
+
 
 log = logging.getLogger(__name__)
 
@@ -73,14 +74,12 @@ def schemas(app_name):
         nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
     uapp_sc = UnificationUapp(eos_client, app_name)
-    schemas = uapp_sc.get_all_db_schemas()
 
     click.echo(f"{app_name} has the following Schemas:\n")
 
-    for schema in schemas:
+    for key, schema in uapp_sc.get_all_db_schemas().items():
         click.echo(f"Schema ID {schema['pkey']}:")
         click.echo(schema['schema'])
-
 
 
 @main.command()

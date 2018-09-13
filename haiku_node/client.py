@@ -1,5 +1,6 @@
 import json
 import tempfile
+import hashlib
 from pathlib import Path
 from eosapi import Client
 
@@ -10,6 +11,7 @@ from haiku_node.blockchain.und_rewards import UndRewards
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.validation.validation import UnificationAppScValidation
+from haiku_node.blockchain.uapp import UnificationUapp
 
 
 log = logging.getLogger(__name__)
@@ -32,13 +34,14 @@ class HaikuDataClient:
         self.local = local
         self.protocol = protocol
 
-    def transform_request_id(self, user, request_hash):
+    def transform_request_id(self, user, request_hash, request_id=None):
         """
         # TODO: Convert to a particular request body
         """
         return {
             'users': [] if user is None else [user],
-            'data_id': request_hash
+            'data_id': request_hash,
+            'request_id': request_id
         }
 
     def persist_data(self, providing_app_name: str, request_hash, data: dict):
@@ -50,9 +53,10 @@ class HaikuDataClient:
         return tp
 
     def make_data_request(
-            self, requesting_app, providing_app: Provider, user, request_hash):
+            self, requesting_app, providing_app: Provider, user, request_hash, request_id):
         """
-        Make a data request from one App to another.
+        Make a data request from one Haiku Node to another,
+        or receive request from UApp Store
         """
 
         # Check if the providing app is valid according to MOTHER
@@ -68,7 +72,7 @@ class HaikuDataClient:
             raise Exception(f"Providing App {providing_app.name} is "
                             f"NOT valid according to MOTHER")
 
-        body = self.transform_request_id(user, request_hash)
+        body = self.transform_request_id(user, request_hash, request_id)
         payload = bundle(
             self.keystore, requesting_app, providing_app.name, body, 'Success')
 
@@ -82,14 +86,23 @@ class HaikuDataClient:
         bundle_d = unbundle(self.keystore, providing_app.name, d)
         decrypted_body = bundle_d['data']
 
-        log.info(f'"In the air" decrypted content is: {decrypted_body}')
+        # log.info(f'"In the air" decrypted content is: {decrypted_body}')
 
-        # TODO: only pay if data is valid
-        und_reward = UndRewards(requesting_app)
+        checksum_ok = False
+
+        # Computationally validate the received data the checksum of the payload
+        data_hash = hashlib.sha224(str(d['payload']).encode('utf-8')).hexdigest()
+
+        uapp_sc = UnificationUapp(eos_client, requesting_app)
+        data_request = uapp_sc.get_data_request_by_pkey(request_id)
+        und_reward = UndRewards(requesting_app, data_request['price'])
+        if data_request['hash'] == data_hash:
+            print("Data computationally valid")
+            checksum_ok = True
 
         json_obj = json.loads(decrypted_body)
 
-        if 'no-data' not in json_obj:
+        if 'no-data' not in json_obj and checksum_ok:
             users_to_pay = json_obj['data']['unification_users']['unification_user']
             print("users_to_pay")
             print(users_to_pay)
@@ -113,7 +126,6 @@ class HaikuDataClient:
             ret = und_reward.pay_unif()
             log.debug(ret)
 
-
         return self.persist_data(
             providing_app.name, request_hash, d)
 
@@ -131,3 +143,4 @@ class HaikuDataClient:
 
         log.info(f'Decrypted content from persistence store: {decrypted_body}')
         return decrypted_body
+
