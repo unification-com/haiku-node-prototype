@@ -81,7 +81,8 @@ def init():
 @click.option('--user', default=None)
 def fetch(provider, request_hash, user):
     """
-    Fetch data from an App to this App for a particular user.
+    Fetch data from an App to this App in an Enterprise/DSP/B2B environment,
+    where data request is agreed external to the UApp Store.
 
     \b
     :param provider: The app name of the data provider.
@@ -103,9 +104,25 @@ def fetch(provider, request_hash, user):
     encoded_password = str.encode(password)
     keystore = UnificationKeystore(encoded_password)
 
+    # Write the data request to the Consumer's UApp smart contract
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+
+    # tmp - get the price for the transfer from Schema[0] in the provider's UApp SC.
+    # This will possibly be determined externally as part of the B2B agreement
+    provider_uapp_sc = UnificationUapp(eos_client, provider.name)
+    db_schema = provider_uapp_sc.get_db_schema_by_pkey(0)  # tmp - only 1 schema
+    sched_price = db_schema['price_sched']
+
+    # initiate request in Consumer's UApp SC
+    consumer_uapp_sc = UnificationUapp(eos_client, requesting_app)
+    latest_req_id = consumer_uapp_sc.init_data_request(provider.name, "0", "0",
+                                                       sched_price)
+
     client = HaikuDataClient(keystore)
     data_path = client.make_data_request(
-        requesting_app, provider, user, req_hash)
+        requesting_app, provider, user, req_hash, latest_req_id)
     click.echo(f'Data written to {data_path}')
     click.echo(f'View using:')
     click.echo(f"haiku view {provider.name} {request_hash}")
@@ -233,7 +250,7 @@ def __request_from_uapp_store(data_request):
 
     client = HaikuDataClient(keystore)
     data_path = client.make_data_request(
-        requesting_app, provider, None, req_hash, 'standard', latest_req_id)
+        requesting_app, provider, None, req_hash, latest_req_id)
     click.echo(f'Data written to {data_path}')
     click.echo(f'View using:')
     click.echo(f"haiku view {provider.name} {request_hash}")

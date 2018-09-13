@@ -52,15 +52,22 @@ def error_request_self():
     }), 418
 
 
+def bc_transaction_error():
+    return flask.jsonify({
+        'success': False,
+        'message': 'Failed to write transaction to blockchain',
+        'signature': None,
+        'body': None
+    }), 500
+
+
 def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
-                users, client_type, request_id=None):
+                users, request_id=None):
     """
     :param eos_account_name: The account name of the requesting App (Data Consumer).
     :param eos_client: EOS RPC Client
     :param acl_contract_acc: The account name of the providing App (Data Provider).
     :param users: The users to obtain data for. None to get all available users
-    :param client_type: enterprise: Direct data requests not initiated via BABEL UApp Store
-                        standard: Data requests initiated via the BABEL UApp store
     :param request_id: Primary Key for the data request held in the Consumer's UApp smart contract
     """
 
@@ -72,20 +79,18 @@ def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
 
     d = bundle(keystore, acl_contract_acc, eos_account_name, body, 'Success')
 
-    if client_type == 'standard':
-        # load UApp SC for requesting app
-        uapp_sc = UnificationUapp(eos_client, eos_account_name)
-        # generate checksum
-        data_hash = hashlib.sha224(b"{d['payload']}").hexdigest()
-        # write to Consumer's smart contract
-        transaction_id = uapp_sc.update_data_request(request_id, acl_contract_acc, data_hash, "test")
+    # load UApp SC for requesting app
+    uapp_sc = UnificationUapp(eos_client, eos_account_name)
+    # generate checksum
+    data_hash = hashlib.sha224(str(d['payload']).encode('utf-8')).hexdigest()
+    # write to Consumer's smart contract
+    transaction_id = uapp_sc.update_data_request(request_id, acl_contract_acc, data_hash, "test")
 
-        # check transaction has been processed
-        if transaction_id is not None:
-            return flask.jsonify(d), 200
-        # Todo - deal with transaction failure
-    else:
+    # check transaction has been processed
+    if transaction_id is not None:
         return flask.jsonify(d), 200
+    else:
+        return bc_transaction_error()
 
 
 def ingest_data(keystore, eos_account_name, eos_client, acl_contract_acc,
@@ -134,11 +139,10 @@ def data_request():
         # data
         if v.valid():
             users = bundle_d.get('users')
-            client_type = bundle_d.get('client_type')
             request_id = bundle_d.get('request_id')
             return obtain_data(
                 app.keystore, sender, eos_client, conf['acl_contract'],
-                users, client_type, request_id)
+                users, request_id)
         else:
             return invalid_app()
 

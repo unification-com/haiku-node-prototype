@@ -34,14 +34,13 @@ class HaikuDataClient:
         self.local = local
         self.protocol = protocol
 
-    def transform_request_id(self, user, request_hash, client_type, request_id=None):
+    def transform_request_id(self, user, request_hash, request_id=None):
         """
         # TODO: Convert to a particular request body
         """
         return {
             'users': [] if user is None else [user],
             'data_id': request_hash,
-            'client_type': client_type,
             'request_id': request_id
         }
 
@@ -54,8 +53,7 @@ class HaikuDataClient:
         return tp
 
     def make_data_request(
-            self, requesting_app, providing_app: Provider, user, request_hash,
-            client_type='enterprise', request_id=None):
+            self, requesting_app, providing_app: Provider, user, request_hash, request_id):
         """
         Make a data request from one Haiku Node to another,
         or receive request from UApp Store
@@ -74,7 +72,7 @@ class HaikuDataClient:
             raise Exception(f"Providing App {providing_app.name} is "
                             f"NOT valid according to MOTHER")
 
-        body = self.transform_request_id(user, request_hash, client_type, request_id)
+        body = self.transform_request_id(user, request_hash, request_id)
         payload = bundle(
             self.keystore, requesting_app, providing_app.name, body, 'Success')
 
@@ -92,20 +90,15 @@ class HaikuDataClient:
 
         checksum_ok = False
 
-        if client_type == 'standard':
-            # Computationally validate the received data the checksum of the payload
-            data_hash = hashlib.sha224(b"{d['payload']}").hexdigest()
+        # Computationally validate the received data the checksum of the payload
+        data_hash = hashlib.sha224(str(d['payload']).encode('utf-8')).hexdigest()
 
-            uapp_sc = UnificationUapp(eos_client, requesting_app)
-            data_request = uapp_sc.get_data_request_by_pkey(request_id)
-            und_reward = UndRewards(requesting_app, data_request['price'])
-            if data_request['hash'] == data_hash:
-                checksum_ok = True
-        else:
-            uapp_sc = UnificationUapp(eos_client, providing_app.name)
-            db_schema = uapp_sc.get_db_schema_by_pkey(0)  # tmp - only 1 schema
-            und_reward = UndRewards(requesting_app, db_schema['price_sched'])
-            checksum_ok = True  # temporary
+        uapp_sc = UnificationUapp(eos_client, requesting_app)
+        data_request = uapp_sc.get_data_request_by_pkey(request_id)
+        und_reward = UndRewards(requesting_app, data_request['price'])
+        if data_request['hash'] == data_hash:
+            print("Data computationally valid")
+            checksum_ok = True
 
         json_obj = json.loads(decrypted_body)
 

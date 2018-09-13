@@ -91,12 +91,21 @@ def systest_ingest(requesting_app, providing_app, user, balances, local=False):
     keystore = UnificationKeystore(encoded_password, app_name=requesting_app,
                                    keystore_path=Path('data/keys'))
 
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+    consumer_uapp_sc = UnificationUapp(eos_client, requesting_app)
+
+    price_sched = demo_config['demo_apps'][providing_app]['db_schemas'][0]['price_sched']
+
+    latest_req_id = consumer_uapp_sc.init_data_request(provider.name, "0", "0",
+                                                       price_sched)
+
     client = HaikuDataClient(keystore)
-    client.make_data_request(requesting_app, provider, user, request_hash)
+    client.make_data_request(requesting_app, provider, user, request_hash, latest_req_id)
     client.read_data_from_store(provider, request_hash)
 
     # Update the system test record of the balances
-    price_sched = demo_config['demo_apps'][providing_app]['db_schemas'][0]['price_sched']
     balances[requesting_app] = balances[requesting_app] - price_sched
     und_rewards = UndRewards(providing_app, price_sched)
     balances[providing_app] = balances[providing_app] + und_rewards.calculate_reward(is_user=False)
