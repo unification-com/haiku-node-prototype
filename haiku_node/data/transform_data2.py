@@ -29,12 +29,9 @@ class TransformDataJSON:
             curr.execute("SELECT * FROM `{}`".format(t))
             dump[t] = self.get_rows_as_dicts(curr, t)
 
-        ret = {}
-        ret['data'] = dump
-        ret['data']['unification_users'] = {}
-
-        for key, value in self.unification_ids.items():
-            ret['data']['unification_users']['unification_user'] = value
+        ret = {'data': dump}
+        ret['data']['unification_users'] = [
+            x for x in self.unification_ids.values()]
 
         return json.dumps(ret)
 
