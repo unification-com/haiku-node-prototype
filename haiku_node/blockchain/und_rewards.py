@@ -30,13 +30,7 @@ class UndRewards:
 
     def send_reward(self, to, is_user=True, num_users=1):
 
-        # Todo: migrate to Token smart contract
-        if is_user:
-            reward = "{0:.4f}".format(
-                round(float((self.__und_amt * END_USERS) / num_users), 4))
-        else:
-            reward = "{0:.4f}".format(
-                round(float(self.__und_amt * DATA_PROVIDER), 4))
+        reward = "{0:.4f}".format(self.calculate_reward(is_user, num_users))
 
         d = {
             'from': self.__my_acl_acc,
@@ -44,6 +38,8 @@ class UndRewards:
             'quantity': f'{reward} UND',
             'memo': 'UND Reward'
         }
+
+        log.debug(f"{self.__my_acl_acc} is paying {to} {reward} UND")
 
         subcommands = [
             "push", "action", "unif.token", "transfer",
@@ -98,6 +94,8 @@ class UndRewards:
         return result
 
     def calculate_reward(self, is_user=True, num_users=1):
+
+        # Todo: migrate to Token smart contract
         if is_user:
             reward = round(
                 float((self.__und_amt * END_USERS) / num_users), 4)
