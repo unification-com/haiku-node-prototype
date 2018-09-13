@@ -8,16 +8,14 @@ class TransformDataJSON:
         self.unification_ids = unification_ids
         self.sqlite_file = sqlite_file
 
-    def get_rows_as_dicts(self, cursor, table):
-        cursor.execute("SELECT * FROM `{}`".format(table))
-        columns = [d[0] for d in cursor.description]
-        return [dict(zip(columns, row)) for row in cursor.fetchall()]
+    def transform(self):
+        conn = sqlite3.connect(self.sqlite_file)
+        j = self.__to_json(conn)
+        conn.close()
 
-    def get_tables(self, cursor):
-        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
-        return [r[0] for r in cursor.fetchall()]
+        return j
 
-    def to_json(self, conn):
+    def __to_json(self, conn):
         """
 
         :param conn: An open SQLite connection
@@ -25,9 +23,9 @@ class TransformDataJSON:
         """
         curr = conn.cursor()
         dump = {}
-        for t in self.get_tables(curr):
+        for t in self.__get_tables(curr):
             curr.execute("SELECT * FROM `{}`".format(t))
-            dump[t] = self.get_rows_as_dicts(curr, t)
+            dump[t] = self.__get_rows_as_dicts(curr, t)
 
         ret = {'data': dump}
         ret['data']['unification_users'] = [
@@ -35,9 +33,11 @@ class TransformDataJSON:
 
         return json.dumps(ret)
 
-    def fetch_json_data(self):
-        conn = sqlite3.connect(self.sqlite_file)
-        j = self.to_json(conn)
-        conn.close()
+    def __get_rows_as_dicts(self, cursor, table):
+        cursor.execute("SELECT * FROM `{}`".format(table))
+        columns = [d[0] for d in cursor.description]
+        return [dict(zip(columns, row)) for row in cursor.fetchall()]
 
-        return j
+    def __get_tables(self, cursor):
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        return [r[0] for r in cursor.fetchall()]

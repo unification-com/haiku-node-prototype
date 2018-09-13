@@ -116,7 +116,7 @@ class UnificationDataFactory:
             data_transform_json = TransformDataJSON(
                 data_source_parms['filename'], unification_ids)
 
-            j = data_transform_json.fetch_json_data()
+            j = data_transform_json.transform()
             self.__raw_data = j
 
         else:
