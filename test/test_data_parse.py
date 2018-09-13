@@ -21,9 +21,32 @@ def test_database_read(db_name):
     :param db_name: database file
     :return: Connection object or None
     """
-    target = target_file(db_name)
+    # target = target_file(db_name)
 
-    transformer = TransformDataJSON(str(target), {'1': 'user1'})
+    # transformer = TransformDataJSON(str(target), {'1': 'user1'})
+    # j = transformer.transform()
+
+    # print(j)
+
+
+def test_data_factory():
+    data_source_parms = {
+        'filename': str(target_file("app1.db")),
+        'userTable': 'Users',
+        'dataTable': 'UserData',
+        'userIdentifier': 'ID',
+        'dataUserIdentifier': 'UserID',
+        'dataColumnsToInclude': ['Heartrate', 'Pulse'],
+        'native_user_ids': ['1', '2'],
+        'base64_encode_cols': [],
+        'providing_app': 'app1',
+        'unification_id_map': {'1': 'user1', '2': 'user2'}
+    }
+
+    transformer = TransformDataJSON(data_source_parms)
     j = transformer.transform()
-
     print(j)
+
+
+if __name__ == "__main__":
+    test_data_factory()

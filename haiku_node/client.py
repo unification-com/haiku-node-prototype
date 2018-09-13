@@ -105,7 +105,7 @@ class HaikuDataClient:
         json_obj = json.loads(decrypted_body)
 
         if 'no-data' not in json_obj and checksum_ok:
-            users_to_pay = json_obj['data']['unification_users']
+            users_to_pay = json_obj['unification_users']
             print("users_to_pay")
             print(users_to_pay)
             num_users = len(users_to_pay)

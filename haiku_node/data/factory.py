@@ -93,7 +93,6 @@ class UnificationDataFactory:
         
         # generate db params for ETL
         data_source_parms = {
-            'odbc': 'sqlite',  # TODO: set/get from db schema/conn/config
             'database': db_schema_map['db_name'],
             'filename': db_connection['filename'],
             'userTable': user_table_info['real_table_name'],  # temp hack
@@ -112,9 +111,8 @@ class UnificationDataFactory:
             for id in native_user_ids:
                 unification_ids[id] = self.__my_lookup.get_eos_account(id)
             
-            data_source_parms['unification_ids'] = unification_ids
-            data_transform_json = TransformDataJSON(
-                data_source_parms['filename'], unification_ids)
+            data_source_parms['unification_id_map'] = unification_ids
+            data_transform_json = TransformDataJSON(data_source_parms)
 
             j = data_transform_json.transform()
             self.__raw_data = j
