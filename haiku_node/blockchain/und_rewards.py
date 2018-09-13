@@ -1,6 +1,9 @@
 import json
 import logging
 import subprocess
+import time
+import string
+import random
 
 from haiku_node.config.config import UnificationConfig
 
@@ -32,11 +35,13 @@ class UndRewards:
 
         reward = "{0:.4f}".format(self.calculate_reward(is_user, num_users))
 
+        reward_timestamp = "%.20f" % time.time()
+
         d = {
             'from': self.__my_acl_acc,
             'to': to,
             'quantity': f'{reward} UND',
-            'memo': 'UND Reward'
+            'memo': f'UND Reward {self.tx_id_generator()} {reward_timestamp}'
         }
 
         log.debug(f"{self.__my_acl_acc} is paying {to} {reward} UND")
@@ -65,11 +70,13 @@ class UndRewards:
     def pay_unif(self):
         und = "{0:.4f}".format(round(float(self.__und_amt * UNIF), 4))
 
+        reward_timestamp = "%.20f" % time.time()
+
         d = {
             'from': self.__my_acl_acc,
             'to': 'unif.mother',
             'quantity': f'{und} UND',
-            'memo': 'UND Reward'
+            'memo': f'UND Tax {self.tx_id_generator()} {reward_timestamp}'
         }
 
         subcommands = [
@@ -103,3 +110,7 @@ class UndRewards:
             reward = round(float(self.__und_amt * DATA_PROVIDER), 4)
 
         return reward
+
+    @staticmethod
+    def tx_id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+        return ''.join(random.choice(chars) for _ in range(size))
