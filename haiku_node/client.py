@@ -1,17 +1,18 @@
 import json
 import tempfile
 import hashlib
+
 from pathlib import Path
 from eosapi import Client
 
 import logging
 import requests
 
+from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.blockchain.und_rewards import UndRewards
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.validation.validation import UnificationAppScValidation
-from haiku_node.blockchain.uapp import UnificationUapp
 
 
 log = logging.getLogger(__name__)
@@ -52,8 +53,8 @@ class HaikuDataClient:
         tp.write_text(json.dumps(data), encoding='utf-8')
         return tp
 
-    def make_data_request(
-            self, requesting_app, providing_app: Provider, user, request_hash, request_id):
+    def make_data_request(self, requesting_app, providing_app: Provider, user,
+                          request_hash, request_id):
         """
         Make a data request from one Haiku Node to another,
         or receive request from UApp Store
@@ -91,7 +92,8 @@ class HaikuDataClient:
         checksum_ok = False
 
         # Computationally validate the received data the checksum of the payload
-        data_hash = hashlib.sha224(str(d['payload']).encode('utf-8')).hexdigest()
+        data_hash = hashlib.sha224(
+            str(d['payload']).encode('utf-8')).hexdigest()
 
         uapp_sc = UnificationUapp(eos_client, requesting_app)
         data_request = uapp_sc.get_data_request_by_pkey(request_id)
@@ -111,7 +113,8 @@ class HaikuDataClient:
 
             for username in users_to_pay:
                 print(f'pay {username}')
-                ret = und_reward.send_reward(username, is_user=True, num_users=num_users)
+                ret = und_reward.send_reward(
+                    username, is_user=True, num_users=num_users)
                 log.debug(ret)
 
             log.debug(f"Pay provider {providing_app.name}")
