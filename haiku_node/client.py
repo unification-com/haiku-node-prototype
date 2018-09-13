@@ -103,19 +103,15 @@ class HaikuDataClient:
         json_obj = json.loads(decrypted_body)
 
         if 'no-data' not in json_obj and checksum_ok:
-            users_to_pay = json_obj['data']['unification_users']['unification_user']
+            users_to_pay = json_obj['data']['unification_users']
             print("users_to_pay")
             print(users_to_pay)
-            if isinstance(users_to_pay, list):
-                num_users = len(users_to_pay)
-                print(f"Pay {num_users} users")
-                for username in users_to_pay:
-                    print(f'pay {username}')
-                    ret = und_reward.send_reward(username, is_user=True, num_users=num_users)
-                    log.debug(ret)
-            else:
-                print(f'pay single user {users_to_pay}')
-                ret = und_reward.send_reward(users_to_pay, is_user=True, num_users=1)
+            num_users = len(users_to_pay)
+            print(f"Pay {num_users} users")
+
+            for username in users_to_pay:
+                print(f'pay {username}')
+                ret = und_reward.send_reward(username, is_user=True, num_users=num_users)
                 log.debug(ret)
 
             log.debug(f"Pay provider {providing_app.name}")
@@ -143,4 +139,3 @@ class HaikuDataClient:
 
         log.info(f'Decrypted content from persistence store: {decrypted_body}')
         return decrypted_body
-
