@@ -1,5 +1,6 @@
 import json
 import sqlite3
+import base64
 
 
 class TransformDataJSON:
@@ -29,6 +30,7 @@ class TransformDataJSON:
             unif_ids.append(val)
 
         ret = {'data': self.__prepare(dump),
+               'schema': self.__data_source_parms['db_schema'],
                'unification_users': unif_ids}
 
         return json.dumps(ret)
@@ -42,11 +44,24 @@ class TransformDataJSON:
         prepared_dump = []
         for d in dump:
             # change Native IDs to Unification IDs
+            # this will ultimately be handled during the export FROM the PostgreSql
+            # staging database
             nid = str(d[self.__data_source_parms['userIdentifier']])
-            d[self.__data_source_parms['userIdentifier']] = self.__data_source_parms['unification_id_map'][nid]
-            d['account_name'] = d.pop(self.__data_source_parms['userIdentifier'])
+            # transform Native User ID into Unification ID
+            d[self.__data_source_parms['userIdentifier']] = \
+                self.__data_source_parms['unification_id_map'][nid]
+            d['account_name'] = \
+                d.pop(self.__data_source_parms['userIdentifier'])
+            # Check for and remove any instances of native User ID
+            if self.__data_source_parms['dataUserIdentifier'] in d:
+                d.pop(self.__data_source_parms['dataUserIdentifier'])
 
-            # Todo - encode images into base64
+            # Encode images
+            for b64_col in self.__data_source_parms['base64_encode_cols']:
+                file = open(d[b64_col], 'rb')
+                file_read = file.read()
+                d[b64_col] = base64.encodebytes(file_read).decode('UTF-8')
+
             prepared_dump.append(d)
 
         return prepared_dump
@@ -55,6 +70,8 @@ class TransformDataJSON:
         data_columns = ""
         native_user_ids_str = ','.join(self.__data_source_parms['native_user_ids'])
 
+        # Generate the query to the SQLite database so that only fields
+        # specified in the Metadata Schema are output
         for item in self.__data_source_parms['dataColumnsToInclude']:
             data_columns += '{dataTable}.{item},'\
                 .format(dataTable=self.__data_source_parms['dataTable'],
@@ -62,6 +79,8 @@ class TransformDataJSON:
 
         data_columns = data_columns.rstrip(",")
 
+        # Query string currently also filters based on user permissions. This will ultimately be
+        # handled in the PostgreSQL staging DB solution
         query_string = 'SELECT {userTable}.{userIdentifier}, {dataColumns} ' \
                        'FROM {userTable} LEFT JOIN {dataTable} ' \
                        'On {userTable}.{userIdentifier} = {dataTable}.{dataUserIdentifier} ' \

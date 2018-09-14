@@ -102,7 +102,8 @@ class UnificationDataFactory:
             'dataColumnsToInclude': cols_to_include,
             'native_user_ids': native_user_ids,
             'base64_encode_cols': base64_encode_cols,
-            'providing_app': self.__acl_contract_acc
+            'providing_app': self.__acl_contract_acc,
+            'db_schema': db_schema
         }
 
         # grab list of EOS account names

@@ -40,7 +40,8 @@ def test_data_factory():
         'native_user_ids': ['1', '2'],
         'base64_encode_cols': [],
         'providing_app': 'app1',
-        'unification_id_map': {'1': 'user1', '2': 'user2'}
+        'unification_id_map': {'1': 'user1', '2': 'user2'},
+        'db_schema': {'tmp': 'tmp'}
     }
 
     transformer = TransformDataJSON(data_source_parms)
