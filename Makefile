@@ -10,7 +10,6 @@ all:
 	docker build -f Docker/babel.Dockerfile -t babel .
 	docker build -f Docker/ipfs/Dockerfile -t ipfs .
 	docker build -f Docker/systemtest.Dockerfile -t systemtest .
-	docker build -f Docker/mysql/Dockerfile -t mysql .
 
 pytest:
 	export PYTHONPATH="."; pytest .
