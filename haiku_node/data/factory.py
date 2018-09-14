@@ -1,13 +1,14 @@
 import json
-from xmljson import parker, Parker
-from lxml.etree import fromstring
+import logging
 
 from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.blockchain.uapp import UnificationUapp
-from haiku_node.config.config import UnificationConfig
-from haiku_node.data.transform_data import TransformData
 from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.config.config import UnificationConfig
+from haiku_node.data.transform_data2 import TransformDataJSON
 from haiku_node.lookup.eos_lookup import UnificationLookup, default_db
+
+log = logging.getLogger(__name__)
 
 
 class UnificationDataFactory:
@@ -36,8 +37,6 @@ class UnificationDataFactory:
         self.__native_user_meta = self.__my_lookup.get_native_user_meta()
 
         for pkey, db_schema in self.__my_db_schemas.items():
-            print("DB_SCHEMA_TEST")
-            print(db_schema)
             schema_map = self.__my_lookup.get_schema_map(pkey)
             self.__db_schema_maps[pkey] = schema_map
 
@@ -61,8 +60,6 @@ class UnificationDataFactory:
                 if user_acc_uint64 in self.__granted:
                     native_user_ids.append(self.__my_lookup.get_native_user_id(u))
 
-        print("native_user_ids")
-        print(native_user_ids)
         return native_user_ids
 
     def __generate_data(self):
@@ -76,24 +73,12 @@ class UnificationDataFactory:
         db_schema_map = self.__db_schema_maps[sc_schema_pkey]
         db_connection = self.__haiku_conf['db_conn']["0"]
 
-        # FOR TESTING
-        # db_schema = "<schema-template><fields><field><name>account_name</name><type>varchar</type><is-null>false</is-null><table>unification_lookup</table></field><field><name>Heartrate</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>GeoLocation</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>TimeStamp</name><type>int</type><is-null>true</is-null><table>data_1</table></field><field><name>Pulse</name><type>int</type><is-null>true</is-null><table>data_1</table></field></fields></schema-template>"
-        ###(Refer to the comment in Asana)
-        ### 1. have the schema in JSON from the beginning
-        ### 2. convert XML to JSON here
-        ### Currently we are going with 2.
-
-        print(db_schema)
-
         cols_to_include = []
         base64_encode_cols = []
         for items in db_schema['fields']:
             if items['table'] != 'unification_lookup':
-                print('table.text before:', items['table'])
                 real_table_data = self.__my_lookup.get_real_table_info(sc_schema_pkey, items['table'])
-                print(real_table_data)
                 items['table'] = real_table_data['real_table_name']
-                print('table text after:', items['table'])
                 cols_to_include.append(items['name'])
                 if items['type'] == 'base64_mime_image':
                     base64_encode_cols.append(items['name'])
@@ -102,23 +87,15 @@ class UnificationDataFactory:
                 items['table'] = real_table_data['real_table_name']
                 cols_to_include.append(real_table_data['user_id_column'])
 
-        print(base64_encode_cols)
-
-        # print("new db schema")
-        # print(db_schema)
-
         # temp hack
         user_table_info = self.__my_lookup.get_real_table_info(sc_schema_pkey, 'users')
         data_table_info = self.__my_lookup.get_real_table_info(sc_schema_pkey, 'data_1')
         
         # generate db params for ETL
         data_source_parms = {
-            'odbc': 'mysql+mysqlconnector',  # TODO: set/get from db schema/conn/config
+            'odbc': 'sqlite',  # TODO: set/get from db schema/conn/config
             'database': db_schema_map['db_name'],
-            'host': db_connection['host'],
-            'port': db_connection['port'],
-            'user': db_connection['user'],
-            'pass': db_connection['pass'],
+            'filename': db_connection['filename'],
             'userTable': user_table_info['real_table_name'],  # temp hack
             'dataTable': data_table_info['real_table_name'],  # temp hack
             'userIdentifier': user_table_info['user_id_column'],  # temp hack
@@ -129,14 +106,6 @@ class UnificationDataFactory:
             'providing_app': self.__acl_contract_acc
         }
 
-        # TEMP FOR TESTING
-        print("data_source_parms")
-        print(data_source_parms)
-        # pp = pprint.PrettyPrinter(indent=4)
-        # pp.pprint(data_source_parms)
-        # print("native User IDs for Query")
-        # print(native_user_ids)
-
         # grab list of EOS account names
         if len(native_user_ids) > 0:
             unification_ids = {}
@@ -144,15 +113,14 @@ class UnificationDataFactory:
                 unification_ids[id] = self.__my_lookup.get_eos_account(id)
             
             data_source_parms['unification_ids'] = unification_ids
-            data_transform = TransformData(data_source_parms)
-            #### transforms xml data to json dictionary (string)
+            data_transform_json = TransformDataJSON(
+                data_source_parms['filename'], unification_ids)
 
-            xml = fromstring(data_transform.fetch_user_data())
-            self.__raw_data = json.dumps(parker.data(xml, preserve_root=True))
+            j = data_transform_json.transform()
+            self.__raw_data = j
 
-            #self.__raw_data = data_transform.fetch_user_data()
         else:
             d = {
                 "no-data": True
             }
-            self.__raw_data = json.dumps(d)  # temp dummy message for no users granting perms
+            self.__raw_data = json.dumps(d)
