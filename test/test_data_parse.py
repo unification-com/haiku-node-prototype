@@ -5,7 +5,8 @@ from pathlib import Path
 
 from haiku_node.data.transform_data2 import TransformDataJSON
 
-data_source_parms = {'app1': {
+data_source_parms = {
+    'app1': {
         'userTable': 'Users',
         'dataTable': 'UserData',
         'userIdentifier': 'ID',

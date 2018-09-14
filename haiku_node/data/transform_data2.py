@@ -26,7 +26,8 @@ class TransformDataJSON:
         dump = self.__get_rows_as_dicts(curr)
 
         unif_ids = []
-        for key, val in list(self.__data_source_parms['unification_id_map'].items()):
+        for key, val in list(
+                self.__data_source_parms['unification_id_map'].items()):
             unif_ids.append(val)
 
         ret = {'data': self.__prepare(dump),
@@ -44,7 +45,8 @@ class TransformDataJSON:
         prepared_dump = []
         for d in dump:
             # change Native IDs to Unification IDs
-            # this will ultimately be handled during the export FROM the PostgreSql
+            # this will ultimately be handled during
+            # the export FROM the PostgreSql
             # staging database
             nid = str(d[self.__data_source_parms['userIdentifier']])
             # transform Native User ID into Unification ID
@@ -56,7 +58,7 @@ class TransformDataJSON:
             if self.__data_source_parms['dataUserIdentifier'] in d:
                 d.pop(self.__data_source_parms['dataUserIdentifier'])
 
-            # Encode images
+            # Base64 encode binary data
             for b64_col in self.__data_source_parms['base64_encode_cols']:
                 file = open(d[b64_col], 'rb')
                 file_read = file.read()
@@ -68,7 +70,8 @@ class TransformDataJSON:
 
     def __get_query_string(self):
         data_columns = ""
-        native_user_ids_str = ','.join(self.__data_source_parms['native_user_ids'])
+        native_user_ids_str = \
+            ','.join(self.__data_source_parms['native_user_ids'])
 
         # Generate the query to the SQLite database so that only fields
         # specified in the Metadata Schema are output
@@ -79,12 +82,16 @@ class TransformDataJSON:
 
         data_columns = data_columns.rstrip(",")
 
-        # Query string currently also filters based on user permissions. This will ultimately be
-        # handled in the PostgreSQL staging DB solution
-        query_string = 'SELECT {userTable}.{userIdentifier}, {dataColumns} ' \
+        # Query string currently also filters based on user permissions.
+        # This will ultimately be handled in the
+        # PostgreSQL staging DB solution
+        query_string = 'SELECT {userTable}.{userIdentifier},' \
+                       ' {dataColumns} ' \
                        'FROM {userTable} LEFT JOIN {dataTable} ' \
-                       'On {userTable}.{userIdentifier} = {dataTable}.{dataUserIdentifier} ' \
-                       'WHERE {userTable}.{userIdentifier} IN ({native_user_ids}) ' \
+                       'On {userTable}.{userIdentifier} ' \
+                       '= {dataTable}.{dataUserIdentifier} ' \
+                       'WHERE {userTable}.{userIdentifier} ' \
+                       'IN ({native_user_ids}) ' \
                        'ORDER BY {userTable}.{userIdentifier}' \
             .format(
                 dataColumns=data_columns,
