@@ -14,6 +14,7 @@ RUN curl -L https://raw.githubusercontent.com/yyuu/pyenv-installer/master/bin/py
 RUN mkdir /haiku
 COPY requirements.txt /haiku
 COPY external/ /haiku/external
+RUN mkdir -p /data_sources/imageblobs
 
 WORKDIR /haiku
 
@@ -36,5 +37,6 @@ COPY bin/haiku /usr/bin/haiku
 COPY haiku_node /haiku/haiku_node
 COPY test /haiku/test
 COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
+COPY data_sources/imageblobs/ /data_sources/imageblobs
 
 CMD ["/haiku/test/bootstrap.sh"]
