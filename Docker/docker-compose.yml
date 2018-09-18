@@ -46,7 +46,7 @@ services:
     ports:
     - "8853:8050"
     volumes:
-        - ${HAIKU_ROOT}/data_sources/imageblobs:/data/imageblobs:ro
+        - ${HAIKU_ROOT}/data_sources/imageblobs:/data_sources/imageblobs:ro
 
   ipfs:
     image: ipfs
