@@ -72,20 +72,6 @@
           ]
         }
       ],
-      "data_sources": [
-        {
-          "source_name": "app1.db1",
-          "source_type": "database"
-        },
-        {
-          "source_name": "app2",
-          "source_type": "contract"
-        },
-        {
-          "source_name": "app3",
-          "source_type": "contract"
-        }
-      ],
       "lookup": {
         "lookup_meta": {
           "native_table": "Users",
@@ -108,8 +94,6 @@
         ]
       },
       "und_rewards": {
-        "user_amt": 1,
-        "app_amt": 10,
         "start_balance": 1000
       }
     },
@@ -162,20 +146,6 @@
           ]
         }
       ],
-      "data_sources": [
-        {
-          "source_name": "app2.db1",
-          "source_type": "database"
-        },
-        {
-          "source_name": "app1",
-          "source_type": "contract"
-        },
-        {
-          "source_name": "app3",
-          "source_type": "contract"
-        }
-      ],
       "lookup": {
         "lookup_meta": {
           "native_table": "BlobCreator",
@@ -198,8 +168,6 @@
         ]
       },
       "und_rewards": {
-        "user_amt": 1,
-        "app_amt": 10,
         "start_balance": 1000
       }
     },
@@ -246,20 +214,6 @@
           ]
         }
       ],
-      "data_sources": [
-        {
-          "source_name": "app3.db1",
-          "source_type": "database"
-        },
-        {
-          "source_name": "app1",
-          "source_type": "contract"
-        },
-        {
-          "source_name": "app2",
-          "source_type": "contract"
-        }
-      ],
       "lookup": {
         "lookup_meta": {
           "native_table": "ImageOwners",
@@ -282,8 +236,6 @@
         ]
       },
       "und_rewards": {
-        "user_amt": 2,
-        "app_amt": 15,
         "start_balance": 1000
       }
     }

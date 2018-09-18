@@ -110,12 +110,6 @@ def systest_ingest(requesting_app, providing_app, user, balances, local=False):
     und_rewards = UndRewards(providing_app, price_sched)
     balances[providing_app] = balances[providing_app] + und_rewards.calculate_reward(is_user=False)
 
-    # rewards = lambda app: demo_config['demo_apps'][app]['und_rewards']
-    # balances[requesting_app] = balances[requesting_app] - (
-    #         rewards(requesting_app)['app_amt'] +
-    #         rewards(requesting_app)['user_amt'])
-    # balances[providing_app] = (
-    #         balances[providing_app] + rewards(requesting_app)['app_amt'])
     return balances
 
 
