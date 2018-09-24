@@ -180,7 +180,7 @@ def uapp_store():
         "unif.mother", "unif.mother", "validapps", True, 0, -1,
         -1)
 
-    uapp_store = {}
+    uapp_store_dict = {}
     store_key = 1
 
     for va in valid_apps['rows']:
@@ -204,12 +204,12 @@ def uapp_store():
                     'schema_pkey': schema_pkey,
                     'price': db_schema['price_sched']
                 }
-                uapp_store[store_key] = d
+                uapp_store_dict[store_key] = d
                 store_key += 1
 
     request_id = int(input(f"Select option 1 - {(store_key - 1)} to generate a data request, or '0' to exit:"))
     if request_id > 0 and request_id <= store_key:
-        data_request = uapp_store[request_id]
+        data_request = uapp_store_dict[request_id]
         __request_from_uapp_store(data_request)
     else:
         click.echo("Exit Uapp Store")
