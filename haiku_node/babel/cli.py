@@ -192,7 +192,7 @@ def transfer(from_acc, to_acc, amount, password):
     d = {
         'from': from_acc,
         'to': to_acc,
-        'quantity': f'{amt} UND',  # TODO - need to fix precision
+        'quantity': f'{amt} UND',
         'memo': 'UND transfer'
     }
 

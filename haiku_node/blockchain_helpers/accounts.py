@@ -115,7 +115,6 @@ class AccountManager:
         quantity = "{0:.4f}".format(round(float(app_conf['und_rewards']['start_balance']), 4))
         log.info(f'Issue 100 UND tokens to {appname}')
 
-        # TODO: migrate quantity to demo_config.json
         d = {
             'to': appname,
             'quantity': f'{quantity} UND',
@@ -361,7 +360,6 @@ def make_default_accounts(
             else:
                 contract_actions = []
 
-            # Todo: AFTER required code modification for new UApp smart contract
             for contract_action in contract_actions:
                 manager.lock_account_permissions(appname, appname, contract_action, app_account_perm)
 
