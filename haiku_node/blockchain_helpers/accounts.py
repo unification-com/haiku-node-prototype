@@ -37,7 +37,9 @@ class AccountManager:
 
     def wallet_import_key(self, username, private_key):
         log.info(f"Importing account for {username}")
-        self.cleos.run(["wallet", "import", "-n", username, private_key])
+        self.cleos.run(["wallet", "import",
+                        "--name", username,
+                        "--private-key", private_key])
 
     def create_account(self, username, public_key):
         log.info(f"Creating account for {username}")
