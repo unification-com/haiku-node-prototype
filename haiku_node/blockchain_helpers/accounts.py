@@ -27,7 +27,7 @@ class AccountManager:
 
     def create_key(self):
         log.info('Generating a key')
-        ret = self.cleos.run(["create", "key"])
+        ret = self.cleos.run(["create", "key", "--to-console"])
 
         s = ret.stdout.split('\n')
         private_key = s[0][len('Private key: '):]
