@@ -82,8 +82,7 @@ class AccountManager:
         ret = self.cleos.run(
             ["set", "contract", username,
              "/eos/contracts/unification_mother",
-             "/eos/contracts/unification_mother/unification_mother.wast",
-             "/eos/contracts/unification_mother/unification_mother.abi",
+             "unification_mother.wasm", "unification_mother.abi",
              "-p", username])
 
         print(ret.stdout)
@@ -93,9 +92,7 @@ class AccountManager:
         ret = self.cleos.run(
             ["set", "contract", username,
              "/eos/contracts/eosio.token",
-             "/eos/contracts/eosio.token/eosio.token.wast",
-             "/eos/contracts/eosio.token/eosio.token.abi",
-             "-p", username])
+             "eosio.token.wasm", "eosio.token.abi", "-p", username])
 
         print(ret.stdout)
 
@@ -132,8 +129,7 @@ class AccountManager:
         log.info('Associating UApp contracts')
         ret = self.cleos.run(["set", "contract", username,
                           "/eos/contracts/unification_uapp",
-                          "/eos/contracts/unification_uapp/unification_uapp.wast",
-                          "/eos/contracts/unification_uapp/unification_uapp.abi",
+                          "unification_uapp.wasm", "unification_uapp.abi",
                           "-p", username])
         print(ret.stdout)
 
