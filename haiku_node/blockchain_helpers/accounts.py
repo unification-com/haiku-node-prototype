@@ -72,7 +72,7 @@ class AccountManager:
 
     def lock_account_permissions(self, username, smart_contract, contract_action, perm_name):
         log.info(f"Lock permission {perm_name} for {username} to action {contract_action} in contract {smart_contract}")
-        ret = self.cleos.run(["set", "account", "permission", username,
+        ret = self.cleos.run(["set", "action", "permission", username,
                           smart_contract, contract_action, perm_name])
 
         print(ret.stdout)
