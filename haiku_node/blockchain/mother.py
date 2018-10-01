@@ -1,4 +1,5 @@
 from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
 
 class UnificationMother:
@@ -21,6 +22,7 @@ class UnificationMother:
         self.__acl_contract_hash_in_mother = ""  # hash held in MOTHER
         self.__haiku_rpc_server_ip = None
         self.__haiku_rpc_server_port = None
+        self.__cleos = EosioCleos()
 
         self.__run()
 
@@ -46,14 +48,18 @@ class UnificationMother:
     def get_haiku_rpc_port(self):
         return self.__haiku_rpc_server_port
 
+    def __get_contract_hash(self):
+        prefix = 'code hash: '
+        result = self.__cleos.run(['get', 'code', self.__acl_contract_acc])
+        return result.stdout.strip()[len(prefix):]
+
     def __call_mother(self):
         """
         Call the Mother Smart Contract, and check if the requesting_app is both
         a verified app, and that it's smart contract code is valid (by checking
         the code's hash).
         """
-        json_data = self.__eosClient.get_code(self.__acl_contract_acc)
-        self.__deployed_contract_hash = json_data['code_hash']
+        self.__deployed_contract_hash = self.__get_contract_hash()
 
         table_data = self.__eosClient.get_table_rows(
             self.__mother, self.__mother, self.__valid_apps_table, True, 0, -1,
