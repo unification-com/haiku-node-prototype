@@ -13,8 +13,7 @@ RUN /tmp/build/bin/eosiocpp -o unification_mother.wast unification_mother.cpp &&
     /tmp/build/bin/eosiocpp -g unification_mother.abi unification_mother.cpp
 
 WORKDIR /eos/contracts/eosio.token
-RUN /tmp/build/bin/eosiocpp -o eosio.token.wast eosio.token.cpp && \
-    /tmp/build/bin/eosiocpp -g eosio.token.abi eosio.token.cpp
+RUN /tmp/build/bin/eosiocpp -o eosio.token.wast eosio.token.cpp
 
 RUN echo "/tmp/build/bin/eosiocpp -o unification_uapp.wast unification_uapp.cpp" >> /root/.bash_history && \
     echo "/tmp/build/bin/eosiocpp -g unification_uapp.abi unification_uapp.cpp" >> /root/.bash_history && \
