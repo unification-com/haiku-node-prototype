@@ -2,6 +2,7 @@ import json
 
 from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
+
 class UnificationUapp:
     """
      - Loads data from UApp Smart Contract for a Haiku node's app

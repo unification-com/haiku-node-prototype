@@ -278,8 +278,8 @@ class AccountManager:
     def run_test_uapp(self, app, demo_apps, appnames):
         print("Loading UApp Contract for: ", app)
 
-        eosClient = Client(nodes=[self.cleos.get_nodeos_url()])
-        u_uapp = UnificationUapp(eosClient, app)
+        eos_client = Client(nodes=[self.cleos.get_nodeos_url()])
+        u_uapp = UnificationUapp(eos_client, app)
 
         print("Data Schemas:")
         print(u_uapp.get_all_db_schemas())
@@ -311,7 +311,6 @@ def make_default_accounts(
     for username, keys in zip(usernames + appnames, keys):
         manager.wallet_import_key(username, keys[1])
         manager.create_account(username, keys[0])
-
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
@@ -377,7 +376,6 @@ def make_default_accounts(
             pub_key, priv_key = manager.create_key()
             manager.wallet_import_key(username, priv_key)
             manager.create_account_permissions(username, 'modperms', pub_key)
-
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
