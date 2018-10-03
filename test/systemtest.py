@@ -74,7 +74,7 @@ def systest_auth(requesting_app, providing_app, user):
 
 
 def systest_ingest(requesting_app, providing_app, user, balances, local=False):
-    log.info(f'Testing ingestion: {requesting_app} is requesting data from '
+    log.info(f'Testing Fetch ingestion: {requesting_app} is requesting data from '
              f'{providing_app}')
     request_hash = f'data-request-{providing_app}-{requesting_app}'
 
@@ -298,7 +298,7 @@ def wait():
         assert manager.get_und_rewards(app) == balance
 
     # The User3 has denied access to for app2 to access data on app 1
-    balances = systest_ingest('app2', 'app1', 'user3', balances)
+    # balances = systest_ingest('app2', 'app1', 'user3', balances)
     # TODO: User denied requests have granular balance effects
 
     log.info(completion_banner())
