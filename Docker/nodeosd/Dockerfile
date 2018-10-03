@@ -7,7 +7,8 @@ COPY --from=unification-base /tmp/build/contracts /contracts
 COPY --from=unification-base /eos/Docker/config.ini /
 COPY --from=unification-contracts /eos/contracts/unification_uapp /eos/contracts/unification_uapp
 COPY --from=unification-contracts /eos/contracts/unification_mother /eos/contracts/unification_mother
-COPY Docker/nodeosd.sh /opt/eosio/bin/nodeosd.sh
+COPY Docker/nodeosd/nodeosd.sh /opt/eosio/bin/nodeosd.sh
+COPY Docker/nodeosd/config.ini /config.ini
 ENV EOSIO_ROOT=/opt/eosio
 RUN chmod +x /opt/eosio/bin/nodeosd.sh
 ENV LD_LIBRARY_PATH /usr/local/lib

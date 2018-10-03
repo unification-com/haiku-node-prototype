@@ -14,7 +14,7 @@ services:
   keosd:
     image: unification-keosd
     container_name: keosd
-    command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir --http-server-address 0.0.0.0:8889
+    command: /opt/eosio/bin/keosd --wallet-dir /opt/eosio/bin/data-dir --http-server-address 0.0.0.0:8889 --http-validate-host 0
     hostname: keosd
     ports:
     - "8889:8889"

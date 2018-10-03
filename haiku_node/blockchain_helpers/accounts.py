@@ -27,7 +27,7 @@ class AccountManager:
 
     def create_key(self):
         log.info('Generating a key')
-        ret = self.cleos.run(["create", "key"])
+        ret = self.cleos.run(["create", "key", "--to-console"])
 
         s = ret.stdout.split('\n')
         private_key = s[0][len('Private key: '):]
@@ -37,7 +37,9 @@ class AccountManager:
 
     def wallet_import_key(self, username, private_key):
         log.info(f"Importing account for {username}")
-        self.cleos.run(["wallet", "import", "-n", username, private_key])
+        self.cleos.run(["wallet", "import",
+                        "--name", username,
+                        "--private-key", private_key])
 
     def create_account(self, username, public_key):
         log.info(f"Creating account for {username}")
@@ -70,7 +72,7 @@ class AccountManager:
 
     def lock_account_permissions(self, username, smart_contract, contract_action, perm_name):
         log.info(f"Lock permission {perm_name} for {username} to action {contract_action} in contract {smart_contract}")
-        ret = self.cleos.run(["set", "account", "permission", username,
+        ret = self.cleos.run(["set", "action", "permission", username,
                           smart_contract, contract_action, perm_name])
 
         print(ret.stdout)
@@ -80,8 +82,7 @@ class AccountManager:
         ret = self.cleos.run(
             ["set", "contract", username,
              "/eos/contracts/unification_mother",
-             "/eos/contracts/unification_mother/unification_mother.wast",
-             "/eos/contracts/unification_mother/unification_mother.abi",
+             "unification_mother.wasm", "unification_mother.abi",
              "-p", username])
 
         print(ret.stdout)
@@ -91,9 +92,7 @@ class AccountManager:
         ret = self.cleos.run(
             ["set", "contract", username,
              "/eos/contracts/eosio.token",
-             "/eos/contracts/eosio.token/eosio.token.wast",
-             "/eos/contracts/eosio.token/eosio.token.abi",
-             "-p", username])
+             "eosio.token.wasm", "eosio.token.abi", "-p", username])
 
         print(ret.stdout)
 
@@ -130,8 +129,7 @@ class AccountManager:
         log.info('Associating UApp contracts')
         ret = self.cleos.run(["set", "contract", username,
                           "/eos/contracts/unification_uapp",
-                          "/eos/contracts/unification_uapp/unification_uapp.wast",
-                          "/eos/contracts/unification_uapp/unification_uapp.abi",
+                          "unification_uapp.wasm", "unification_uapp.abi",
                           "-p", username])
         print(ret.stdout)
 

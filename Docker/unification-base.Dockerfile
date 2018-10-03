@@ -1,6 +1,6 @@
 FROM eosio/builder
 
-ARG branch=dawn-v4.2.0
+ARG branch=v1.3.0
 
 RUN git clone -b $branch https://github.com/EOSIO/eos.git --depth=1 --recursive \
     && cd eos && echo "$branch:$(git rev-parse HEAD)" > /etc/eosio-version \
