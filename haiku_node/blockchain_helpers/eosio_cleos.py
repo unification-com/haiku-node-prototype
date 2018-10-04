@@ -86,3 +86,8 @@ class EosioCleos:
         return self.run(
             ["wallet", "unlock", "--name", username, "--password", password])
 
+    def get_actions(self, acc_name):
+        return self.run(["get", "actions", acc_name, "--full"])
+
+    def get_tx(self, tx):
+        return self.run(["get", "transaction ", tx])

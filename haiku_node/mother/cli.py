@@ -120,5 +120,33 @@ def invalidate(appname, password):
         click.echo(bold('Invalidation failed'))
 
 
+@main.command()
+@click.argument('acc_name')
+def get_actions(acc_name):
+    """
+    Get transaction history for an account
+     \b
+    :param acc_name: EOS Account name for which to list transactions
+    """
+    cleos = EosioCleos()
+    result = cleos.get_actions(acc_name)
+    click.echo(result.stdout)
+    click.echo(result.stderr)
+
+
+@main.command()
+@click.argument('tx')
+def get_tx(tx):
+    """
+    Get transaction details for given Tx ID
+     \b
+    :param tx: Tx ID
+    """
+    cleos = EosioCleos()
+    result = cleos.get_tx(tx)
+    click.echo(result.stdout)
+    click.echo(result.stderr)
+
+
 if __name__ == "__main__":
     main()
