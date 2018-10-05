@@ -268,7 +268,10 @@ def wait():
     time.sleep(5)
 
     # create EOS accounts
+    log.info('Create EOS Accounts')
     systest_accounts()
+
+    time.sleep(20)
 
     # Deploy and populate Smart Contracts
     log.info('Ensure accounts are created, and contracts populated')
@@ -276,17 +279,17 @@ def wait():
     systest_smart_contract_acl()
     systest_user_permissions()
 
-    time.sleep(20)
-
     manager = AccountManager(host=False)
 
     # First ensure that an incorrectly signed request is rejected
+    log.info('run systest_auth')
     systest_auth('app1', 'app2', 'user1')
 
     balances = {}
     for k, d in demo_config['demo_apps'].items():
         balances[d['eos_sc_account']] = d['und_rewards']['start_balance']
 
+    log.info('run systest_ingest')
     balances = systest_ingest('app1', 'app2', 'user1', balances)
     balances = systest_ingest('app2', 'app1', 'user1', balances)
     balances = systest_ingest('app3', 'app1', 'user1', balances)
