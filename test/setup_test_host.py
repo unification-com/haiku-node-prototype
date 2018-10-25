@@ -26,6 +26,10 @@ shutil.copy(
     f"/haiku/test/data/sqlite/{app_name}.db",
     "/haiku/haiku_node/data/Data.db")
 
+shutil.copy(
+    f"/haiku/test/data/perm_batch/{app_name}.perm_batches.db",
+    "/haiku/haiku_node/permissions/perm_batches.db")
+
 print(f"set config/config.json values for host {app_name}")
 uc = UnificationConfig()
 uc["acl_contract"] = app_name
