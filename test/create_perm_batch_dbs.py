@@ -38,7 +38,8 @@ def create_perm_batch_db(app_name: str):
                  end_user_account text, 
                  consumer_account text, 
                  operation text,
-                 processed INTEGER)''')
+                 processed INTEGER,
+                 proof_tx text NULL)''')
 
     conn.commit()
     conn.close()
