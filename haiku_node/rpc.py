@@ -209,3 +209,24 @@ def data_ingest():
     except Exception as e:
         logger.exception(e)
         return generic_error()
+
+
+@app.route('/modify_permission', methods=['POST'])
+def modify_permission():
+    try:
+        d = flask.request.get_json()
+
+        # ToDo:
+        # 1. user send data as JWT
+        # 2. check JWT sig against EOS pub key
+
+        user_account = d['user_account']
+        consumer_account = d['consumer_account']
+        permission_op = d['perm']
+
+    except InvalidSignature:
+        return invalid_response()
+
+    except Exception as e:
+        logger.exception(e)
+        return generic_error()
