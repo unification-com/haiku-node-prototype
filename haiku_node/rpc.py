@@ -1,15 +1,15 @@
 import flask
 import hashlib
-import time
 
 from cryptography.exceptions import InvalidSignature
 from eosapi import Client
 
+from haiku_node.encryption.payload import bundle, unbundle
+from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
+from haiku_node.permissions.permission_batcher import PermissionBatcher, default_db
+from haiku_node.validation.validation import UnificationAppScValidation
 from haiku_node.data.factory import UnificationDataFactory
 from haiku_node.blockchain.uapp import UnificationUapp
-from haiku_node.encryption.payload import unbundle, bundle
-from haiku_node.validation.validation import UnificationAppScValidation
-from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
 app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
@@ -213,6 +213,8 @@ def data_ingest():
 
 @app.route('/modify_permission', methods=['POST'])
 def modify_permission():
+    conf = app.unification_config
+
     try:
         d = flask.request.get_json()
 
@@ -222,7 +224,17 @@ def modify_permission():
 
         user_account = d['user_account']
         consumer_account = d['consumer_account']
-        permission_op = d['perm']
+        permission_op = d['perm_op']
+
+        pb = PermissionBatcher(default_db())
+        rowid = pb.add(user_account, consumer_account, permission_op)
+
+        d = {
+            'app': conf['acl_contract'],
+            'proc_id': rowid
+        }
+
+        return flask.jsonify(d), 200
 
     except InvalidSignature:
         return invalid_response()
