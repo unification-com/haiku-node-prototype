@@ -216,6 +216,12 @@ def transfer(from_acc, to_acc, amount, password):
 
 
 def get_balance(user):
+    """
+    Get UND Balance for a user
+
+    \b
+    :param user: The EOS user account name.
+    """
     conf = UnificationConfig()
     cmd = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
            "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
@@ -234,6 +240,23 @@ def get_balance(user):
 
     return my_balance
 
+
+@main.command()
+@click.argument('user')
+@click.argument('password')
+def permissions(user, password):
+    """
+    Get UND Balance for a user
+
+    \b
+    :param user: The EOS user account name.
+    :param password: Wallet password for user.
+    """
+
+    cleos = EosioCleos()
+    cleos.unlock_wallet(user, password)
+
+    cleos.lock_wallet(user)
 
 if __name__ == "__main__":
     main()
