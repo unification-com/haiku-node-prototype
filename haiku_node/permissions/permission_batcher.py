@@ -6,7 +6,7 @@ from pathlib import Path
 def default_db():
     currentdir = os.path.dirname(os.path.abspath(__file__))
     parentdir = os.path.dirname(currentdir)
-    db_path = Path(parentdir + '/permissions/perm_batches.db')
+    db_path = Path(parentdir + '/dbs/perm_batches.db')
     return str(db_path.resolve())
 
 
