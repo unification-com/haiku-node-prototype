@@ -13,3 +13,4 @@ pyyaml == 4.2b4
 requests==2.19.0
 SQLAlchemy==1.2.8
 xmljson==0.1.9
+-e external/eospy
