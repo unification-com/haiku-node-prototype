@@ -246,7 +246,9 @@ def get_balance(user):
 @main.command()
 @click.argument('user')
 @click.argument('password')
-def permissions(user, password, perm='active'):
+@click.argument('provider')
+@click.argument('consumer')
+def permissions(user, password, provider, consumer, perm='active'):
     """
     Modify permissions
 
@@ -256,7 +258,62 @@ def permissions(user, password, perm='active'):
     :param perm: EOS Permission level to use for acquiring keys
     """
 
-    consumer = 'app1'
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+
+    uapp_sc = UnificationUapp(eos_client, provider)
+
+    click.echo(f"{provider} has the following Schemas:\n")
+
+    provider_schemas = uapp_sc.get_all_db_schemas().items()
+    schemas_map = {}
+    perm_id = 0
+    for key, schema in provider_schemas:
+        s_id = schema['pkey']
+        fields = []
+        for field in schema['schema']['fields']:
+            if field['name'] != 'account_name':
+                fields.append(field['name'])
+        schemas_map[s_id] = fields
+
+    for key, fields in schemas_map.items():
+        click.echo(f"Schema ID {key}:")
+        click.echo(', '.join(fields))
+
+    schema_id = int(input(f"Select Schema ID:"))
+
+    schema_fields = schemas_map[schema_id]
+
+    field_perms = {}
+
+    for f in schema_fields:
+        field_perms[f] = True
+        click.echo(f"{f} = True")
+
+    perm_action = input("Type field name to toggle permission, or 's' to send: ")
+
+    while perm_action != 's':
+        if perm_action in field_perms:
+            field_perms[perm_action] = not field_perms[perm_action]
+        else:
+            click.echo("Invalid field name")
+
+        for n, v in field_perms.items():
+            click.echo(f"{n} = {v}")
+
+        perm_action = input("Type field name to toggle permission, or 's' to send: ")
+
+    granted_fields = []
+    for n, v in field_perms.items():
+        if v:
+            granted_fields.append(n)
+
+    granted_fields_str = ",".join(granted_fields)
+
+    click.echo(f"{user} is Requesting permission change: Granting access to {consumer} "
+               f"in Provider {provider} for fields {granted_fields_str}")
+
     cleos = EosioCleos()
     cleos.unlock_wallet(user, password)
 
@@ -270,7 +327,9 @@ def permissions(user, password, perm='active'):
             'eos_perm': perm,
             'user': user,
             'consumer': consumer,
-            'perms': 'Heartrate,GeoLocation'
+            'provider': provider,
+            'schema': schema_id,
+            'perms': granted_fields_str
         }
 
         cleos.lock_wallet(user)
@@ -287,7 +346,7 @@ def permissions(user, password, perm='active'):
             'eos_perm': perm
         }
 
-        base = "https://haiku-app1:8050"
+        base = f"https://haiku-{provider}:8050"
 
         r = requests.post(f"{base}/modify_permission", json=payload, verify=False)
         d = r.json()
