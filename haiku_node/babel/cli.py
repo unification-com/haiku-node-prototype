@@ -255,6 +255,8 @@ def permissions(user, password, provider, consumer, perm='active'):
     \b
     :param user: The EOS user account name.
     :param password: Wallet password for user.
+    :param provider: Provider EOS account name
+    :param consumer: Consumer EOS account name
     :param perm: EOS Permission level to use for acquiring keys
     """
 
@@ -268,7 +270,7 @@ def permissions(user, password, provider, consumer, perm='active'):
 
     provider_schemas = uapp_sc.get_all_db_schemas().items()
     schemas_map = {}
-    perm_id = 0
+
     for key, schema in provider_schemas:
         s_id = schema['pkey']
         fields = []
@@ -351,7 +353,14 @@ def permissions(user, password, provider, consumer, perm='active'):
         r = requests.post(f"{base}/modify_permission", json=payload, verify=False)
         d = r.json()
 
-        print(d)
+        proc_id = d['proc_id']
+        ret_app = d['app']
+
+        if ret_app == provider and proc_id > 0:
+            click.echo(f"Success. Process ID {proc_id} Queued by {ret_app}")
+        else:
+            click.echo("Something went wrong...")
+
     else:
         click.echo(bold(f'Could not get private key for {pub_key}'))
 
