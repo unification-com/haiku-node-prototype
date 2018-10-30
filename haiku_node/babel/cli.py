@@ -1,6 +1,7 @@
 import logging
 import subprocess
 import json
+import requests
 from itertools import product
 
 import click
@@ -255,6 +256,7 @@ def permissions(user, password, perm='active'):
     :param perm: EOS Permission level to use for acquiring keys
     """
 
+    consumer = 'app1'
     cleos = EosioCleos()
     cleos.unlock_wallet(user, password)
 
@@ -265,7 +267,7 @@ def permissions(user, password, perm='active'):
     jwt_payload = {
         'eos_perm': perm,
         'user': user,
-        'consumer': 'app1',
+        'consumer': consumer,
         'perms': 'Heartrate,GeoLocation'
     }
 
@@ -277,6 +279,18 @@ def permissions(user, password, perm='active'):
 
     jwt = unif_jwt.to_jwt()
 
+    payload = {
+        'jwt': jwt,
+        'user': user,
+        'eos_perm': perm
+    }
+
+    base = "https://haiku-app1:8050"
+
+    r = requests.post(f"{base}/modify_permission", json=payload, verify=False)
+    d = r.json()
+
+    print(d)
 
 
 if __name__ == "__main__":
