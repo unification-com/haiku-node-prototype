@@ -9,13 +9,13 @@ from eosapi import Client
 import click
 import requests
 
-from haiku_node.blockchain.mother import UnificationMother
-from haiku_node.blockchain.uapp import UnificationUapp
-from haiku_node.blockchain.und_rewards import UndRewards
+from haiku_node.blockchain.eos.mother import UnificationMother
+from haiku_node.blockchain.eos.uapp import UnificationUapp
+from haiku_node.blockchain.eos.und_rewards import UndRewards
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle
-from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import (
     AccountManager, make_default_accounts, create_public_data)
 from haiku_node.keystore.keystore import UnificationKeystore

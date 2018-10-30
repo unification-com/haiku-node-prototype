@@ -3,7 +3,7 @@ from eosapi import Client
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 
-from haiku_node.blockchain.uapp import UnificationUapp
+from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.config.config import UnificationConfig
 

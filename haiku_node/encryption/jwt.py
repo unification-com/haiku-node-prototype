@@ -4,7 +4,7 @@ import random
 import time
 
 from eospy.utils import sha256
-from haiku_node.blockchain_helpers.eos_keys import UnifEosKey
+from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 
 
 class UnifJWT:

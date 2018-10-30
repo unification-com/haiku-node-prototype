@@ -4,8 +4,8 @@ import hashlib
 from cryptography.exceptions import InvalidSignature
 from eosapi import Client
 
-from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
-from haiku_node.blockchain.uapp import UnificationUapp
+from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
+from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.data.factory import UnificationDataFactory
 from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.encryption.jwt import UnifJWT

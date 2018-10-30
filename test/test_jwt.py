@@ -1,6 +1,6 @@
 import pytest
 
-from haiku_node.blockchain_helpers.eos_keys import UnifEosKey
+from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 from haiku_node.encryption.jwt import UnifJWT
 
 

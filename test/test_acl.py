@@ -1,6 +1,6 @@
 from eosapi import Client
 
-from haiku_node.blockchain.uapp import UnificationUapp
+from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.config.config import UnificationConfig
 
 apps_to_test = ['app1', 'app2', 'app3']

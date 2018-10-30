@@ -8,10 +8,10 @@ import click
 from eosapi import Client
 
 from haiku_node.config.config import UnificationConfig
-from haiku_node.blockchain.uapp import UnificationUapp
-from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.blockchain.eos.uapp import UnificationUapp
+from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
-from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
+from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.encryption.jwt import UnifJWT
 from haiku_node.validation.validation import UnificationAppScValidation
 
