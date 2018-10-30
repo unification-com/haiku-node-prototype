@@ -11,6 +11,7 @@ from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.blockchain_helpers import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
+from haiku_node.encryption.jwt import UnifJWT
 from haiku_node.validation.validation import UnificationAppScValidation
 
 
@@ -244,23 +245,38 @@ def get_balance(user):
 @main.command()
 @click.argument('user')
 @click.argument('password')
-def permissions(user, password):
+def permissions(user, password, perm='active'):
     """
     Modify permissions
 
     \b
     :param user: The EOS user account name.
     :param password: Wallet password for user.
+    :param perm: EOS Permission level to use for acquiring keys
     """
 
     cleos = EosioCleos()
     cleos.unlock_wallet(user, password)
 
-    active_pub_key = cleos.get_public_key(user, 'active')
+    active_pub_key = cleos.get_public_key(user, perm)
 
     private_key = cleos.get_private_key(user, password, active_pub_key)
 
+    jwt_payload = {
+        'eos_perm': perm,
+        'user': user,
+        'consumer': 'app1',
+        'perms': 'Heartrate,GeoLocation'
+    }
+
     cleos.lock_wallet(user)
+
+    unif_jwt = UnifJWT()
+    unif_jwt.generate(jwt_payload)
+    unif_jwt.sign(private_key)
+
+    jwt = unif_jwt.to_jwt()
+
 
 
 if __name__ == "__main__":
