@@ -53,6 +53,13 @@ def error_request_self():
         'body': None
     }), 418
 
+def error_request_not_me():
+    return flask.jsonify({
+        'success': False,
+        'message': 'Requested provider is not me',
+        'signature': None,
+        'body': None
+    }), 418
 
 def bc_transaction_error():
     return flask.jsonify({
@@ -233,6 +240,11 @@ def modify_permission():
             return invalid_response()
 
         consumer_account = pl['consumer']
+        provider = pl['provider']
+
+        if provider != conf['acl_contract']:
+            return error_request_not_me()
+
         pb = PermissionBatcher(default_db())
 
         # ToDo: Validate permission list sent
