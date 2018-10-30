@@ -246,7 +246,7 @@ def get_balance(user):
 @click.argument('password')
 def permissions(user, password):
     """
-    Get UND Balance for a user
+    Modify permissions
 
     \b
     :param user: The EOS user account name.
@@ -256,7 +256,12 @@ def permissions(user, password):
     cleos = EosioCleos()
     cleos.unlock_wallet(user, password)
 
+    active_pub_key = cleos.get_public_key(user, 'active')
+
+    private_key = cleos.get_private_key(user, password, active_pub_key)
+
     cleos.lock_wallet(user)
+
 
 if __name__ == "__main__":
     main()
