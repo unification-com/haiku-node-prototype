@@ -224,12 +224,19 @@ def modify_permission():
         jwt = d['jwt']
 
         cleos = EosioCleos()
+        # ToDo: find better way to get public key from EOS account
         public_key = cleos.get_public_key(user_account, eos_perm)
         unif_jwt = UnifJWT(jwt)
         pl = unif_jwt.decode_jwt(public_key)
 
+        if not pl:
+            return invalid_response()
+
         consumer_account = pl['consumer']
         pb = PermissionBatcher(default_db())
+
+        # ToDo: Validate permission list sent
+
         rowid = pb.add(user_account, consumer_account, jwt)
 
         d = {

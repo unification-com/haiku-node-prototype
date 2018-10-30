@@ -260,37 +260,41 @@ def permissions(user, password, perm='active'):
     cleos = EosioCleos()
     cleos.unlock_wallet(user, password)
 
-    active_pub_key = cleos.get_public_key(user, perm)
+    pub_key = cleos.get_public_key(user, perm)
 
-    private_key = cleos.get_private_key(user, password, active_pub_key)
+    # ToDo: find better way to get public key from EOS account
+    private_key = cleos.get_private_key(user, password, pub_key)
 
-    jwt_payload = {
-        'eos_perm': perm,
-        'user': user,
-        'consumer': consumer,
-        'perms': 'Heartrate,GeoLocation'
-    }
+    if len(private_key) > 0:
+        jwt_payload = {
+            'eos_perm': perm,
+            'user': user,
+            'consumer': consumer,
+            'perms': 'Heartrate,GeoLocation'
+        }
 
-    cleos.lock_wallet(user)
+        cleos.lock_wallet(user)
 
-    unif_jwt = UnifJWT()
-    unif_jwt.generate(jwt_payload)
-    unif_jwt.sign(private_key)
+        unif_jwt = UnifJWT()
+        unif_jwt.generate(jwt_payload)
+        unif_jwt.sign(private_key)
 
-    jwt = unif_jwt.to_jwt()
+        jwt = unif_jwt.to_jwt()
 
-    payload = {
-        'jwt': jwt,
-        'user': user,
-        'eos_perm': perm
-    }
+        payload = {
+            'jwt': jwt,
+            'user': user,
+            'eos_perm': perm
+        }
 
-    base = "https://haiku-app1:8050"
+        base = "https://haiku-app1:8050"
 
-    r = requests.post(f"{base}/modify_permission", json=payload, verify=False)
-    d = r.json()
+        r = requests.post(f"{base}/modify_permission", json=payload, verify=False)
+        d = r.json()
 
-    print(d)
+        print(d)
+    else:
+        click.echo(bold(f'Could not get private key for {pub_key}'))
 
 
 if __name__ == "__main__":
