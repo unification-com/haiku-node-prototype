@@ -6,6 +6,7 @@ import string
 import random
 
 from haiku_node.config.config import UnificationConfig
+from haiku_node.network.eos import get_cleos
 
 log = logging.getLogger(__name__)
 
@@ -22,6 +23,9 @@ class UndRewards:
         :param und_amt: The amount of UND to be processed
         """
         self.__my_acl_acc = acl_acc
+        self.__cleos = get_cleos()
+
+        #TODO: I think I can deprecate the following
         conf = UnificationConfig()
         self.__eos_client_pre = [
             "/opt/eosio/bin/cleos", "--url",
@@ -50,20 +54,7 @@ class UndRewards:
             "push", "action", "unif.token", "transfer",
             json.dumps(d), "-p", self.__my_acl_acc]
 
-        cmd = self.__eos_client_pre + subcommands
-
-        log.debug(f"cleos command: {cmd}")
-
-        result = subprocess.run(
-            cmd, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, universal_newlines=True)
-
-        log.debug(result.stdout)
-        if result.returncode != 0:
-            log.warning(result.stdout)
-            log.debug(result.stdout)
-            log.debug(result.stderr)
-            log.debug(' '.join(cmd))
+        result = self.__cleos.run(subcommands)
 
         return result
 
@@ -83,20 +74,7 @@ class UndRewards:
             "push", "action", "unif.token", "transfer", json.dumps(d),
             "-p", self.__my_acl_acc]
 
-        cmd = self.__eos_client_pre + subcommands
-
-        log.debug(f"cleos command: {cmd}")
-
-        result = subprocess.run(
-            cmd, stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE, universal_newlines=True)
-
-        log.debug(result.stdout)
-        if result.returncode != 0:
-            log.warning(result.stdout)
-            log.debug(result.stdout)
-            log.debug(result.stderr)
-            log.debug(' '.join(cmd))
+        result = self.__cleos.run(subcommands)
 
         return result
 
