@@ -226,24 +226,28 @@ def modify_permission():
     try:
         d = flask.request.get_json()
 
-        user_account = d['user']
         eos_perm = d['eos_perm']
         jwt = d['jwt']
 
         cleos = EosioCleos()
+
+        unif_jwt = UnifJWT(jwt)
+
+        user_account = unif_jwt.get_issuer()
+        audience = unif_jwt.get_audience()
+
+        if audience != conf['acl_contract']:
+            return error_request_not_me()
+
         # ToDo: find better way to get public key from EOS account
         public_key = cleos.get_public_key(user_account, eos_perm)
-        unif_jwt = UnifJWT(jwt)
+
         pl = unif_jwt.decode_jwt(public_key)
 
         if not pl:
             return invalid_response()
 
         consumer_account = pl['consumer']
-        provider = pl['provider']
-
-        if provider != conf['acl_contract']:
-            return error_request_not_me()
 
         pb = PermissionBatcher(default_db())
 

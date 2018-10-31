@@ -69,6 +69,24 @@ class UnifJWT:
     def to_jwt(self):
         return self.jwt
 
+    def get_issuer(self):
+        if self.jwt is None:
+            return None
+
+        jwt_list = self.jwt.split('.')
+        payload = json.loads(self.__base64url_decode(jwt_list[1].encode('utf-8')))
+
+        return payload['iss']
+
+    def get_audience(self):
+        if self.jwt is None:
+            return None
+
+        jwt_list = self.jwt.split('.')
+        payload = json.loads(self.__base64url_decode(jwt_list[1].encode('utf-8')))
+
+        return payload['aud']
+
     def decode_jwt(self, public_key):
         if self.jwt is None:
             return {}

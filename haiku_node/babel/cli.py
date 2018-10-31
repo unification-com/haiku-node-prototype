@@ -330,9 +330,7 @@ def permissions(user, password, provider, consumer, perm='active'):
             'sub': 'perm_request',  # RFC 7519 4.1.2
             'aud': provider,  # RFC 7519 4.1.3
             'eos_perm': perm,
-            'user': user,
             'consumer': consumer,
-            'provider': provider,
             'schema': schema_id,
             'perms': granted_fields_str
         }
@@ -347,7 +345,6 @@ def permissions(user, password, provider, consumer, perm='active'):
 
         payload = {
             'jwt': jwt,
-            'user': user,
             'eos_perm': perm
         }
 
