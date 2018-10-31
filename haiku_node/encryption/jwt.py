@@ -1,9 +1,7 @@
-import base64
 import json
-import random
 import time
 
-from eospy.utils import sha256
+from haiku_node.utils.utils import base64url_decode, base64url_encode, generate_nonce, json_encode, sha256
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 
 
@@ -22,10 +20,6 @@ class UnifJWT:
     def __init__(self, jwt=None):
         self.jwt = jwt
 
-    def __generate_nonce(self, length=8):
-        """Generate pseudorandom number."""
-        return ''.join([str(random.randint(0, 9)) for i in range(length)])
-
     def __generate_header(self):
         self.jwt_header = {
             "alg": "ES256K1",
@@ -33,27 +27,13 @@ class UnifJWT:
         }
 
     def __encode(self):
-        self.jwt_header_enc = self.__base64url_encode(self.__json_encode(self.jwt_header))
-        self.jwt_payload_enc = self.__base64url_encode(self.__json_encode(self.jwt_payload))
+        self.jwt_header_enc = base64url_encode(json_encode(self.jwt_header))
+        self.jwt_payload_enc = base64url_encode(json_encode(self.jwt_payload))
         self.digest = str(self.jwt_header_enc.decode()) + "." + str(self.jwt_payload_enc.decode())
         self.digest_sha = sha256(self.digest.encode('utf-8'))
 
-    def __json_encode(self, input_str):
-        return json.dumps(input_str, separators=(',', ':')).encode('utf-8')
-
-    def __base64url_decode(self, input_str):
-        rem = len(input_str) % 4
-
-        if rem > 0:
-            input_str += b'=' * (4 - rem)
-
-        return base64.urlsafe_b64decode(input_str)
-
-    def __base64url_encode(self, input_str):
-        return base64.urlsafe_b64encode(input_str).replace(b'=', b'')
-
     def generate(self, payload):
-        payload['jti'] = self.__generate_nonce()  # RFC 7519 4.1.7
+        payload['jti'] = generate_nonce()  # RFC 7519 4.1.7
         payload['iat'] = time.time()  # RFC 7519 4.1.6
         self.jwt_payload = payload
         self.__generate_header()
@@ -62,7 +42,7 @@ class UnifJWT:
     def sign(self, private_key):
         eosk = UnifEosKey(private_key)
         self.jwt_signature = eosk.sign(self.digest_sha)
-        self.jwt_signature_enc = self.__base64url_encode(self.jwt_signature.encode('utf-8'))
+        self.jwt_signature_enc = base64url_encode(self.jwt_signature.encode('utf-8'))
 
         self.jwt = self.digest + "." + str(self.jwt_signature_enc.decode())
 
@@ -74,7 +54,7 @@ class UnifJWT:
             return None
 
         jwt_list = self.jwt.split('.')
-        payload = json.loads(self.__base64url_decode(jwt_list[1].encode('utf-8')))
+        payload = json.loads(base64url_decode(jwt_list[1].encode('utf-8')))
 
         return payload['iss']
 
@@ -83,7 +63,7 @@ class UnifJWT:
             return None
 
         jwt_list = self.jwt.split('.')
-        payload = json.loads(self.__base64url_decode(jwt_list[1].encode('utf-8')))
+        payload = json.loads(base64url_decode(jwt_list[1].encode('utf-8')))
 
         return payload['aud']
 
@@ -103,12 +83,12 @@ class UnifJWT:
 
         digest_sha = sha256(digest.encode('utf-8'))
 
-        jwt_signature = self.__base64url_decode(jwt_signature_enc.encode('utf-8'))
+        jwt_signature = base64url_decode(jwt_signature_enc.encode('utf-8'))
 
         key_match = eosk.verify_pub_key(jwt_signature.decode(), digest_sha, public_key)
 
         if key_match:
-            payload_str = self.__base64url_decode(jwt_payload_enc.encode('utf-8'))
+            payload_str = base64url_decode(jwt_payload_enc.encode('utf-8'))
             payload = json.loads(payload_str)
 
         return payload
