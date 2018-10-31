@@ -53,8 +53,8 @@ class UnifJWT:
         return base64.urlsafe_b64encode(input_str).replace(b'=', b'')
 
     def generate(self, payload):
-        payload['nonce'] = self.__generate_nonce()
-        payload['ts'] = time.time()
+        payload['jti'] = self.__generate_nonce()  # RFC 7519 4.1.7
+        payload['iat'] = time.time()  # RFC 7519 4.1.6
         self.jwt_payload = payload
         self.__generate_header()
         self.__encode()

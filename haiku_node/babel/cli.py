@@ -326,6 +326,9 @@ def permissions(user, password, provider, consumer, perm='active'):
 
     if len(private_key) > 0:
         jwt_payload = {
+            'iss': user,  # RFC 7519 4.1.1
+            'sub': 'perm_request',  # RFC 7519 4.1.2
+            'aud': provider,  # RFC 7519 4.1.3
             'eos_perm': perm,
             'user': user,
             'consumer': consumer,
