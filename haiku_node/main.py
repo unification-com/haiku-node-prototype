@@ -5,7 +5,7 @@ import json
 
 from cryptography.fernet import Fernet
 
-from haiku_node.blockchain.mother import UnificationMother
+from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.client import HaikuDataClient, Provider, ProviderNew
 from haiku_node.config.config import UnificationConfig
 from haiku_node.keystore.keystore import UnificationKeystore

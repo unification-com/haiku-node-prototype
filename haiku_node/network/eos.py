@@ -5,7 +5,7 @@ from enum import Enum
 from eosapi import Client
 
 from haiku_node.blockchain.ipfs import IPFSDataStore
-from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
+from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.config.config import UnificationConfig
 
 
