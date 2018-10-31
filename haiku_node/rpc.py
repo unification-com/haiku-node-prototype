@@ -8,7 +8,7 @@ from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.data.factory import UnificationDataFactory
 from haiku_node.encryption.payload import bundle, unbundle
-from haiku_node.encryption.jwt import UnifJWT
+from haiku_node.encryption.jwt.jwt import UnifJWT
 from haiku_node.permissions.permission_batcher import PermissionBatcher, default_db
 from haiku_node.validation.validation import UnificationAppScValidation
 

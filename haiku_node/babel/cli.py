@@ -12,7 +12,7 @@ from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
-from haiku_node.encryption.jwt import UnifJWT
+from haiku_node.encryption.jwt.jwt import UnifJWT
 from haiku_node.validation.validation import UnificationAppScValidation
 
 

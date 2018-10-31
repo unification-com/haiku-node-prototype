@@ -3,7 +3,7 @@ import json
 import pytest
 
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
-from haiku_node.encryption.jwt import UnifJWT
+from haiku_node.encryption.jwt.jwt import UnifJWT
 
 
 def generate_eos_key_pair():
