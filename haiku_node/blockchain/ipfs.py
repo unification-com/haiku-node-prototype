@@ -6,8 +6,8 @@ IPFS_PORT = 5001
 
 class IPFSDataStore:
 
-    def __init__(self):
-        self.api = ipfsapi.connect(IPFS_HOST, IPFS_PORT)
+    def __init__(self, host=IPFS_HOST, port=IPFS_PORT):
+        self.api = ipfsapi.connect(host, port)
 
     def add_file(self, public_key_path):
         res = self.api.add(str(public_key_path))

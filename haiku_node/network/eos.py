@@ -4,6 +4,7 @@ from enum import Enum
 
 from eosapi import Client
 
+from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 from haiku_node.config.config import UnificationConfig
 
@@ -29,10 +30,6 @@ def get_enum():
 
 
 def get_cleos():
-    """
-    #TODO: Pass the env in
-    """
-
     haiku_env = get_enum()
 
     if haiku_env == Environment.HOST:
@@ -43,10 +40,6 @@ def get_cleos():
 
 
 def get_eos_rpc_client():
-    """
-    #TODO: Pass the env in
-    """
-
     haiku_env = get_enum()
 
     conf = UnificationConfig()
@@ -59,3 +52,15 @@ def get_eos_rpc_client():
         eos_port = conf['eos_rpc_port']
 
     return Client(nodes=[f"http://{eos_host}:{eos_port}"])
+
+
+def get_ipfs_client():
+    """
+    #TODO: This method does not belong here
+    """
+    haiku_env = get_enum()
+
+    if haiku_env == Environment.HOST:
+        return IPFSDataStore(host='127.0.0.1')
+    else:
+        return IPFSDataStore()
