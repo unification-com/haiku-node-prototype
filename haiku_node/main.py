@@ -9,6 +9,7 @@ from haiku_node.blockchain.mother import UnificationMother
 from haiku_node.client import HaikuDataClient, Provider, ProviderNew
 from haiku_node.config.config import UnificationConfig
 from haiku_node.keystore.keystore import UnificationKeystore
+from haiku_node.network.eos import get_eos_rpc_client
 from haiku_node.rpc import app
 from eosapi import Client
 from haiku_node.blockchain_helpers.eos import eosio_account
@@ -95,14 +96,9 @@ def fetch(provider, request_hash, user):
     password = os.environ['keystore']
 
     # Write the data request to the Consumer's UApp smart contract
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
-
-    # TODO: get host and port values from MOTHER, by passing provider name
+    eos_client = get_eos_rpc_client()
     mother = UnificationMother(eos_client, provider)
 
-    #TODO: Don't shadow outer scope
     provider_obj = ProviderNew(provider, 'https', mother)
     req_hash = f'request-{request_hash}'
 
@@ -125,7 +121,7 @@ def fetch(provider, request_hash, user):
         provider, "0", "0", sched_price)
 
     client = HaikuDataClient(keystore)
-    data_path = client.make_data_request(
+    data_path = client.make_data_request_new(
         requesting_app, provider_obj, user, req_hash, latest_req_id)
     click.echo(f'Data written to {data_path}')
     click.echo(f'View using:')
