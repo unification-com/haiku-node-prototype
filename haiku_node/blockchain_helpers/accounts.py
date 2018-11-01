@@ -96,12 +96,11 @@ class AccountManager:
 
         print(ret.stdout)
 
-    def create_und_token(self):
+    def create_und_token(self, maximum_supply):
         log.info('Create UND tokens')
-        # TODO: migrate maximum_supply to demo_config.json
         d = {
             'issuer': 'eosio',
-            'maximum_supply': '1000000000.0000 UND'
+            'maximum_supply': f'{maximum_supply} UND'
         }
         ret = self.cleos.run(
             ['push', 'action', 'unif.token', 'create', json.dumps(d), '-p',
@@ -298,6 +297,7 @@ def make_default_accounts(
         manager: AccountManager, demo_config, appnames, usernames):
     demo_apps = demo_config['demo_apps']
     demo_permissions = demo_config['demo_permissions']
+    test_net = demo_config['test_net']
 
     for username in usernames + appnames:
         manager.cleos.open_wallet(username)
@@ -320,7 +320,7 @@ def make_default_accounts(
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
-    manager.create_und_token()
+    manager.create_und_token(test_net['maximum_supply'])
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)

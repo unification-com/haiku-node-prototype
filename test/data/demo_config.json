@@ -10,6 +10,9 @@
       "password": "Lah5Kwt9mziZh9A_Xi6RQ_quqwII5Bhvw5MZ8xE03IA="
     }
   },
+  "test_net": {
+    "maximum_supply": "1000000000.0000"
+  },
   "demo_apps": {
     "app1": {
       "eos_sc_account": "app1",
