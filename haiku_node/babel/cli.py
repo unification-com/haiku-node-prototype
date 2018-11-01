@@ -287,6 +287,7 @@ def permissions(user, password, provider, consumer, perm='active'):
 
     schema_fields = schemas_map[schema_id]
 
+    # ToDo - get user's current permission levels from provider/IPFS etc.
     field_perms = {}
 
     for f in schema_fields:
