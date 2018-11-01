@@ -143,17 +143,20 @@ def view(provider, request_hash):
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
-    provider = Provider(provider, 'https', f'haiku-{provider}', PORT)
+    eos_client = get_eos_rpc_client()
+    mother = UnificationMother(eos_client, provider)
+
+    provider_obj = ProviderNew(provider, 'https', mother)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is reading ingested data from '
-               f'{provider.name}')
+               f'{provider_obj.name}')
 
     encoded_password = str.encode(password)
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    data = client.read_data_from_store(provider, req_hash)
+    data = client.read_data_from_store(provider_obj, req_hash)
 
     json_obj = json.loads(data)
 
@@ -240,20 +243,22 @@ def __request_from_uapp_store(data_request):
 
     request_hash = f"{data_request['provider']}-{data_request['schema_pkey']}-{latest_req_id}.dat"
 
-    provider = Provider(data_request['provider'], 'https', f"haiku-{data_request['provider']}", PORT)
+    provider_name = data_request['provider']
+    mother = UnificationMother(eos_client, provider_name)
+    provider_obj = ProviderNew(provider_name, 'https', mother)
     req_hash = f'request-{request_hash}'
 
-    click.echo(f'App {requesting_app} is requesting data from {provider.name}')
+    click.echo(f'App {requesting_app} is requesting data from {provider_obj.name}')
 
     encoded_password = str.encode(password)
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    data_path = client.make_data_request(
-        requesting_app, provider, None, req_hash, latest_req_id)
+    data_path = client.make_data_request_new(
+        requesting_app, provider_obj, None, req_hash, latest_req_id)
     click.echo(f'Data written to {data_path}')
     click.echo(f'View using:')
-    click.echo(f"haiku view {provider.name} {request_hash}")
+    click.echo(f"haiku view {provider_obj.name} {request_hash}")
 
 
 if __name__ == "__main__":

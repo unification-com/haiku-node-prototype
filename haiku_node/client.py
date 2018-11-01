@@ -216,7 +216,7 @@ class HaikuDataClient:
             providing_app.name, request_hash, d)
 
     def read_data_from_store(
-            self, providing_app: Provider, request_hash):
+            self, providing_app: ProviderNew, request_hash):
         temp_dir = Path(tempfile.gettempdir())
 
         tp = temp_dir / Path(f"{providing_app.name}-{request_hash}")
