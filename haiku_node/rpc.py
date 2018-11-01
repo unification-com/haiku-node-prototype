@@ -9,6 +9,7 @@ from haiku_node.data.factory import UnificationDataFactory
 from haiku_node.blockchain.uapp import UnificationUapp
 from haiku_node.encryption.payload import unbundle, bundle
 from haiku_node.validation.validation import UnificationAppScValidation
+from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
 app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
@@ -83,8 +84,18 @@ def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
     uapp_sc = UnificationUapp(eos_client, eos_account_name)
     # generate checksum
     data_hash = hashlib.sha224(str(d['payload']).encode('utf-8')).hexdigest()
+
+    # temporarily allow acl_contract_acc@modreq to interact with consumer's contract
+    eosio_cleos = EosioCleos(False)
+    eosio_cleos.run(["set", "action", "permission", acl_contract_acc,
+                     eos_account_name, 'updatereq', 'modreq', '-p', f'{acl_contract_acc}@active'])
+
     # write to Consumer's smart contract
     transaction_id = uapp_sc.update_data_request(request_id, acl_contract_acc, data_hash, "test")
+
+    # Remove permission association for action in consumer's contract
+    eosio_cleos.run(["set", "action", "permission", acl_contract_acc,
+                     eos_account_name, 'updatereq', 'NULL', '-p', f'{acl_contract_acc}@active'])
 
     # check transaction has been processed
     if transaction_id is not None:

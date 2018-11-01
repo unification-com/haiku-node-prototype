@@ -73,7 +73,7 @@ class AccountManager:
     def lock_account_permissions(self, username, smart_contract, contract_action, perm_name):
         log.info(f"Lock permission {perm_name} for {username} to action {contract_action} in contract {smart_contract}")
         ret = self.cleos.run(["set", "action", "permission", username,
-                          smart_contract, contract_action, perm_name])
+                          smart_contract, contract_action, perm_name, '-p', f'{username}@active'])
 
         print(ret.stdout)
 
@@ -142,12 +142,14 @@ class AccountManager:
                 'price_sched': i['price_sched'],
                 'price_adhoc': i['price_adhoc']
             }
+
             # ret = self.cleos.run(
             #     ['push', 'action', appname, 'addschema', json.dumps(d), '-p',
-            #      f'{appname}@modschema'])
+            #      appname])
             ret = self.cleos.run(
                 ['push', 'action', appname, 'addschema', json.dumps(d), '-p',
-                 appname])
+                 f'{appname}@modschema'])
+
             print(ret.stdout)
 
     def get_und_rewards(self, appname : str) -> float:
@@ -220,9 +222,9 @@ class AccountManager:
             'rsa_key': public_key_hash
         }
         return self.cleos.run(
-            ['push', 'action', provider, 'setrsakey', json.dumps(d), '-p', provider])
-        # return self.cleos.run(
-        #     ['push', 'action', provider, 'setrsakey', json.dumps(d), '-p', f'{provider}@modrsakey'])
+            ['push', 'action', provider, 'setrsakey', json.dumps(d),
+             '-p', f'{provider}@modrsakey'])
+
 
     def revoke(self, provider, requester, user):
         d = {
