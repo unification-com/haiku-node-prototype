@@ -3,7 +3,8 @@ import json
 import pytest
 
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
-from haiku_node.encryption.jwt.exceptions import *
+from haiku_node.encryption.jwt.exceptions import (
+    InvalidPublicKey, JWTSignatureMismatch)
 from haiku_node.encryption.jwt.jwt import UnifJWT
 
 
