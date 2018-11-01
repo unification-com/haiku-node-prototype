@@ -145,7 +145,7 @@ class UnifJWT:
         return self.payload_json['aud']
 
     def generate(self, payload):
-        payload['jti'] = generate_nonce()  # RFC 7519 4.1.7
+        payload['jti'] = generate_nonce(16)  # RFC 7519 4.1.7
         payload['iat'] = time.time()  # RFC 7519 4.1.6
         self.jwt_payload = payload
         self.__generate_header()
