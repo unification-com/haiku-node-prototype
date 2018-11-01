@@ -6,7 +6,7 @@ import json
 from cryptography.fernet import Fernet
 
 from haiku_node.blockchain.eos.mother import UnificationMother
-from haiku_node.client import HaikuDataClient, Provider, ProviderNew
+from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.network.eos import get_eos_rpc_client
@@ -99,7 +99,7 @@ def fetch(provider, request_hash, user):
     eos_client = get_eos_rpc_client()
     mother = UnificationMother(eos_client, provider)
 
-    provider_obj = ProviderNew(provider, 'https', mother)
+    provider_obj = Provider(provider, 'https', mother)
     req_hash = f'request-{request_hash}'
 
     suffix = 'for all users' if user is None else f'for {user}'
@@ -146,7 +146,7 @@ def view(provider, request_hash):
     eos_client = get_eos_rpc_client()
     mother = UnificationMother(eos_client, provider)
 
-    provider_obj = ProviderNew(provider, 'https', mother)
+    provider_obj = Provider(provider, 'https', mother)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is reading ingested data from '
@@ -245,7 +245,7 @@ def __request_from_uapp_store(data_request):
 
     provider_name = data_request['provider']
     mother = UnificationMother(eos_client, provider_name)
-    provider_obj = ProviderNew(provider_name, 'https', mother)
+    provider_obj = Provider(provider_name, 'https', mother)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is requesting data from {provider_obj.name}')

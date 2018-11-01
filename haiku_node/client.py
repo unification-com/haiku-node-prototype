@@ -20,17 +20,6 @@ log = logging.getLogger(__name__)
 
 
 class Provider:
-    def __init__(self, name, protocol, host, port):
-        self.name = name
-        self.protocol = protocol
-        self.host = host
-        self.port = port
-
-    def base_url(self):
-        return f"{self.protocol}://{self.host}:{self.port}"
-
-
-class ProviderNew:
     def __init__(self, name: str, protocol: str, mother: UnificationMother):
         self.name = name
         self.protocol = protocol
@@ -72,7 +61,7 @@ class HaikuDataClient:
         tp.write_text(json.dumps(data), encoding='utf-8')
         return tp
 
-    def make_data_request(self, requesting_app, providing_app: ProviderNew, user,
+    def make_data_request(self, requesting_app, providing_app: Provider, user,
                           request_hash, request_id):
         # Check if the providing app is valid according to MOTHER
         conf = UnificationConfig()
@@ -141,7 +130,7 @@ class HaikuDataClient:
             providing_app.name, request_hash, d)
 
     def read_data_from_store(
-            self, providing_app: ProviderNew, request_hash):
+            self, providing_app: Provider, request_hash):
         temp_dir = Path(tempfile.gettempdir())
 
         tp = temp_dir / Path(f"{providing_app.name}-{request_hash}")

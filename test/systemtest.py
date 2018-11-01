@@ -15,7 +15,7 @@ from haiku_node.blockchain_helpers.accounts import (
 from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.eos.und_rewards import UndRewards
-from haiku_node.client import HaikuDataClient, Provider, ProviderNew
+from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle
 from haiku_node.keystore.keystore import UnificationKeystore
@@ -58,17 +58,18 @@ def systest_auth(requesting_app, providing_app, user):
     app_config = demo_config['demo_apps'][providing_app]
     port = app_config['rpc_server_port']
 
-    provider = Provider(
-        providing_app, 'https', app_config['rpc_server'], port)
+    eos_client = get_eos_rpc_client()
+    mother = UnificationMother(eos_client, providing_app)
+    provider_obj = Provider(providing_app, 'https', mother)
 
     encoded_password = demo_config['system'][requesting_app]['password']
 
     ks = UnificationKeystore(encoded_password, app_name=requesting_app,
                              keystore_path=Path('data/keys'))
-    payload = bundle(ks, requesting_app, provider.name, body, 'Success')
+    payload = bundle(ks, requesting_app, provider_obj.name, body, 'Success')
     payload = broken(payload, 'signature')
 
-    base = provider.base_url()
+    base = provider_obj.base_url()
 
     r = requests.post(f"{base}/data_request", json=payload, verify=False)
     assert r.status_code == 401
@@ -84,7 +85,7 @@ def systest_ingest(requesting_app, providing_app, user, balances):
 
     eos_client = get_eos_rpc_client()
     mother = UnificationMother(eos_client, providing_app)
-    provider_obj = ProviderNew(providing_app, 'https', mother)
+    provider_obj = Provider(providing_app, 'https', mother)
 
     password = demo_config['system'][requesting_app]['password']
     encoded_password = str.encode(password)
