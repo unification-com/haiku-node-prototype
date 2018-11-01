@@ -8,6 +8,8 @@ from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.data.factory import UnificationDataFactory
 from haiku_node.encryption.payload import bundle, unbundle
+from haiku_node.encryption.jwt.exceptions import (
+    InvalidJWT, InvalidPublicKey, JWTSignatureMismatch)
 from haiku_node.encryption.jwt.jwt import UnifJWT
 from haiku_node.permissions.permission_batcher import PermissionBatcher, default_db
 from haiku_node.validation.validation import UnificationAppScValidation
@@ -22,6 +24,15 @@ def invalid_response():
     return flask.jsonify({
         'success': False,
         'message': 'Unauthorized',
+        'signature': None,
+        'body': None
+    }), 401
+
+
+def invalid_jwt(message):
+    return flask.jsonify({
+        'success': False,
+        'message': message,
         'signature': None,
         'body': None
     }), 401
@@ -53,6 +64,7 @@ def error_request_self():
         'body': None
     }), 418
 
+
 def error_request_not_me():
     return flask.jsonify({
         'success': False,
@@ -60,6 +72,16 @@ def error_request_not_me():
         'signature': None,
         'body': None
     }), 418
+
+
+def error_request_not_you():
+    return flask.jsonify({
+        'success': False,
+        'message': 'You are not you...',
+        'signature': None,
+        'body': None
+    }), 401
+
 
 def bc_transaction_error():
     return flask.jsonify({
@@ -227,40 +249,49 @@ def modify_permission():
         d = flask.request.get_json()
 
         eos_perm = d['eos_perm']
+        req_sender = d['user']
         jwt = d['jwt']
 
         cleos = EosioCleos()
 
-        unif_jwt = UnifJWT(jwt)
-
-        user_account = unif_jwt.get_issuer()
-        audience = unif_jwt.get_audience()
-
-        if audience != conf['acl_contract']:
-            return error_request_not_me()
-
         # ToDo: find better way to get public key from EOS account
-        public_key = cleos.get_public_key(user_account, eos_perm)
+        public_key = cleos.get_public_key(req_sender, eos_perm)
 
-        pl = unif_jwt.decode_jwt(public_key)
+        try:
+            unif_jwt = UnifJWT(jwt, public_key)
 
-        if not pl:
-            return invalid_response()
+            issuer = unif_jwt.get_issuer()
+            audience = unif_jwt.get_audience()
 
-        consumer_account = pl['consumer']
+            if audience != conf['acl_contract']:
+                return error_request_not_me()
 
-        pb = PermissionBatcher(default_db())
+            if req_sender != issuer:
+                return error_request_not_you()
 
-        # ToDo: Validate permission list sent
+            pl = unif_jwt.get_payload()
 
-        rowid = pb.add(user_account, consumer_account, jwt)
+            consumer_account = pl['consumer']
 
-        d = {
-            'app': conf['acl_contract'],
-            'proc_id': rowid
-        }
+            pb = PermissionBatcher(default_db())
 
-        return flask.jsonify(d), 200
+            # ToDo: Validate permission list sent
+            # ToDo: store pub key, or method to get pub key (e.g. eos permission level)
+            rowid = pb.add(issuer, consumer_account, jwt)
+
+            d = {
+                'app': conf['acl_contract'],
+                'proc_id': rowid
+            }
+
+            return flask.jsonify(d), 200
+
+        except InvalidJWT as e:
+            return invalid_jwt(e)
+        except InvalidPublicKey as e:
+            return invalid_jwt(e)
+        except JWTSignatureMismatch as e:
+            return invalid_jwt(e)
 
     except InvalidSignature:
         return invalid_response()

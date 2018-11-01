@@ -345,7 +345,9 @@ def permissions(user, password, provider, consumer, perm='active'):
 
         payload = {
             'jwt': jwt,
-            'eos_perm': perm
+            'eos_perm': perm,
+            'user': user,
+            'provider': provider
         }
 
         base = f"https://haiku-{provider}:8050"
