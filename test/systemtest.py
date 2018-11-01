@@ -102,7 +102,7 @@ def systest_ingest(requesting_app, providing_app, user, balances):
                                                        price_sched)
 
     client = HaikuDataClient(keystore)
-    client.make_data_request_new(requesting_app, provider_obj, user, request_hash, latest_req_id)
+    client.make_data_request(requesting_app, provider_obj, user, request_hash, latest_req_id)
     client.read_data_from_store(provider_obj, request_hash)
 
     # Update the system test record of the balances

@@ -72,7 +72,7 @@ class HaikuDataClient:
         tp.write_text(json.dumps(data), encoding='utf-8')
         return tp
 
-    def make_data_request_new(self, requesting_app, providing_app: ProviderNew, user,
+    def make_data_request(self, requesting_app, providing_app: ProviderNew, user,
                           request_hash, request_id):
         # Check if the providing app is valid according to MOTHER
         conf = UnificationConfig()

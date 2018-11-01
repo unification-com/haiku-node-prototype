@@ -121,7 +121,7 @@ def fetch(provider, request_hash, user):
         provider, "0", "0", sched_price)
 
     client = HaikuDataClient(keystore)
-    data_path = client.make_data_request_new(
+    data_path = client.make_data_request(
         requesting_app, provider_obj, user, req_hash, latest_req_id)
     click.echo(f'Data written to {data_path}')
     click.echo(f'View using:')
@@ -254,7 +254,7 @@ def __request_from_uapp_store(data_request):
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    data_path = client.make_data_request_new(
+    data_path = client.make_data_request(
         requesting_app, provider_obj, None, req_hash, latest_req_id)
     click.echo(f'Data written to {data_path}')
     click.echo(f'View using:')
