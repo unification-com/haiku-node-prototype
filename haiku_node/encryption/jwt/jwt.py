@@ -5,7 +5,6 @@ from haiku_node.encryption.jwt.exceptions import *
 from haiku_node.utils.utils import base64url_decode, base64url_encode, generate_nonce, json_encode, sha256
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 
-
 INVALID_CHARACTERS = ['\n', '\t', '\r', ' ']
 VALID_JOSE_KEYS = ['alg', 'typ']
 SUPPORTED_JOSE_TYPES = ['jwt']
@@ -31,6 +30,7 @@ class UnifJWT:
     def __init__(self, jwt=None, public_key=None):
         self.jwt = jwt
         self.public_key = public_key
+
         if jwt is not None:
             if self.public_key is None:
                 raise InvalidPublicKey("No public key given. Cannot validate signature")
@@ -39,7 +39,7 @@ class UnifJWT:
     def __verify_jwt(self):
         # check has dot
         if '.' not in self.jwt:  # rfc7519 7.2: 1
-            raise InvalidJWT("JWT Invalid: no period found")
+            raise InvalidJWT("JWT Invalid: no dot found")
 
         jwt_list = self.jwt.split('.')
 
@@ -48,7 +48,7 @@ class UnifJWT:
 
         # validate JWS rfc7519 7.2: 7 and rfc7515 5.2
         if self.jwt.count(".") != 2:  # rfc7515 5.2: 1
-            raise InvalidJWT("JWT Invalid: JWS Must contain exactly 2 periods")
+            raise InvalidJWT("JWT Invalid: JWS Must contain exactly 2 dots")
 
         # verify payload
         self.__verify_jwt_payload(jwt_list)
@@ -58,7 +58,7 @@ class UnifJWT:
         # validate signature
         self.__validate_signature()
 
-        # set values
+        # set values, since everything has been correctly verified
         self.jwt_payload = base64url_decode(self.jwt_payload_enc.encode('utf-8'))
         self.jwt_signature = base64url_decode(self.jwt_signature_enc.encode('utf-8'))
         self.payload_json = json.loads(self.jwt_payload)
@@ -93,7 +93,8 @@ class UnifJWT:
 
         for k in VALID_JOSE_KEYS:
             if k not in self.jose_header_json.keys():  # rfc7515 5.2: 8
-                raise InvalidJWT("Missing required keys in JOSE header JSON")
+                req_k = ",".join(VALID_JOSE_KEYS)
+                raise InvalidJWT(f"Missing required JSON keys {req_k} in JOSE header JSON")
 
         self.jwt_signature_enc = jwt_signature_enc
 
@@ -117,8 +118,8 @@ class UnifJWT:
         }
 
     def __encode(self):
-        self.jwt_header_enc = base64url_encode(json_encode(self.jwt_header))
         self.jwt_payload_enc = base64url_encode(json_encode(self.jwt_payload))
+        self.jwt_header_enc = base64url_encode(json_encode(self.jwt_header))
         self.digest = str(self.jwt_header_enc.decode()) + "." + str(self.jwt_payload_enc.decode())
         self.digest_sha = sha256(self.digest.encode('utf-8'))
 
@@ -130,6 +131,18 @@ class UnifJWT:
 
     def get_signature(self):
         return self.jwt_signature
+
+    def get_issuer(self):
+        if self.payload_json is None:
+            return None
+
+        return self.payload_json['iss']
+
+    def get_audience(self):
+        if self.payload_json is None:
+            return None
+
+        return self.payload_json['aud']
 
     def generate(self, payload):
         payload['jti'] = generate_nonce()  # RFC 7519 4.1.7
@@ -147,47 +160,3 @@ class UnifJWT:
 
     def to_jwt(self):
         return self.jwt
-
-    def get_issuer(self):
-        if self.jwt is None:
-            return None
-
-        jwt_list = self.jwt.split('.')
-        payload = json.loads(base64url_decode(jwt_list[1].encode('utf-8')))
-
-        return payload['iss']
-
-    def get_audience(self):
-        if self.jwt is None:
-            return None
-
-        jwt_list = self.jwt.split('.')
-        payload = json.loads(base64url_decode(jwt_list[1].encode('utf-8')))
-
-        return payload['aud']
-
-    def decode_jwt(self, public_key):
-        if self.jwt is None:
-            return {}
-
-        jwt_list = self.jwt.split('.')
-        eosk = UnifEosKey()
-        payload = {}
-
-        jwt_header_enc = jwt_list[0]
-        jwt_payload_enc = jwt_list[1]
-        jwt_signature_enc = jwt_list[2]
-
-        digest = jwt_header_enc + "." + jwt_payload_enc
-
-        digest_sha = sha256(digest.encode('utf-8'))
-
-        jwt_signature = base64url_decode(jwt_signature_enc.encode('utf-8'))
-
-        key_match = eosk.verify_pub_key(jwt_signature.decode(), digest_sha, public_key)
-
-        if key_match:
-            payload_str = base64url_decode(jwt_payload_enc.encode('utf-8'))
-            payload = json.loads(payload_str)
-
-        return payload
