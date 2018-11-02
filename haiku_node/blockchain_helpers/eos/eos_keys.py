@@ -1,5 +1,7 @@
-import ecdsa
 from binascii import hexlify, unhexlify
+
+from ecdsa import SECP256k1
+from ecdsa.util import number_to_string
 from eospy.keys import EOSKey
 from eospy.utils import hex_to_int
 
@@ -23,9 +25,9 @@ class UnifEosKey(EOSKey):
         # verify sig
         vk = self._recover_key(unhexlify(digest), unhexlify(sig), recover_param)
 
-        order = ecdsa.SECP256k1.order
+        order = SECP256k1.order
         p = vk.pubkey.point
-        x_str = ecdsa.util.number_to_string(p.x(), order)
+        x_str = number_to_string(p.x(), order)
         hex_data = bytearray(chr(2 + (p.y() & 1)), 'utf-8')
         compressed = hexlify(hex_data + x_str).decode()
         p_key = 'EOS' + self._check_encode(compressed).decode()
