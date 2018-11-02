@@ -158,9 +158,7 @@ def view(provider, request_hash):
     client = HaikuDataClient(keystore)
     data = client.read_data_from_store(provider_obj, req_hash)
 
-    json_obj = json.loads(data)
-
-    print(json_obj)
+    click.echo(json.loads(data))
 
 
 @main.command()
