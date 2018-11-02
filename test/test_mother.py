@@ -13,8 +13,6 @@ demo_apps = demo_config["demo_apps"]
 
 
 def run_test(app):
-    global conf
-
     print("Contacting MOTHER FOR: ", app)
     eos_client = get_eos_rpc_client()
     um = UnificationMother(eos_client, app, get_cleos())
