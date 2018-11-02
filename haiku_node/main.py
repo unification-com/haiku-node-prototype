@@ -124,9 +124,8 @@ def fetch(provider, request_hash, user):
     data_path = client.make_data_request(
         requesting_app, provider, user, req_hash, latest_req_id)
 
-    click.echo(f'Data written to {data_path}')
-    click.echo(f'View using:')
-    click.echo(f"haiku view {provider.name} {request_hash}")
+    click.echo(f'Data written to: {data_path}')
+    click.echo(f'View using: haiku view {provider.name} {request_hash}')
 
 
 @main.command()
