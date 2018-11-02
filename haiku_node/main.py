@@ -173,10 +173,7 @@ def uapp_store():
 
     click.echo(bold("UApp Store"))
 
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
-
+    eos_client = get_eos_rpc_client()
     valid_apps = eos_client.get_table_rows(
         "unif.mother", "unif.mother", "validapps", True, 0, -1,
         -1)
