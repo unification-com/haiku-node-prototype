@@ -3,7 +3,9 @@ import json
 import pytest
 
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
-from haiku_node.encryption.jwt import UnifJWT
+from haiku_node.encryption.jwt.exceptions import (
+    InvalidPublicKey, JWTSignatureMismatch)
+from haiku_node.encryption.jwt.jwt import UnifJWT
 
 
 def generate_eos_key_pair():
@@ -62,10 +64,34 @@ def test_jwt(payload):
     private_key, public_key = generate_eos_key_pair()
     jwt = generate_jwt(payload, private_key)
 
-    unif_jwt = UnifJWT(jwt)
-    pl = unif_jwt.decode_jwt(public_key)
+    unif_jwt = UnifJWT(jwt, public_key)
+    pl = unif_jwt.get_payload()
 
     assert not pl is False
+
+
+@pytest.mark.parametrize("payload", [
+    {
+        "user": "user2",
+        "foo": "bar"
+    },
+    {
+        "x": "y",
+        "z": "a"
+    },
+    {
+        "dfg": "123",
+        "hjk": "456"
+    }
+])
+def test_jwt_no_pub_key(payload):
+
+    private_key, public_key = generate_eos_key_pair()
+    jwt = generate_jwt(payload, private_key)
+
+    with pytest.raises(InvalidPublicKey):
+        # should fail - no public key
+        UnifJWT(jwt)
 
 
 @pytest.mark.parametrize("payload", [
@@ -88,11 +114,10 @@ def test_jwt_key_mismatch(payload):
     jwt = generate_jwt(payload, private_key)
 
     private_key2, public_key2 = generate_eos_key_pair()
-    unif_jwt = UnifJWT(jwt)
-    pl = unif_jwt.decode_jwt(public_key2)
 
-    # should fail - key mismatch (decoded payload should be empty)
-    assert not pl is True
+    with pytest.raises(JWTSignatureMismatch):
+        # should fail - key mismatch
+        UnifJWT(jwt, public_key2)
 
 
 @pytest.mark.parametrize("payload", [
@@ -123,8 +148,6 @@ def test_jwt_payload_mismatch(payload):
     jwt_tampered_payload_enc = base64url_encode(json_encode(tampered_payload))
     tampered_jwt = jwt_list[0] + "." + str(jwt_tampered_payload_enc.decode()) + "." + jwt_list[2]
 
-    unif_jwt = UnifJWT(tampered_jwt)
-    pl = unif_jwt.decode_jwt(public_key)
-
-    # should fail - tampered payload (decoded payload should be empty)
-    assert not pl is True
+    with pytest.raises(JWTSignatureMismatch):
+        # should fail - sig mismatch
+        UnifJWT(tampered_jwt, public_key)

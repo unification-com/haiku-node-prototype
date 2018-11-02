@@ -12,7 +12,7 @@ from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
-from haiku_node.encryption.jwt import UnifJWT
+from haiku_node.encryption.jwt.jwt import UnifJWT
 from haiku_node.validation.validation import UnificationAppScValidation
 
 
@@ -287,6 +287,7 @@ def permissions(user, password, provider, consumer, perm='active'):
 
     schema_fields = schemas_map[schema_id]
 
+    # ToDo - get user's current permission levels from provider/IPFS etc.
     field_perms = {}
 
     for f in schema_fields:
@@ -345,7 +346,9 @@ def permissions(user, password, provider, consumer, perm='active'):
 
         payload = {
             'jwt': jwt,
-            'eos_perm': perm
+            'eos_perm': perm,
+            'user': user,
+            'provider': provider
         }
 
         base = f"https://haiku-{provider}:8050"
