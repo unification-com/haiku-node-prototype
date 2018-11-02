@@ -382,6 +382,13 @@ def make_default_accounts(
 
             for contract_action in contract_actions:
                 manager.lock_account_permissions(appname, appname, contract_action, app_account_perm)
+                # ToDo: This is probably better suited as a temporary assignment, set in the client
+                if app_account_perm == 'modreq':
+                    # need to set for initperm for consumer in provider contracts
+                    for prov_app in appnames:
+                        if prov_app != appname:
+                            manager.lock_account_permissions(appname, prov_app, 'initperm', app_account_perm)
+
 
         manager.set_schema(demo_apps, appname)
         print("Wait for transactions to process")
