@@ -182,7 +182,8 @@ def uapp_store():
     store_key = 1
 
     for va in valid_apps['rows']:
-        data_provider = eosio_account.name_to_string(int(va['acl_contract_acc']))
+        data_provider = eosio_account.name_to_string(
+            int(va['acl_contract_acc']))
         if int(va['is_valid']) == 1 and data_provider != requesting_app:
             uapp_sc = UnificationUapp(eos_client, data_provider)
             db_schemas = uapp_sc.get_all_db_schemas()
@@ -205,7 +206,8 @@ def uapp_store():
                 uapp_store_dict[store_key] = d
                 store_key += 1
 
-    request_id = int(input(f"Select option 1 - {(store_key - 1)} to generate a data request, or '0' to exit:"))
+    request_id = int(input(f"Select option 1 - {(store_key - 1)} to generate "
+                           f"a data request, or '0' to exit:"))
     if request_id > 0 and request_id <= store_key:
         data_request = uapp_store_dict[request_id]
         __request_from_uapp_store(data_request)
