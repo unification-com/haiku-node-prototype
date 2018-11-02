@@ -99,7 +99,7 @@ def fetch(provider, request_hash, user):
     eos_client = get_eos_rpc_client()
     mother = UnificationMother(eos_client, provider)
 
-    provider_obj = Provider(provider, 'https', mother)
+    provider = Provider(provider, 'https', mother)
     req_hash = f'request-{request_hash}'
 
     suffix = 'for all users' if user is None else f'for {user}'
@@ -109,7 +109,7 @@ def fetch(provider, request_hash, user):
     encoded_password = str.encode(password)
     keystore = UnificationKeystore(encoded_password)
 
-    # tmp - get the price for the transfer from Schema[0] in the provider's UApp SC.
+    # tmp - get the price for the transfer from Schema[0] in provider's UApp SC
     # This will possibly be determined externally as part of the B2B agreement
     provider_uapp_sc = UnificationUapp(eos_client, provider)
     db_schema = provider_uapp_sc.get_db_schema_by_pkey(0)  # tmp - only 1 schema
@@ -122,10 +122,11 @@ def fetch(provider, request_hash, user):
 
     client = HaikuDataClient(keystore)
     data_path = client.make_data_request(
-        requesting_app, provider_obj, user, req_hash, latest_req_id)
+        requesting_app, provider, user, req_hash, latest_req_id)
+
     click.echo(f'Data written to {data_path}')
     click.echo(f'View using:')
-    click.echo(f"haiku view {provider_obj.name} {request_hash}")
+    click.echo(f"haiku view {provider.name} {request_hash}")
 
 
 @main.command()
