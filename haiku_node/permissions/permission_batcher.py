@@ -1,6 +1,9 @@
+import json
 import os
 import sqlite3
 from pathlib import Path
+
+from haiku_node.permissions.permissions import UnifPermissions
 
 
 def default_db():
@@ -37,15 +40,37 @@ class PermissionBatcher:
 
         return batch_id
 
-    def get_unprocessed(self):
+    def get_unprocessed(self, num=10):
         self.__open_con()
-        self.__c.execute('SELECT * FROM permissions WHERE processed=0 LIMIT 100')
+        self.__c.execute(f'SELECT * FROM permissions '
+                         f'WHERE processed=0 '
+                         f'ORDER BY consumer_account ASC '
+                         f'LIMIT {num}')
         columns = [d[0] for d in self.__c.description]
         res = [dict(zip(columns, row)) for row in self.__c.fetchall()]
 
         self.__close_con()
 
         return res
+
+    def process_batch(self, num=10):
+        batch = self.get_unprocessed(num)
+        permissions = UnifPermissions()
+
+        for b in batch:
+            perm_obj = {
+                'perms': b['perms'],
+                'p_nonce': b['p_nonce'],
+                'p_sig': b['p_sig'],
+                'pub_key': b['pub_key'],
+                'schema_id': b['schema_id'],
+                'consumer': b['consumer_account'],
+                'user': b['end_user_account']
+            }
+            permissions.add_update(b['consumer_account'], b['end_user_account'], perm_obj)
+
+        updates = permissions.get_updates()
+        print(json.dumps(updates))
 
     def __open_con(self):
         self.__conn = sqlite3.connect(self.__db_name)
