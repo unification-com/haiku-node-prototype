@@ -328,7 +328,7 @@ def modify_permissions(user, password, provider, consumer, perm='active'):
     private_key = cleos.get_private_key(user, password, pub_key)
 
     p_nonce = generate_nonce(16)
-    perm_digest_sha = generate_perm_digest_sha(granted_fields_str, p_nonce, consumer)
+    perm_digest_sha = generate_perm_digest_sha(granted_fields_str, schema_id,  p_nonce, consumer)
 
     # sign permission changes
     eosk = UnifEosKey(private_key)
