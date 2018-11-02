@@ -168,7 +168,6 @@ def uapp_store():
     Allow option to initiate and process a data transfer
     \b
     """
-
     requesting_app = os.environ['app_name']
 
     click.echo(bold("UApp Store"))
@@ -208,7 +207,7 @@ def uapp_store():
 
     request_id = int(input(f"Select option 1 - {(store_key - 1)} to generate "
                            f"a data request, or '0' to exit:"))
-    if request_id > 0 and request_id <= store_key:
+    if 0 < request_id <= store_key:
         data_request = uapp_store_dict[request_id]
         __request_from_uapp_store(data_request)
     else:
@@ -229,9 +228,7 @@ def __request_from_uapp_store(data_request):
     click.echo("Processing request from UApp Store:")
     click.echo(data_request)
 
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+    eos_client = get_eos_rpc_client()
 
     # Write the data request to the Consumer's smart contract
     uapp_sc = UnificationUapp(eos_client, requesting_app)
