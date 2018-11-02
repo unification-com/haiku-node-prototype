@@ -1,16 +1,16 @@
 from haiku_node.blockchain_helpers.eos import eosio_account
-from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
+from haiku_node.network.eos import get_cleos
 
 
 class UnificationMother:
     """
-    Loads data from MOTHER Smart Contract for a Haiku node's app
+    Loads data from MOTHER Smart Contract for a Haiku node's app.
     """
 
     def __init__(self, eos_client, acl_contract_acc):
         """
         :param acl_contract_acc: the eos account name of the app for which the
-            class will retrieve data from the ACL/Meta Data smart contract
+            class will retrieve data from the ACL/Meta Data smart contract.
         """
         self.__mother = "unif.mother"
         self.__valid_apps_table = "validapps"
@@ -22,7 +22,10 @@ class UnificationMother:
         self.__acl_contract_hash_in_mother = ""  # hash held in MOTHER
         self.__haiku_rpc_server_ip = None
         self.__haiku_rpc_server_port = None
-        self.__cleos = EosioCleos()
+
+        #TODO: Don't instantiate in the __init__, but find all the usages and
+        # pass it in instead
+        self.__cleos = get_cleos()
 
         self.__run()
 

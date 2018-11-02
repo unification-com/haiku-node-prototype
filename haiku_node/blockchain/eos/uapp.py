@@ -1,6 +1,6 @@
 import json
 
-from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
+from haiku_node.network.eos import get_cleos
 
 
 class UnificationUapp:
@@ -25,7 +25,7 @@ class UnificationUapp:
         self.__eos_rpc_client = eos_rpc_client
 
         # Todo: Migrate from cleos command line to EOS RPC API
-        self.__cleos = EosioCleos(host=False)
+        self.__cleos = get_cleos()
 
     def get_all_db_schemas(self):
         db_schemas = {}

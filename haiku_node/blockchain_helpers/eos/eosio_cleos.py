@@ -24,8 +24,8 @@ class EosioCleos:
         """
         self.host = host
         if host:
-            self.nodeos = f"http://127.0.0.1:{NODEOS_PORT}"
-            self.keosd = f"http://127.0.0.1:{KEOS_PORT}"
+            self.nodeos = f"http://{NODEOS_IP}:{NODEOS_PORT}"
+            self.keosd = f"http://{KEOS_IP}:{KEOS_PORT}"
             self.nodeos_ip = '127.0.0.1'
 
         else:

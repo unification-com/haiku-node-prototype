@@ -5,9 +5,11 @@ import json
 
 from cryptography.fernet import Fernet
 
+from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.keystore.keystore import UnificationKeystore
+from haiku_node.network.eos import get_eos_rpc_client
 from haiku_node.rpc import app
 from eosapi import Client
 from haiku_node.blockchain_helpers.eos import eosio_account
@@ -93,39 +95,37 @@ def fetch(provider, request_hash, user):
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
-    # TODO: get host and port values from MOTHER, by passing provider name
-    provider = Provider(provider, 'https', f'haiku-{provider}', PORT)
+    # Write the data request to the Consumer's UApp smart contract
+    eos_client = get_eos_rpc_client()
+    mother = UnificationMother(eos_client, provider)
+
+    provider_obj = Provider(provider, 'https', mother)
     req_hash = f'request-{request_hash}'
 
     suffix = 'for all users' if user is None else f'for {user}'
-    click.echo(f'App {requesting_app} is requesting data from {provider.name}'
+    click.echo(f'App {requesting_app} is requesting data from {provider}'
                f' {suffix}')
 
     encoded_password = str.encode(password)
     keystore = UnificationKeystore(encoded_password)
 
-    # Write the data request to the Consumer's UApp smart contract
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
-
     # tmp - get the price for the transfer from Schema[0] in the provider's UApp SC.
     # This will possibly be determined externally as part of the B2B agreement
-    provider_uapp_sc = UnificationUapp(eos_client, provider.name)
+    provider_uapp_sc = UnificationUapp(eos_client, provider)
     db_schema = provider_uapp_sc.get_db_schema_by_pkey(0)  # tmp - only 1 schema
     sched_price = db_schema['price_sched']
 
     # initiate request in Consumer's UApp SC
     consumer_uapp_sc = UnificationUapp(eos_client, requesting_app)
-    latest_req_id = consumer_uapp_sc.init_data_request(provider.name, "0", "0",
-                                                       sched_price)
+    latest_req_id = consumer_uapp_sc.init_data_request(
+        provider, "0", "0", sched_price)
 
     client = HaikuDataClient(keystore)
     data_path = client.make_data_request(
-        requesting_app, provider, user, req_hash, latest_req_id)
+        requesting_app, provider_obj, user, req_hash, latest_req_id)
     click.echo(f'Data written to {data_path}')
     click.echo(f'View using:')
-    click.echo(f"haiku view {provider.name} {request_hash}")
+    click.echo(f"haiku view {provider_obj.name} {request_hash}")
 
 
 @main.command()
@@ -143,17 +143,20 @@ def view(provider, request_hash):
     requesting_app = os.environ['app_name']
     password = os.environ['keystore']
 
-    provider = Provider(provider, 'https', f'haiku-{provider}', PORT)
+    eos_client = get_eos_rpc_client()
+    mother = UnificationMother(eos_client, provider)
+
+    provider_obj = Provider(provider, 'https', mother)
     req_hash = f'request-{request_hash}'
 
     click.echo(f'App {requesting_app} is reading ingested data from '
-               f'{provider.name}')
+               f'{provider_obj.name}')
 
     encoded_password = str.encode(password)
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
-    data = client.read_data_from_store(provider, req_hash)
+    data = client.read_data_from_store(provider_obj, req_hash)
 
     json_obj = json.loads(data)
 
@@ -240,20 +243,22 @@ def __request_from_uapp_store(data_request):
 
     request_hash = f"{data_request['provider']}-{data_request['schema_pkey']}-{latest_req_id}.dat"
 
-    provider = Provider(data_request['provider'], 'https', f"haiku-{data_request['provider']}", PORT)
+    provider_name = data_request['provider']
+    mother = UnificationMother(eos_client, provider_name)
+    provider_obj = Provider(provider_name, 'https', mother)
     req_hash = f'request-{request_hash}'
 
-    click.echo(f'App {requesting_app} is requesting data from {provider.name}')
+    click.echo(f'App {requesting_app} is requesting data from {provider_obj.name}')
 
     encoded_password = str.encode(password)
     keystore = UnificationKeystore(encoded_password)
 
     client = HaikuDataClient(keystore)
     data_path = client.make_data_request(
-        requesting_app, provider, None, req_hash, latest_req_id)
+        requesting_app, provider_obj, None, req_hash, latest_req_id)
     click.echo(f'Data written to {data_path}')
     click.echo(f'View using:')
-    click.echo(f"haiku view {provider.name} {request_hash}")
+    click.echo(f"haiku view {provider_obj.name} {request_hash}")
 
 
 if __name__ == "__main__":

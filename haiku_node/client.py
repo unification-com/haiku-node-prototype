@@ -8,25 +8,33 @@ from eosapi import Client
 import logging
 import requests
 
+from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.eos.und_rewards import UndRewards
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle, unbundle
+from haiku_node.network.eos import get_eos_rpc_client, get_enum, Environment
 from haiku_node.validation.validation import UnificationAppScValidation
-
 
 log = logging.getLogger(__name__)
 
 
 class Provider:
-    def __init__(self, name, protocol, host, port):
+    def __init__(self, name: str, protocol: str, mother: UnificationMother):
         self.name = name
         self.protocol = protocol
-        self.host = host
-        self.port = port
+        self.host = mother.get_haiku_rpc_ip()
+        self.port = mother.get_haiku_rpc_port()
 
     def base_url(self):
-        return f"{self.protocol}://{self.host}:{self.port}"
+        haiku_env = get_enum()
+        if haiku_env == Environment.HOST:
+            return f"https://localhost:8852"
+        else:
+            return f"{self.protocol}://{self.host}:{self.port}"
+
+    def __repr__(self):
+        return self.base_url()
 
 
 class HaikuDataClient:
@@ -55,18 +63,11 @@ class HaikuDataClient:
 
     def make_data_request(self, requesting_app, providing_app: Provider, user,
                           request_hash, request_id):
-        """
-        Make a data request from one Haiku Node to another,
-        or receive request from UApp Store
-        """
-
         # Check if the providing app is valid according to MOTHER
         conf = UnificationConfig()
-        eos_client = Client(
-            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
-
+        eos_client = get_eos_rpc_client()
         v = UnificationAppScValidation(
-            eos_client, conf['acl_contract'],  providing_app.name,
+            eos_client, conf['acl_contract'], providing_app.name,
             get_perms=True)
 
         if not v.valid():

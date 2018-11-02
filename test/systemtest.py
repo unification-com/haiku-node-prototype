@@ -9,16 +9,17 @@ from eosapi import Client
 import click
 import requests
 
+from haiku_node.blockchain_helpers.eos import eosio_account
+from haiku_node.blockchain_helpers.accounts import (
+    AccountManager, make_default_accounts, create_public_data)
 from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.eos.und_rewards import UndRewards
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle
-from haiku_node.blockchain_helpers.eos import eosio_account
-from haiku_node.blockchain_helpers.accounts import (
-    AccountManager, make_default_accounts, create_public_data)
 from haiku_node.keystore.keystore import UnificationKeystore
+from haiku_node.network.eos import get_eos_rpc_client
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
@@ -57,34 +58,34 @@ def systest_auth(requesting_app, providing_app, user):
     app_config = demo_config['demo_apps'][providing_app]
     port = app_config['rpc_server_port']
 
-    provider = Provider(
-        providing_app, 'https', app_config['rpc_server'], port)
+    eos_client = get_eos_rpc_client()
+    mother = UnificationMother(eos_client, providing_app)
+    provider_obj = Provider(providing_app, 'https', mother)
 
     encoded_password = demo_config['system'][requesting_app]['password']
 
     ks = UnificationKeystore(encoded_password, app_name=requesting_app,
                              keystore_path=Path('data/keys'))
-    payload = bundle(ks, requesting_app, provider.name, body, 'Success')
+    payload = bundle(ks, requesting_app, provider_obj.name, body, 'Success')
     payload = broken(payload, 'signature')
 
-    base = provider.base_url()
+    base = provider_obj.base_url()
 
     r = requests.post(f"{base}/data_request", json=payload, verify=False)
     assert r.status_code == 401
 
 
-def systest_ingest(requesting_app, providing_app, user, balances, local=False):
+def systest_ingest(requesting_app, providing_app, user, balances):
     log.info(f'Testing Fetch ingestion: {requesting_app} is requesting data from '
              f'{providing_app}')
     request_hash = f'data-request-{providing_app}-{requesting_app}'
 
     app_config = demo_config['demo_apps'][providing_app]
     port = app_config['rpc_server_port']
-    if not local:
-        provider = Provider(
-            providing_app, 'https', app_config['rpc_server'], port)
-    else:
-        provider = Provider(providing_app, 'http', '127.0.0.1', port)
+
+    eos_client = get_eos_rpc_client()
+    mother = UnificationMother(eos_client, providing_app)
+    provider_obj = Provider(providing_app, 'https', mother)
 
     password = demo_config['system'][requesting_app]['password']
     encoded_password = str.encode(password)
@@ -98,12 +99,12 @@ def systest_ingest(requesting_app, providing_app, user, balances, local=False):
 
     price_sched = demo_config['demo_apps'][providing_app]['db_schemas'][0]['price_sched']
 
-    latest_req_id = consumer_uapp_sc.init_data_request(provider.name, "0", "0",
+    latest_req_id = consumer_uapp_sc.init_data_request(provider_obj.name, "0", "0",
                                                        price_sched)
 
     client = HaikuDataClient(keystore)
-    client.make_data_request(requesting_app, provider, user, request_hash, latest_req_id)
-    client.read_data_from_store(provider, request_hash)
+    client.make_data_request(requesting_app, provider_obj, user, request_hash, latest_req_id)
+    client.read_data_from_store(provider_obj, request_hash)
 
     # Update the system test record of the balances
     balances[requesting_app] = balances[requesting_app] - price_sched
@@ -233,18 +234,6 @@ def systest_user_permissions():
                 log.info(f"Actual - ACL/Meta Data Smart Contract: {acl_perm}")
 
                 assert (config_granted == acl_perm) is True
-
-
-@main.command()
-def host():
-    """
-    Test from the host machine.
-    """
-    balances = {}
-    for k, d in demo_config['demo_apps'].items():
-        balances[d['eos_sc_account']] = d['und_rewards']['start_balance']
-
-    systest_ingest('app2', 'app1', 'user3', balances, local=True)
 
 
 def completion_banner():
