@@ -232,17 +232,20 @@ def __request_from_uapp_store(data_request):
 
     # Write the data request to the Consumer's smart contract
     uapp_sc = UnificationUapp(eos_client, requesting_app)
-    latest_req_id = uapp_sc.init_data_request(data_request['provider'], data_request['schema_pkey'], "0",
-                                              data_request['price'])
+    latest_req_id = uapp_sc.init_data_request(
+        data_request['provider'], data_request['schema_pkey'], "0",
+        data_request['price'])
 
-    request_hash = f"{data_request['provider']}-{data_request['schema_pkey']}-{latest_req_id}.dat"
+    request_hash = f"{data_request['provider']}-{data_request['schema_pkey']}" \
+                   f"-{latest_req_id}.dat"
 
     provider_name = data_request['provider']
     mother = UnificationMother(eos_client, provider_name)
     provider_obj = Provider(provider_name, 'https', mother)
     req_hash = f'request-{request_hash}'
 
-    click.echo(f'App {requesting_app} is requesting data from {provider_obj.name}')
+    click.echo(f'App {requesting_app} is requesting data from '
+               f'{provider_obj.name}')
 
     encoded_password = str.encode(password)
     keystore = UnificationKeystore(encoded_password)
@@ -250,6 +253,7 @@ def __request_from_uapp_store(data_request):
     client = HaikuDataClient(keystore)
     data_path = client.make_data_request(
         requesting_app, provider_obj, None, req_hash, latest_req_id)
+
     click.echo(f'Data written to {data_path}')
     click.echo(f'View using:')
     click.echo(f"haiku view {provider_obj.name} {request_hash}")
