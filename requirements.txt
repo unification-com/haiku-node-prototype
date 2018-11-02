@@ -10,6 +10,7 @@ lxml==4.2.4
 pyopenssl==17.5.0
 pytest==3.5.1
 pyyaml == 4.2b4
-requests==2.19.0
+requests==2.20.0
 SQLAlchemy==1.2.8
 xmljson==0.1.9
+-e external/eospy
