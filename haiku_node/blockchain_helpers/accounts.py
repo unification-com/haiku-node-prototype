@@ -2,12 +2,12 @@ import json
 import logging
 import time
 
-from pathlib import Path
 from eosapi import Client
+from pathlib import Path
 
-from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
+from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 
 
@@ -388,7 +388,6 @@ def make_default_accounts(
                     for prov_app in appnames:
                         if prov_app != appname:
                             manager.lock_account_permissions(appname, prov_app, 'initperm', app_account_perm)
-
 
         manager.set_schema(demo_apps, appname)
         print("Wait for transactions to process")
