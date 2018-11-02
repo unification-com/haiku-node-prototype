@@ -250,7 +250,7 @@ def get_balance(user):
 @click.argument('password')
 @click.argument('provider')
 @click.argument('consumer')
-def permissions(user, password, provider, consumer, perm='active'):
+def modify_permissions(user, password, provider, consumer, perm='active'):
     """
     Modify permissions
 
