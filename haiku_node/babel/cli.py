@@ -341,7 +341,7 @@ def permissions(user, password, provider, consumer, perm='active'):
             'aud': provider,  # RFC 7519 4.1.3
             'eos_perm': perm,
             'consumer': consumer,
-            'schema': schema_id,
+            'schema_id': schema_id,
             'perms': granted_fields_str,
             'p_nonce': p_nonce,
             'p_sig': p_sig

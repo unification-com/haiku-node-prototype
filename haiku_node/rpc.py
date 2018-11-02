@@ -271,13 +271,16 @@ def modify_permission():
 
             pl = unif_jwt.get_payload()
 
-            consumer_account = pl['consumer']
-
             pb = PermissionBatcher(default_db())
 
-            # ToDo: Validate permission list sent
-            # ToDo: store pub key, or method to get pub key (e.g. eos permission level)
-            rowid = pb.add(issuer, consumer_account, jwt)
+            # ToDo: Validate permission list sent, against current metadata schema
+            rowid = pb.add(issuer,
+                           pl['consumer'],
+                           pl['schema_id'],
+                           pl['perms'],
+                           pl['p_nonce'],
+                           pl['p_sig'],
+                           public_key)
 
             d = {
                 'app': conf['acl_contract'],

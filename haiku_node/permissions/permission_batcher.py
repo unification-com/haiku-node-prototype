@@ -15,13 +15,17 @@ class PermissionBatcher:
     def __init__(self, db_name: Path):
         self.__db_name = db_name
 
-    def add(self, user_account, consumer_account, op, bc_type='eos'):
+    def add(self, user_account, consumer_account, schema_id, perms, p_nonce, p_sig, pub_key, bc_type='eos'):
         self.__open_con()
         self.__c.execute(f"INSERT INTO permissions "
                          f"VALUES (NULL,"
                          f"'{user_account}', "
                          f"'{consumer_account}',"
-                         f"'{op}',"
+                         f"'{schema_id}',"
+                         f"'{perms}',"
+                         f"'{p_nonce}',"
+                         f"'{p_sig}',"
+                         f"'{pub_key}',"
                          f"0,"
                          f"NULL)")
 
