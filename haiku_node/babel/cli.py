@@ -7,12 +7,14 @@ from itertools import product
 import click
 from eosapi import Client
 
+from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.encryption.jwt.jwt import UnifJWT
+from haiku_node.utils.utils import (generate_nonce, sha256)
 from haiku_node.validation.validation import UnificationAppScValidation
 
 
@@ -325,6 +327,13 @@ def permissions(user, password, provider, consumer, perm='active'):
     # ToDo: find better way to get public key from EOS account
     private_key = cleos.get_private_key(user, password, pub_key)
 
+    p_nonce = generate_nonce(16)
+    perm_digest = granted_fields_str + consumer + str(p_nonce)
+    perm_digest_sha = sha256(perm_digest.encode('utf-8'))
+
+    eosk = UnifEosKey(private_key)
+    p_sig = eosk.sign(perm_digest_sha)
+
     if len(private_key) > 0:
         jwt_payload = {
             'iss': user,  # RFC 7519 4.1.1
@@ -333,7 +342,9 @@ def permissions(user, password, provider, consumer, perm='active'):
             'eos_perm': perm,
             'consumer': consumer,
             'schema': schema_id,
-            'perms': granted_fields_str
+            'perms': granted_fields_str,
+            'p_nonce': p_nonce,
+            'p_sig': p_sig
         }
 
         cleos.lock_wallet(user)
