@@ -14,7 +14,7 @@ from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.encryption.jwt.jwt import UnifJWT
-from haiku_node.utils.utils import (generate_nonce, sha256)
+from haiku_node.utils.utils import (generate_nonce, generate_perm_digest_sha)
 from haiku_node.validation.validation import UnificationAppScValidation
 
 
@@ -328,9 +328,9 @@ def permissions(user, password, provider, consumer, perm='active'):
     private_key = cleos.get_private_key(user, password, pub_key)
 
     p_nonce = generate_nonce(16)
-    perm_digest = granted_fields_str + consumer + str(p_nonce)
-    perm_digest_sha = sha256(perm_digest.encode('utf-8'))
+    perm_digest_sha = generate_perm_digest_sha(granted_fields_str, p_nonce, consumer)
 
+    # sign permission changes
     eosk = UnifEosKey(private_key)
     p_sig = eosk.sign(perm_digest_sha)
 

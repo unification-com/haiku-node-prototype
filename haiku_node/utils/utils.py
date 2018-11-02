@@ -27,3 +27,9 @@ def base64url_decode(input_str):
 
 def base64url_encode(input_str):
     return base64.urlsafe_b64encode(input_str).replace(b'=', b'')
+
+
+def generate_perm_digest_sha(perms, nonce, consumer):
+    perm_digest = perms + consumer + str(nonce)
+
+    return sha256(perm_digest.encode('utf-8'))
