@@ -254,9 +254,8 @@ def __request_from_uapp_store(data_request):
     data_path = client.make_data_request(
         requesting_app, provider_obj, None, req_hash, latest_req_id)
 
-    click.echo(f'Data written to {data_path}')
-    click.echo(f'View using:')
-    click.echo(f"haiku view {provider_obj.name} {request_hash}")
+    click.echo(f'Data written to: {data_path}')
+    click.echo(f'View using: haiku view {provider_obj.name} {request_hash}')
 
 
 if __name__ == "__main__":
