@@ -3,7 +3,7 @@ from pathlib import Path
 
 from eosapi import Client
 
-from haiku_node.blockchain.mother import UnificationMother
+from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.config.config import UnificationConfig
 
 apps_to_test = ['app1', 'app2', 'app3']

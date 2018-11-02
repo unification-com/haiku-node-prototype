@@ -20,11 +20,15 @@ shutil.copy(
 
 shutil.copy(
     f"/haiku/test/data/lookups/{app_name}.unification_lookup.db",
-    "/haiku/haiku_node/lookup/unification_lookup.db")
+    "/haiku/haiku_node/dbs/unification_lookup.db")
 
 shutil.copy(
     f"/haiku/test/data/sqlite/{app_name}.db",
-    "/haiku/haiku_node/data/Data.db")
+    "/haiku/haiku_node/dbs/Data.db")
+
+shutil.copy(
+    f"/haiku/test/data/perm_batch/{app_name}.perm_batches.db",
+    "/haiku/haiku_node/dbs/perm_batches.db")
 
 print(f"set config/config.json values for host {app_name}")
 uc = UnificationConfig()

@@ -1,15 +1,16 @@
 import flask
 import hashlib
-import time
 
 from cryptography.exceptions import InvalidSignature
 from eosapi import Client
 
+from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
+from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.data.factory import UnificationDataFactory
-from haiku_node.blockchain.uapp import UnificationUapp
-from haiku_node.encryption.payload import unbundle, bundle
+from haiku_node.encryption.payload import bundle, unbundle
+from haiku_node.encryption.jwt import UnifJWT
+from haiku_node.permissions.permission_batcher import PermissionBatcher, default_db
 from haiku_node.validation.validation import UnificationAppScValidation
-from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
 
 app = flask.Flask(__name__)
 app.logger_name = "haiku-rpc"
@@ -52,6 +53,13 @@ def error_request_self():
         'body': None
     }), 418
 
+def error_request_not_me():
+    return flask.jsonify({
+        'success': False,
+        'message': 'Requested provider is not me',
+        'signature': None,
+        'body': None
+    }), 418
 
 def bc_transaction_error():
     return flask.jsonify({
@@ -202,6 +210,57 @@ def data_ingest():
                 app.keystore, sender, eos_client, conf['acl_contract'], users)
         else:
             return invalid_app()
+
+    except InvalidSignature:
+        return invalid_response()
+
+    except Exception as e:
+        logger.exception(e)
+        return generic_error()
+
+
+@app.route('/modify_permission', methods=['POST'])
+def modify_permission():
+    conf = app.unification_config
+
+    try:
+        d = flask.request.get_json()
+
+        eos_perm = d['eos_perm']
+        jwt = d['jwt']
+
+        cleos = EosioCleos()
+
+        unif_jwt = UnifJWT(jwt)
+
+        user_account = unif_jwt.get_issuer()
+        audience = unif_jwt.get_audience()
+
+        if audience != conf['acl_contract']:
+            return error_request_not_me()
+
+        # ToDo: find better way to get public key from EOS account
+        public_key = cleos.get_public_key(user_account, eos_perm)
+
+        pl = unif_jwt.decode_jwt(public_key)
+
+        if not pl:
+            return invalid_response()
+
+        consumer_account = pl['consumer']
+
+        pb = PermissionBatcher(default_db())
+
+        # ToDo: Validate permission list sent
+
+        rowid = pb.add(user_account, consumer_account, jwt)
+
+        d = {
+            'app': conf['acl_contract'],
+            'proc_id': rowid
+        }
+
+        return flask.jsonify(d), 200
 
     except InvalidSignature:
         return invalid_response()

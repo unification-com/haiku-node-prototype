@@ -1,6 +1,6 @@
 import json
 
-from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
+from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 
 
 class UnificationUapp:

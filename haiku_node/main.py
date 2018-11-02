@@ -10,8 +10,8 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.rpc import app
 from eosapi import Client
-from haiku_node.blockchain_helpers import eosio_account
-from haiku_node.blockchain.uapp import UnificationUapp
+from haiku_node.blockchain_helpers.eos import eosio_account
+from haiku_node.blockchain.eos.uapp import UnificationUapp
 
 PORT = 8050
 

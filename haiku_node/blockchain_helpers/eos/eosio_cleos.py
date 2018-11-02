@@ -1,3 +1,4 @@
+import json
 import logging
 import subprocess
 import requests
@@ -85,6 +86,30 @@ class EosioCleos:
     def unlock_wallet(self, username, password):
         return self.run(
             ["wallet", "unlock", "--name", username, "--password", password])
+
+    def get_private_key(self, username, password, public_key):
+        pkey = ''
+        result = self.run(
+            ["wallet", "private_keys", "--name", username, "--password", password])
+
+        wallet_keys = json.loads(result.stdout)
+        for k_pair in wallet_keys:
+            if k_pair[0] == public_key:
+                pkey = k_pair[1]
+
+        return pkey
+
+    def get_public_key(self, username, permission):
+        pub_key = ''
+        result =self.run(
+            ["get", "account", username, "--json"])
+
+        acc = json.loads(result.stdout)
+        for perm in acc['permissions']:
+            if perm['perm_name'] == permission:
+                pub_key = perm['required_auth']['keys'][0]['key']
+
+        return pub_key
 
     def get_actions(self, acc_name):
         return self.run(["get", "actions", acc_name, "--full"])

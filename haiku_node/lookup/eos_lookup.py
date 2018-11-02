@@ -2,13 +2,13 @@ import os
 import sqlite3
 from pathlib import Path
 
-from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.blockchain_helpers.eos import eosio_account
 
 
 def default_db():
     currentdir = os.path.dirname(os.path.abspath(__file__))
     parentdir = os.path.dirname(currentdir)
-    db_path = Path(parentdir + '/lookup/unification_lookup.db')
+    db_path = Path(parentdir + '/dbs/unification_lookup.db')
     return str(db_path.resolve())
 
 

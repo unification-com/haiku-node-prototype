@@ -1,16 +1,18 @@
 import logging
 import subprocess
 import json
+import requests
 from itertools import product
 
 import click
 from eosapi import Client
 
 from haiku_node.config.config import UnificationConfig
-from haiku_node.blockchain.uapp import UnificationUapp
-from haiku_node.blockchain_helpers import eosio_account
+from haiku_node.blockchain.eos.uapp import UnificationUapp
+from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
-from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
+from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
+from haiku_node.encryption.jwt import UnifJWT
 from haiku_node.validation.validation import UnificationAppScValidation
 
 
@@ -216,6 +218,12 @@ def transfer(from_acc, to_acc, amount, password):
 
 
 def get_balance(user):
+    """
+    Get UND Balance for a user
+
+    \b
+    :param user: The EOS user account name.
+    """
     conf = UnificationConfig()
     cmd = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
            "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
@@ -233,6 +241,128 @@ def get_balance(user):
         my_balance = '0.0000 UND'
 
     return my_balance
+
+
+@main.command()
+@click.argument('user')
+@click.argument('password')
+@click.argument('provider')
+@click.argument('consumer')
+def permissions(user, password, provider, consumer, perm='active'):
+    """
+    Modify permissions
+
+    \b
+    :param user: The EOS user account name.
+    :param password: Wallet password for user.
+    :param provider: Provider EOS account name
+    :param consumer: Consumer EOS account name
+    :param perm: EOS Permission level to use for acquiring keys
+    """
+
+    conf = UnificationConfig()
+    eos_client = Client(
+        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+
+    uapp_sc = UnificationUapp(eos_client, provider)
+
+    click.echo(f"{provider} has the following Schemas:\n")
+
+    provider_schemas = uapp_sc.get_all_db_schemas().items()
+    schemas_map = {}
+
+    for key, schema in provider_schemas:
+        s_id = schema['pkey']
+        fields = []
+        for field in schema['schema']['fields']:
+            if field['name'] != 'account_name':
+                fields.append(field['name'])
+        schemas_map[s_id] = fields
+
+    for key, fields in schemas_map.items():
+        click.echo(f"Schema ID {key}:")
+        click.echo(', '.join(fields))
+
+    schema_id = int(input(f"Select Schema ID:"))
+
+    schema_fields = schemas_map[schema_id]
+
+    field_perms = {}
+
+    for f in schema_fields:
+        field_perms[f] = True
+        click.echo(f"{f} = True")
+
+    perm_action = input("Type field name to toggle permission, or 's' to send: ")
+
+    while perm_action != 's':
+        if perm_action in field_perms:
+            field_perms[perm_action] = not field_perms[perm_action]
+        else:
+            click.echo("Invalid field name")
+
+        for n, v in field_perms.items():
+            click.echo(f"{n} = {v}")
+
+        perm_action = input("Type field name to toggle permission, or 's' to send: ")
+
+    granted_fields = []
+    for n, v in field_perms.items():
+        if v:
+            granted_fields.append(n)
+
+    granted_fields_str = ",".join(granted_fields)
+
+    click.echo(f"{user} is Requesting permission change: Granting access to {consumer} "
+               f"in Provider {provider} for fields {granted_fields_str}")
+
+    cleos = EosioCleos()
+    cleos.unlock_wallet(user, password)
+
+    pub_key = cleos.get_public_key(user, perm)
+
+    # ToDo: find better way to get public key from EOS account
+    private_key = cleos.get_private_key(user, password, pub_key)
+
+    if len(private_key) > 0:
+        jwt_payload = {
+            'iss': user,  # RFC 7519 4.1.1
+            'sub': 'perm_request',  # RFC 7519 4.1.2
+            'aud': provider,  # RFC 7519 4.1.3
+            'eos_perm': perm,
+            'consumer': consumer,
+            'schema': schema_id,
+            'perms': granted_fields_str
+        }
+
+        cleos.lock_wallet(user)
+
+        unif_jwt = UnifJWT()
+        unif_jwt.generate(jwt_payload)
+        unif_jwt.sign(private_key)
+
+        jwt = unif_jwt.to_jwt()
+
+        payload = {
+            'jwt': jwt,
+            'eos_perm': perm
+        }
+
+        base = f"https://haiku-{provider}:8050"
+
+        r = requests.post(f"{base}/modify_permission", json=payload, verify=False)
+        d = r.json()
+
+        proc_id = d['proc_id']
+        ret_app = d['app']
+
+        if ret_app == provider and proc_id > 0:
+            click.echo(f"Success. Process ID {proc_id} Queued by {ret_app}")
+        else:
+            click.echo("Something went wrong...")
+
+    else:
+        click.echo(bold(f'Could not get private key for {pub_key}'))
 
 
 if __name__ == "__main__":

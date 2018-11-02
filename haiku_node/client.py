@@ -8,8 +8,8 @@ from eosapi import Client
 import logging
 import requests
 
-from haiku_node.blockchain.uapp import UnificationUapp
-from haiku_node.blockchain.und_rewards import UndRewards
+from haiku_node.blockchain.eos.uapp import UnificationUapp
+from haiku_node.blockchain.eos.und_rewards import UndRewards
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.validation.validation import UnificationAppScValidation

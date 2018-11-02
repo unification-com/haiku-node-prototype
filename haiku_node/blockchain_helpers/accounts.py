@@ -6,9 +6,9 @@ from pathlib import Path
 from eosapi import Client
 
 from haiku_node.blockchain.ipfs import IPFSDataStore
-from haiku_node.blockchain.mother import UnificationMother
-from haiku_node.blockchain.uapp import UnificationUapp
-from haiku_node.blockchain_helpers.eosio_cleos import EosioCleos
+from haiku_node.blockchain.eos.mother import UnificationMother
+from haiku_node.blockchain.eos.uapp import UnificationUapp
+from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 
 
 BLOCK_SLEEP = 0.5
