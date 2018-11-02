@@ -19,7 +19,7 @@ from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle
 from haiku_node.keystore.keystore import UnificationKeystore
-from haiku_node.network.eos import get_eos_rpc_client
+from haiku_node.network.eos import get_eos_rpc_client, get_cleos
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
@@ -59,7 +59,7 @@ def systest_auth(requesting_app, providing_app, user):
     port = app_config['rpc_server_port']
 
     eos_client = get_eos_rpc_client()
-    mother = UnificationMother(eos_client, providing_app)
+    mother = UnificationMother(eos_client, providing_app, get_cleos())
     provider_obj = Provider(providing_app, 'https', mother)
 
     encoded_password = demo_config['system'][requesting_app]['password']
@@ -84,7 +84,7 @@ def systest_ingest(requesting_app, providing_app, user, balances):
     port = app_config['rpc_server_port']
 
     eos_client = get_eos_rpc_client()
-    mother = UnificationMother(eos_client, providing_app)
+    mother = UnificationMother(eos_client, providing_app, get_cleos())
     provider_obj = Provider(providing_app, 'https', mother)
 
     password = demo_config['system'][requesting_app]['password']
@@ -141,7 +141,8 @@ def systest_smart_contract_mother():
         log.info("------------------------------------------")
         app_data = d_apps[appname]
         log.info(f"Contacting MOTHER for {app_data['eos_sc_account']}")
-        mother = UnificationMother(eos_client, app_data['eos_sc_account'])
+        mother = UnificationMother(
+            eos_client, app_data['eos_sc_account'], get_cleos())
 
         log.info("App is Valid")
         log.info("Expecting: True")

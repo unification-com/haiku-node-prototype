@@ -7,6 +7,7 @@ from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.config.config import UnificationConfig
 from haiku_node.data.transform_data2 import TransformDataJSON
 from haiku_node.lookup.eos_lookup import UnificationLookup, default_db
+from haiku_node.network.eos import get_cleos
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +24,8 @@ class UnificationDataFactory:
         self.__requesting_app = requesting_app
         self.__haiku_conf = UnificationConfig()
 
-        self.__my_mother = UnificationMother(eos_client, acl_contract_acc)
+        self.__my_mother = UnificationMother(
+            eos_client, acl_contract_acc, get_cleos())
         self.__my_uapp_sc = UnificationUapp(eos_client, acl_contract_acc)
         self.__my_lookup = UnificationLookup(default_db())
         self.__users = None if len(users) == 0 else users

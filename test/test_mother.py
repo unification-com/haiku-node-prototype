@@ -5,6 +5,7 @@ from eosapi import Client
 
 from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.config.config import UnificationConfig
+from haiku_node.network.eos import get_cleos
 
 apps_to_test = ['app1', 'app2', 'app3']
 config = UnificationConfig()
@@ -19,7 +20,7 @@ def run_test(app):
     print("Contacting MOTHER FOR: ", app)
     eos_client = Client(
         nodes=[f"http://{config['eos_rpc_ip']}:{config['eos_rpc_port']}"])
-    um = UnificationMother(eos_client, app)
+    um = UnificationMother(eos_client, app, get_cleos())
     print("Valid app: ", um.valid_app())
     assert um.valid_app() is True
 

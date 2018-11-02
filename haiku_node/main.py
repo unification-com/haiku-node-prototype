@@ -11,7 +11,7 @@ from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.config.config import UnificationConfig
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.keystore.keystore import UnificationKeystore
-from haiku_node.network.eos import get_eos_rpc_client
+from haiku_node.network.eos import get_eos_rpc_client, get_cleos
 from haiku_node.rpc import app
 
 PORT = 8050
@@ -96,7 +96,7 @@ def fetch(provider, request_hash, user):
 
     # Write the data request to the Consumer's UApp smart contract
     eos_client = get_eos_rpc_client()
-    mother = UnificationMother(eos_client, provider)
+    mother = UnificationMother(eos_client, provider, get_cleos())
 
     provider = Provider(provider, 'https', mother)
     req_hash = f'request-{request_hash}'
@@ -143,7 +143,7 @@ def view(provider, request_hash):
     password = os.environ['keystore']
 
     eos_client = get_eos_rpc_client()
-    mother = UnificationMother(eos_client, provider)
+    mother = UnificationMother(eos_client, provider, get_cleos())
 
     provider_obj = Provider(provider, 'https', mother)
     req_hash = f'request-{request_hash}'
@@ -239,7 +239,7 @@ def __request_from_uapp_store(data_request):
                    f"-{latest_req_id}.dat"
 
     provider_name = data_request['provider']
-    mother = UnificationMother(eos_client, provider_name)
+    mother = UnificationMother(eos_client, provider_name, get_cleos())
     provider_obj = Provider(provider_name, 'https', mother)
     req_hash = f'request-{request_hash}'
 
