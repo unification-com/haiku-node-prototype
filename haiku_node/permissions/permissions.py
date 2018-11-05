@@ -24,8 +24,13 @@ class UnifPermissions:
         eosk = UnifEosKey()
         return eosk.verify_pub_key(perm_obj['p_sig'], perm_digest_sha, perm_obj['pub_key'])
 
+    def __merge_updates(self, current_perms_hash, new_perms):
+        current_permissions = json.loads(self.__ipfs.get_json(current_perms_hash))
+        new_perms = {**current_permissions, **new_perms}
+        return new_perms
+
     def load_perms(self, ipfs_hash):
-        perms_str = self.__ipfs.cat_file(ipfs_hash)
+        perms_str = self.__ipfs.get_json(ipfs_hash)
         self.__consumer_perms = json.loads(perms_str)
 
     def get_user_perms(self, user_account):
@@ -47,18 +52,19 @@ class UnifPermissions:
 
             self.__updates[consumer][user][perms_obj['schema_id']] = perms_obj
 
+            return True
+        else:
+            return False
+
     def process(self):
+        consumer_txs = {}
         for consumer, perms in self.__updates.items():
             ipfs_hash, merkle_root = self.__provider_uapp.get_ipfs_perms_for_req_app(consumer)
-
-            print(consumer)
-            print(json.dumps(perms))
-            print(ipfs_hash)
-            print(merkle_root)
 
             if ipfs_hash is None:
                 print("no Provider -> Consumer relationship yet. Add to tmp storage")
                 # ToDo: move to temporary storage, until Consumer makes request. Then process.
+                consumer_txs[consumer] = None
             elif ipfs_hash == '0000000000000000000000000000000000000000000000':
                 # relationship established, but not permissions stored yet
                 perms_json_str = json.dumps(perms)
@@ -68,15 +74,21 @@ class UnifPermissions:
 
                 tx_id = self.__provider_uapp.update_userperms(consumer, new_ipfs_hash, new_merkle_root)
 
-                print('new_ipfs_hash:', new_ipfs_hash)
-                print('new_ipfs_json:', self.__ipfs.get_json(new_ipfs_hash))
-                print('tx_id:', tx_id)
+                consumer_txs[consumer] = tx_id
             else:
                 # update existing permissions
                 print("update existing permissions")
+                new_perms = self.__merge_updates(ipfs_hash, perms)
+                perms_json_str = json.dumps(new_perms)
+                new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
+                # ToDo: Merkle tree
+                new_merkle_root = '0000000000000000000000000000000000000000000000'
 
-    # def merge_updates(self):
-    #     # Todo
+                tx_id = self.__provider_uapp.update_userperms(consumer, new_ipfs_hash, new_merkle_root)
+
+                consumer_txs[consumer] = tx_id
+
+        return consumer_txs
 
     def get_updates(self):
         return self.__updates
