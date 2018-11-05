@@ -257,44 +257,45 @@ def modify_permission():
         # ToDo: find better way to get public key from EOS account
         public_key = cleos.get_public_key(req_sender, eos_perm)
 
-        try:
-            unif_jwt = UnifJWT(jwt, public_key)
+        unif_jwt = UnifJWT(jwt, public_key)
 
-            issuer = unif_jwt.get_issuer()
-            audience = unif_jwt.get_audience()
+        issuer = unif_jwt.get_issuer()
+        audience = unif_jwt.get_audience()
 
-            if audience != conf['acl_contract']:
-                return error_request_not_me()
+        if audience != conf['acl_contract']:
+            return error_request_not_me()
 
-            if req_sender != issuer:
-                return error_request_not_you()
+        if req_sender != issuer:
+            return error_request_not_you()
 
-            pl = unif_jwt.get_payload()
+        pl = unif_jwt.get_payload()
 
-            pb = PermissionBatcher(default_db())
+        pb = PermissionBatcher(default_db())
 
-            # ToDo: Validate permission list sent, against current metadata schema
-            rowid = pb.add(issuer,
-                           pl['consumer'],
-                           pl['schema_id'],
-                           pl['perms'],
-                           pl['p_nonce'],
-                           pl['p_sig'],
-                           public_key)
+        # ToDo: Validate permission list sent, against current metadata schema
+        rowid = pb.add(issuer,
+                       pl['consumer'],
+                       pl['schema_id'],
+                       pl['perms'],
+                       pl['p_nonce'],
+                       pl['p_sig'],
+                       public_key)
 
-            d = {
-                'app': conf['acl_contract'],
-                'proc_id': rowid
-            }
+        d = {
+            'app': conf['acl_contract'],
+            'proc_id': rowid
+        }
 
-            return flask.jsonify(d), 200
+        return flask.jsonify(d), 200
 
-        except InvalidJWT as e:
-            return invalid_jwt(e)
-        except InvalidPublicKey as e:
-            return invalid_jwt(e)
-        except JWTSignatureMismatch as e:
-            return invalid_jwt(e)
+    except InvalidJWT as e:
+        return invalid_jwt(e)
+
+    except InvalidPublicKey as e:
+        return invalid_jwt(e)
+
+    except JWTSignatureMismatch as e:
+        return invalid_jwt(e)
 
     except InvalidSignature:
         return invalid_response()
