@@ -290,7 +290,7 @@ class UnificationUapp:
 
         return ret
 
-    def init_data_request(self, provider_name, schema_id, req_type, price, query=None):
+    def init_data_request(self, provider_name, schema_id, req_type, price):
         timestamp = unix_timestamp()
         d = {
             'provider_name': provider_name,
@@ -301,7 +301,7 @@ class UnificationUapp:
             'query': 'test',
             'price': price
         }
-        ret = self.__cleos.run(
+        self.__cleos.run(
             ['push', 'action', self.__acl_contract_acc, 'initreq', json.dumps(d), '-p',
              f'{self.__acl_contract_acc}@modreq'])
 
