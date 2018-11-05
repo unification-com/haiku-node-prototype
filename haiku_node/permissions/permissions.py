@@ -66,8 +66,11 @@ class UnifPermissions:
                 # ToDo: Merkle tree
                 new_merkle_root = '0000000000000000000000000000000000000000000000'
 
+                tx_id = self.__provider_uapp.update_userperms(consumer, new_ipfs_hash, new_merkle_root)
+
                 print('new_ipfs_hash:', new_ipfs_hash)
                 print('new_ipfs_json:', self.__ipfs.get_json(new_ipfs_hash))
+                print('tx_id:', tx_id)
             else:
                 # update existing permissions
                 print("update existing permissions")

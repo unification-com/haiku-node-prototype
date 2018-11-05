@@ -314,3 +314,21 @@ class UnificationUapp:
 
         return None
 
+    def update_userperms(self, consumer_id, ipfs_hash, merkle_root):
+        d = {
+            'consumer_id': consumer_id,
+            'ipfs_hash': ipfs_hash,
+            'merkle_root': merkle_root
+        }
+
+        ret = self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'updateperm', json.dumps(d), '-p',
+             f'{self.__acl_contract_acc}'])
+
+        # Todo: Once migrated to EOS RPC API, wait for transaction confirmation
+        if ret.stderr.find("executed transaction") != -1:
+            ret_list = ret.stderr.split(' ')
+            transaction_id = ret_list[3]
+            return transaction_id
+
+        return None
