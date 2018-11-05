@@ -5,7 +5,6 @@ import requests
 from itertools import product
 
 import click
-from eosapi import Client
 
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 from haiku_node.config.config import UnificationConfig
@@ -14,6 +13,7 @@ from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.encryption.jwt.jwt import UnifJWT
+from haiku_node.network.eos import get_eos_rpc_client
 from haiku_node.utils.utils import (generate_nonce, generate_perm_digest_sha)
 from haiku_node.validation.validation import UnificationAppScValidation
 
@@ -37,9 +37,7 @@ def permissions(user):
     \b
     :param user: The EOS user account name to query.
     """
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+    eos_client = get_eos_rpc_client()
 
     apps = []
 
@@ -73,9 +71,7 @@ def schemas(app_name):
     \b
     :param app_name: The EOS app account name to query.
     """
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+    eos_client = get_eos_rpc_client()
 
     uapp_sc = UnificationUapp(eos_client, app_name)
 
@@ -132,6 +128,7 @@ def revoke(provider, requester, user, password):
     """
     click.echo(f"{bold(user)} is revoking access from {bold(requester)} "
                f"to their data in held {bold(provider)}:")
+
     cleos = EosioCleos()
     accounts = AccountManager()
     cleos.unlock_wallet(user, password)
@@ -262,9 +259,7 @@ def modify_permissions(user, password, provider, consumer, perm='active'):
     :param perm: EOS Permission level to use for acquiring keys
     """
 
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+    eos_client = get_eos_rpc_client()
 
     uapp_sc = UnificationUapp(eos_client, provider)
 
