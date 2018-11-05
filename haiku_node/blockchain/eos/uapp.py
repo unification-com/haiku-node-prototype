@@ -1,4 +1,5 @@
 import json
+import time
 
 from haiku_node.config.config import UnificationConfig
 from haiku_node.network.eos import get_cleos, get_eos_rpc_client
@@ -8,6 +9,10 @@ def get_self_uapp():
     conf = UnificationConfig()
     eos_client = get_eos_rpc_client()
     return UnificationUapp(eos_client, conf['acl_contract'])
+
+
+def unix_timestamp():
+    return int(time.time() * 1000)
 
 
 class UnificationUapp:
@@ -286,9 +291,12 @@ class UnificationUapp:
         return ret
 
     def init_data_request(self, provider_name, schema_id, req_type, price, query=None):
+        timestamp = unix_timestamp()
         d = {
             'provider_name': provider_name,
             'schema_id': schema_id,
+            'ts_created': timestamp,
+            'ts_updated': timestamp,
             'req_type': req_type,
             'query': 'test',
             'price': price
@@ -307,6 +315,7 @@ class UnificationUapp:
             'provider_name': provider_name,
             'pkey': pkey,
             'hash': hash,
+            'ts_updated': unix_timestamp(),
             'aggr': aggr
         }
 
