@@ -90,7 +90,8 @@ class EosioCleos:
     def get_private_key(self, username, password, public_key):
         pkey = ''
         result = self.run(
-            ["wallet", "private_keys", "--name", username, "--password", password])
+            ["wallet", "private_keys", "--name", username,
+             "--password", password])
 
         wallet_keys = json.loads(result.stdout)
         for k_pair in wallet_keys:
@@ -101,7 +102,7 @@ class EosioCleos:
 
     def get_public_key(self, username, permission):
         pub_key = ''
-        result =self.run(
+        result = self.run(
             ["get", "account", username, "--json"])
 
         acc = json.loads(result.stdout)
