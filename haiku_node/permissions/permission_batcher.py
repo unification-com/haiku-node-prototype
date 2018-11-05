@@ -69,8 +69,7 @@ class PermissionBatcher:
             }
             permissions.add_update(b['consumer_account'], b['end_user_account'], perm_obj)
 
-        updates = permissions.get_updates()
-        print(json.dumps(updates))
+        permissions.process()
 
     def __open_con(self):
         self.__conn = sqlite3.connect(self.__db_name)
