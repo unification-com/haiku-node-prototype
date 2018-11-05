@@ -302,8 +302,8 @@ class UnificationUapp:
             'price': price
         }
         self.__cleos.run(
-            ['push', 'action', self.__acl_contract_acc, 'initreq', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modreq'])
+            ['push', 'action', self.__acl_contract_acc, 'initreq',
+             json.dumps(d), '-p', f'{self.__acl_contract_acc}@modreq'])
 
         data_requests = self.get_all_data_requests()
         latest_req_id = list(data_requests.keys())[-1]
@@ -320,8 +320,8 @@ class UnificationUapp:
         }
 
         ret = self.__cleos.run(
-            ['push', 'action', self.__acl_contract_acc, 'updatereq', json.dumps(d), '-p',
-             f'{provider_name}@modreq'])
+            ['push', 'action', self.__acl_contract_acc, 'updatereq',
+             json.dumps(d), '-p', f'{provider_name}@modreq'])
 
         # Todo: Once migrated to EOS RPC API, wait for transaction confirmation
         if ret.stderr.find("executed transaction") != -1:
