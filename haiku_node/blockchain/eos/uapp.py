@@ -309,7 +309,7 @@ class UnificationUapp:
         # Todo: Once migrated to EOS RPC API, wait for transaction confirmation
         if ret.stderr.find("executed transaction") != -1:
             ret_list = ret.stderr.split(' ')
-            transaction_id = ret_list[3]
+            transaction_id = ret_list[2]
             return transaction_id
 
         return None
@@ -325,10 +325,12 @@ class UnificationUapp:
             ['push', 'action', self.__acl_contract_acc, 'updateperm', json.dumps(d), '-p',
              f'{self.__acl_contract_acc}'])
 
+        print(ret)
+
         # Todo: Once migrated to EOS RPC API, wait for transaction confirmation
         if ret.stderr.find("executed transaction") != -1:
             ret_list = ret.stderr.split(' ')
-            transaction_id = ret_list[3]
+            transaction_id = ret_list[2]
             return transaction_id
 
         return None
