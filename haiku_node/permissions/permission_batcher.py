@@ -91,6 +91,15 @@ class PermissionBatcher:
 
         return res
 
+    def delete_op(self, op_id):
+        self.__open_con()
+
+        self.__c.execute(f"DELETE FROM permissions "
+                         f"WHERE op_id='{op_id}'")
+
+        self.__conn.commit()
+        self.__close_con()
+
     def process_batch(self, num=10):
         from haiku_node.permissions.permissions import UnifPermissions
 
@@ -134,7 +143,9 @@ class PermissionBatcher:
                                                      ret_d['stash']['merkle_root'])
 
                     self.update_processed(b_p['op_id'], stash_id=stash_id)
-            # Todo - deal with failed operations
+            else:
+                # Currently fails if sig is invalid, so delete
+                self.delete_op(b_p['op_id'])
 
         print(ret_data)
 
