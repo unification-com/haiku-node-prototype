@@ -1,17 +1,8 @@
-import os
 import time
 
-from pathlib import Path
-
-from haiku_node.permissions.perm_batch_db import (PermissionBatchDatabase, default_db as pb_db)
+from haiku_node.permissions.perm_batch_db import (
+    PermissionBatchDatabase, default_db as pb_db)
 from haiku_node.utils.utils import generate_nonce
-
-
-def default_db():
-    currentdir = os.path.dirname(os.path.abspath(__file__))
-    parentdir = os.path.dirname(currentdir)
-    db_path = Path(parentdir + '/dbs/perm_batches.db')
-    return str(db_path.resolve())
 
 
 class PermissionBatcher:
@@ -22,7 +13,7 @@ class PermissionBatcher:
     def add(self,
             user_account,
             consumer_account,
-            schema_id, 
+            schema_id,
             perms,
             p_nonce,
             p_sig,
