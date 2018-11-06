@@ -282,10 +282,7 @@ def modify_permission():
                 return generic_error(
                     f"Invalid Metadata Schema ID: {payload['schema_id']}")
 
-            valid_fields = []
-            for f in db_schema['schema']['fields']:
-                valid_fields.append(f['name'])
-
+            valid_fields = [f['name'] for f in db_schema['schema']['fields']]
             for pf in field_list:
                 if pf not in valid_fields:
                     return generic_error(
