@@ -12,7 +12,7 @@ from haiku_node.encryption.jwt.exceptions import (
     InvalidJWT, InvalidPublicKey, JWTSignatureMismatch)
 from haiku_node.encryption.jwt.jwt import UnifJWT
 from haiku_node.network.eos import get_eos_rpc_client
-from haiku_node.permissions.permission_batcher import PermissionBatcher, default_db
+from haiku_node.permissions.permission_batcher import PermissionBatcher
 from haiku_node.validation.validation import UnificationAppScValidation
 
 app = flask.Flask(__name__)
@@ -289,7 +289,7 @@ def modify_permission():
                 if pf not in valid_fields:
                     return generic_error(f"Invalid field list: {pl['perms']}")
 
-        pb = PermissionBatcher(default_db())
+        pb = PermissionBatcher()
 
         # ToDo: Validate permission list sent, against current metadata schema
         rowid = pb.add(issuer,
