@@ -10,15 +10,15 @@ class PermissionBatcher:
     def __init__(self):
         self.__pbdb = PermissionBatchDatabase(pb_db())
 
-    def add(self,
-            user_account,
-            consumer_account,
-            schema_id,
-            perms,
-            p_nonce,
-            p_sig,
-            pub_key,
-            bc_type='eos'):
+    def add_to_queue(self,
+                     user_account,
+                     consumer_account,
+                     schema_id,
+                     perms,
+                     p_nonce,
+                     p_sig,
+                     pub_key,
+                     bc_type='eos'):
 
         return self.__pbdb.add(user_account,
                                consumer_account,
@@ -29,7 +29,7 @@ class PermissionBatcher:
                                pub_key,
                                bc_type)
 
-    def process_batch(self, num=10):
+    def process_batch_queue(self, num=10):
         from haiku_node.permissions.permissions import UnifPermissions
 
         batch = self.__pbdb.get_unprocessed(num)
@@ -49,7 +49,7 @@ class PermissionBatcher:
                 'b_nonce': generate_nonce(16),
                 'b_time': time.time()
             }
-            is_added = permissions.add_update(
+            is_added = permissions.add_change_request(
                 b['consumer_account'], b['end_user_account'], perm_obj)
 
             b_proc = {
@@ -60,7 +60,7 @@ class PermissionBatcher:
 
             processed.append(b_proc)
 
-        ret_data = permissions.process()
+        ret_data = permissions.process_change_requests()
 
         for b_p in processed:
             if b_p['is_added']:
@@ -80,9 +80,9 @@ class PermissionBatcher:
             else:
                 # Currently fails if sig is invalid, so delete
                 self.__pbdb.delete_op(b_p['op_id'])
-                
+
         # cleanup stashes
-        for ret_d in ret_data:
+        for c, ret_d in ret_data.items():
             if ret_d['stash_id_committed'] is not None:
                 self.__pbdb.update_batch_stashes_with_tx(
                     ret_d['stash_id_committed'], ret_d['proof_tx'])

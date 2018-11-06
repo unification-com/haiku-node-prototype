@@ -217,7 +217,7 @@ def uapp_store():
 @main.command()
 def process_batch():
     pb = PermissionBatcher()
-    pb.process_batch()
+    pb.process_batch_queue()
 
 
 def __request_from_uapp_store(data_request):
