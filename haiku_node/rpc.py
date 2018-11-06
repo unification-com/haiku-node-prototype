@@ -288,12 +288,13 @@ def modify_permission():
 
             for pf in field_list:
                 if pf not in valid_fields:
-                    return generic_error(f"Invalid field list: {payload['perms']}")
+                    return generic_error(
+                        f"Invalid field list: {payload['perms']}")
 
-        pb = PermissionBatcher()
+        batcher = PermissionBatcher()
 
         # ToDo: Validate permission list sent, against current metadata schema
-        rowid = pb.add(issuer,
+        rowid = batcher.add(issuer,
                        payload['consumer'],
                        payload['schema_id'],
                        payload['perms'],
