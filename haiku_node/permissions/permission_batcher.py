@@ -99,6 +99,23 @@ class PermissionBatcher:
         self.__conn.commit()
         self.__close_con()
 
+    def get_latest_stash(self, consumer_account):
+        stash = {}
+        self.__open_con()
+        self.__c.execute(f'SELECT * FROM permission_stash '
+                         f"WHERE consumer_account='{consumer_account}'"
+                         f'ORDER BY stash_id DESC '
+                         f'LIMIT 1')
+        columns = [d[0] for d in self.__c.description]
+        res = [dict(zip(columns, row)) for row in self.__c.fetchall()]
+
+        self.__close_con()
+
+        if res:
+            stash = res[0]
+
+        return stash
+
     def process_batch(self, num=10):
         from haiku_node.permissions.permissions import UnifPermissions
 
