@@ -32,6 +32,7 @@ class PermissionBatcher:
                          f"'{p_sig}',"
                          f"'{pub_key}',"
                          f"0,"
+                         f"NULL,"
                          f"NULL)")
 
         self.__conn.commit()
@@ -59,6 +60,8 @@ class PermissionBatcher:
         batch = self.get_unprocessed(num)
         permissions = UnifPermissions()
 
+        processed = []
+
         for b in batch:
             perm_obj = {
                 'perms': b['perms'],
@@ -73,9 +76,37 @@ class PermissionBatcher:
             }
             is_added = permissions.add_update(b['consumer_account'], b['end_user_account'], perm_obj)
 
-        txs = permissions.process()
+            b_proc = {
+                'op_id': b['op_id'],
+                'consumer': b['consumer_account'],
+                'is_added': is_added
+            }
 
-        print(txs)
+            processed.append(b_proc)
+
+        ret_data = permissions.process()
+
+        self.__open_con()
+        for b_p in processed:
+            if b_p['is_added']:
+                ret_d = ret_data[b_p['consumer']]
+                if ret_d['bc']:
+                    self.__c.execute(f"UPDATE permissions "
+                                     f"SET processed='1',"
+                                     f"proof_tx='{ret_d['proof_tx']}' "
+                                     f"WHERE op_id='{b_p['op_id']}'")
+                else:
+                    self.__c.execute(f"UPDATE permissions "
+                                     f"SET processed='1',"
+                                     f"stash_id='{ret_d['stash_id']}' "
+                                     f"WHERE op_id='{b_p['op_id']}'")
+
+                self.__conn.commit()
+            # Todo - deal with failed operations
+
+        self.__close_con()
+
+        print(ret_data)
 
     def __open_con(self):
         self.__conn = sqlite3.connect(self.__db_name)

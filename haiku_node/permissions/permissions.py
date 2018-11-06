@@ -60,11 +60,14 @@ class UnifPermissions:
         consumer_txs = {}
         for consumer, perms in self.__updates.items():
             ipfs_hash, merkle_root = self.__provider_uapp.get_ipfs_perms_for_req_app(consumer)
+            d = {}
 
             if ipfs_hash is None:
                 print("no Provider -> Consumer relationship yet. Add to tmp storage")
                 # ToDo: move to temporary storage, until Consumer makes request. Then process.
-                consumer_txs[consumer] = None
+                d['bc'] = False
+                d['proof_tx'] = None
+                d['stash_id'] = None
             elif ipfs_hash == '0000000000000000000000000000000000000000000000':
                 # relationship established, but not permissions stored yet
                 perms_json_str = json.dumps(perms)
@@ -74,7 +77,9 @@ class UnifPermissions:
 
                 tx_id = self.__provider_uapp.update_userperms(consumer, new_ipfs_hash, new_merkle_root)
 
-                consumer_txs[consumer] = tx_id
+                d['bc'] = True
+                d['proof_tx'] = tx_id
+                d['stash_id'] = None
             else:
                 # update existing permissions
                 print("update existing permissions")
@@ -86,10 +91,13 @@ class UnifPermissions:
 
                 tx_id = self.__provider_uapp.update_userperms(consumer, new_ipfs_hash, new_merkle_root)
 
-                consumer_txs[consumer] = tx_id
+                d['bc'] = True
+                d['proof_tx'] = tx_id
+                d['stash_id'] = None
+
+            consumer_txs[consumer] = d
 
         return consumer_txs
 
     def get_updates(self):
         return self.__updates
-
