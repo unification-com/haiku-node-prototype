@@ -254,12 +254,12 @@ def modify_permission():
         jwt = d['jwt']
 
         cleos = get_cleos()
+        eos_rpc_client = get_eos_rpc_client()
 
         # ToDo: find better way to get public key from EOS account
         public_key = cleos.get_public_key(req_sender, eos_perm)
 
         unif_jwt = UnifJWT(jwt, public_key)
-
         issuer = unif_jwt.get_issuer()
         audience = unif_jwt.get_audience()
 
@@ -275,11 +275,12 @@ def modify_permission():
         if len(payload['perms']) > 0:
             field_list = payload['perms'].split(',')
 
-            uapp_sc = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
+            uapp_sc = UnificationUapp(eos_rpc_client, conf['acl_contract'])
             db_schema = uapp_sc.get_db_schema_by_pkey(int(payload['schema_id']))
 
             if not db_schema:
-                return generic_error(f"Invalid Metadata Schema ID: {payload['schema_id']}")
+                return generic_error(
+                    f"Invalid Metadata Schema ID: {payload['schema_id']}")
 
             valid_fields = []
             for f in db_schema['schema']['fields']:
