@@ -1,9 +1,11 @@
 import json
 import time
 
-from haiku_node.encryption.jwt.exceptions import InvalidJWT, InvalidPublicKey, JWTSignatureMismatch
+from haiku_node.encryption.jwt.exceptions import (
+    InvalidJWT, InvalidPublicKey, JWTSignatureMismatch)
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
-from haiku_node.utils.utils import base64url_decode, base64url_encode, generate_nonce, json_encode, sha256
+from haiku_node.utils.utils import (
+    base64url_decode, base64url_encode, generate_nonce, json_encode, sha256)
 
 JWT_INVALID_CHARACTERS = ['\n', '\t', '\r', ' ']
 JWT_VALID_JOSE_KEYS = ['alg', 'typ']
@@ -33,7 +35,8 @@ class UnifJWT:
 
         if jwt is not None:
             if self.public_key is None:
-                raise InvalidPublicKey("No public key given. Cannot validate signature")
+                raise InvalidPublicKey(
+                    "No public key given. Cannot validate signature")
             self.__verify_jwt()
 
     def __verify_jwt(self):
