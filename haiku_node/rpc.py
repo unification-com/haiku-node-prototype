@@ -269,17 +269,17 @@ def modify_permission():
         if req_sender != issuer:
             return error_request_not_you()
 
-        pl = unif_jwt.get_payload()
+        payload = unif_jwt.get_payload()
 
         # Check field list sent matches fields in metadata schema
-        if len(pl['perms']) > 0:
-            field_list = pl['perms'].split(',')
+        if len(payload['perms']) > 0:
+            field_list = payload['perms'].split(',')
 
             uapp_sc = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
-            db_schema = uapp_sc.get_db_schema_by_pkey(int(pl['schema_id']))
+            db_schema = uapp_sc.get_db_schema_by_pkey(int(payload['schema_id']))
 
             if not db_schema:
-                return generic_error(f"Invalid Metadata Schema ID: {pl['schema_id']}")
+                return generic_error(f"Invalid Metadata Schema ID: {payload['schema_id']}")
 
             valid_fields = []
             for f in db_schema['schema']['fields']:
@@ -287,17 +287,17 @@ def modify_permission():
 
             for pf in field_list:
                 if pf not in valid_fields:
-                    return generic_error(f"Invalid field list: {pl['perms']}")
+                    return generic_error(f"Invalid field list: {payload['perms']}")
 
         pb = PermissionBatcher()
 
         # ToDo: Validate permission list sent, against current metadata schema
         rowid = pb.add(issuer,
-                       pl['consumer'],
-                       pl['schema_id'],
-                       pl['perms'],
-                       pl['p_nonce'],
-                       pl['p_sig'],
+                       payload['consumer'],
+                       payload['schema_id'],
+                       payload['perms'],
+                       payload['p_nonce'],
+                       payload['p_sig'],
                        public_key)
 
         d = {
