@@ -49,7 +49,8 @@ class PermissionBatcher:
                 'b_nonce': generate_nonce(16),
                 'b_time': time.time()
             }
-            is_added = permissions.add_update(b['consumer_account'], b['end_user_account'], perm_obj)
+            is_added = permissions.add_update(
+                b['consumer_account'], b['end_user_account'], perm_obj)
 
             b_proc = {
                 'op_id': b['op_id'],
@@ -65,17 +66,21 @@ class PermissionBatcher:
             if b_p['is_added']:
                 ret_d = ret_data[b_p['consumer']]
                 if ret_d['bc']:
-                    self.__pbdb.update_processed(b_p['op_id'], proof_tx=ret_d['proof_tx'])
+                    self.__pbdb.update_processed(
+                        b_p['op_id'], proof_tx=ret_d['proof_tx'])
 
                     if ret_d['stash_id_committed'] is not None:
-                        self.__pbdb.update_batch_stashes_with_tx(ret_d['stash_id_committed'], ret_d['proof_tx'])
+                        self.__pbdb.update_batch_stashes_with_tx(
+                            ret_d['stash_id_committed'], ret_d['proof_tx'])
                         self.__pbdb.delete_stash(ret_d['stash_id_committed'])
                 else:
-                    stash_id = self.__pbdb.stash_permission(ret_d['stash']['consumer'],
-                                                     ret_d['stash']['ipfs_hash'],
-                                                     ret_d['stash']['merkle_root'])
+                    stash_id = self.__pbdb.stash_permission(
+                        ret_d['stash']['consumer'],
+                        ret_d['stash']['ipfs_hash'],
+                        ret_d['stash']['merkle_root'])
 
-                    self.__pbdb.update_processed(b_p['op_id'], stash_id=stash_id)
+                    self.__pbdb.update_processed(b_p['op_id'],
+                                                 stash_id=stash_id)
             else:
                 # Currently fails if sig is invalid, so delete
                 self.__pbdb.delete_op(b_p['op_id'])
