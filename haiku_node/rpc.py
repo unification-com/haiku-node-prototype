@@ -11,7 +11,7 @@ from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.encryption.jwt.exceptions import (
     InvalidJWT, InvalidPublicKey, JWTSignatureMismatch)
 from haiku_node.encryption.jwt.jwt import UnifJWT
-from haiku_node.network.eos import get_eos_rpc_client
+from haiku_node.network.eos import get_eos_rpc_client, get_cleos
 from haiku_node.permissions.permission_batcher import PermissionBatcher
 from haiku_node.validation.validation import UnificationAppScValidation
 
@@ -253,7 +253,7 @@ def modify_permission():
         req_sender = d['user']
         jwt = d['jwt']
 
-        cleos = EosioCleos()
+        cleos = get_cleos()
 
         # ToDo: find better way to get public key from EOS account
         public_key = cleos.get_public_key(req_sender, eos_perm)
