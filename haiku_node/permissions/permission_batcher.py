@@ -1,9 +1,11 @@
 import json
 import os
 import sqlite3
+import time
 from pathlib import Path
 
 from haiku_node.permissions.permissions import UnifPermissions
+from haiku_node.utils.utils import generate_nonce
 
 
 def default_db():
@@ -65,7 +67,9 @@ class PermissionBatcher:
                 'pub_key': b['pub_key'],
                 'schema_id': b['schema_id'],
                 'consumer': b['consumer_account'],
-                'user': b['end_user_account']
+                'user': b['end_user_account'],
+                'b_nonce': generate_nonce(16),
+                'b_time': time.time()
             }
             is_added = permissions.add_update(b['consumer_account'], b['end_user_account'], perm_obj)
 
