@@ -43,11 +43,12 @@ def create_perm_batch_db(app_name: str):
                  p_sig text,
                  pub_key text,
                  processed INTEGER,
-                 proof_tx text NULL)''')
+                 proof_tx text NULL,
+                 stash_id INTEGER NULL)''')
 
     conn.commit()
 
-    c.execute('''CREATE TABLE permission_stash (perm_id INTEGER PRIMARY KEY,
+    c.execute('''CREATE TABLE permission_stash (stash_id INTEGER PRIMARY KEY,
                  consumer_account text,
                  ipfs_hash text,
                  merkle_root text)''')
