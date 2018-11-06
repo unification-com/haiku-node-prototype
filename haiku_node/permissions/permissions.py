@@ -20,7 +20,10 @@ class UnifPermissions:
         self.__provider_uapp = UnificationUapp(eos_client, conf['acl_contract'])
 
     def __verify_change_request(self, perm_obj):
-        perm_digest_sha = generate_perm_digest_sha(perm_obj['perms'], perm_obj['schema_id'], perm_obj['p_nonce'], perm_obj['consumer'])
+        perm_digest_sha = generate_perm_digest_sha(perm_obj['perms'],
+                                                   perm_obj['schema_id'],
+                                                   perm_obj['p_nonce'],
+                                                   perm_obj['consumer'])
         eosk = UnifEosKey()
         return eosk.verify_pub_key(perm_obj['p_sig'], perm_digest_sha, perm_obj['pub_key'])
 
