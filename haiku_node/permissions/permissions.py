@@ -5,6 +5,7 @@ from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 from haiku_node.config.config import UnificationConfig
 from haiku_node.network.eos import get_eos_rpc_client
+from haiku_node.permissions.permission_batcher import (PermissionBatcher, default_db as pb_db)
 from haiku_node.utils.utils import generate_perm_digest_sha
 
 
@@ -58,16 +59,24 @@ class UnifPermissions:
 
     def process(self):
         consumer_txs = {}
+        pb = PermissionBatcher(pb_db())
         for consumer, perms in self.__updates.items():
             ipfs_hash, merkle_root = self.__provider_uapp.get_ipfs_perms_for_req_app(consumer)
             d = {}
 
             if ipfs_hash is None:
                 print("no Provider -> Consumer relationship yet. Add to tmp storage")
-                # ToDo: move to temporary storage, until Consumer makes request. Then process.
+                # ToDo: check for existing stash and update
+                # ToDo: on first consumer request, sequentially process each stash, and record Tx in batch table
+                perms_json_str = json.dumps(perms)
+                new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
+                # ToDo: Merkle tree
+                new_merkle_root = '0000000000000000000000000000000000000000000000'
+                stash_id = pb.stash_permission(consumer, new_ipfs_hash, new_merkle_root)
+
                 d['bc'] = False
                 d['proof_tx'] = None
-                d['stash_id'] = None
+                d['stash_id'] = stash_id
             elif ipfs_hash == '0000000000000000000000000000000000000000000000':
                 # relationship established, but not permissions stored yet
                 perms_json_str = json.dumps(perms)

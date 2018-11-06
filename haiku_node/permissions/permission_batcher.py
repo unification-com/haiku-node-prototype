@@ -43,6 +43,22 @@ class PermissionBatcher:
 
         return batch_id
 
+    def stash_permission(self, consumer_account, ipfs_hash, merkle_root):
+        self.__open_con()
+        self.__c.execute(f"INSERT INTO permission_stash "
+                         f"VALUES (NULL,"
+                         f"'{consumer_account}', "
+                         f"'{ipfs_hash}',"
+                         f"'{merkle_root}')")
+
+        self.__conn.commit()
+
+        stash_id = self.__c.lastrowid
+
+        self.__close_con()
+
+        return stash_id
+
     def get_unprocessed(self, num=10):
         self.__open_con()
         self.__c.execute(f'SELECT * FROM permissions '
