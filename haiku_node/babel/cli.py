@@ -2,6 +2,7 @@ import logging
 import subprocess
 import json
 import requests
+
 from itertools import product
 
 import click
@@ -278,7 +279,8 @@ def post_permissions(user, password, perm, granted_fields_str: str,
     private_key = cleos.get_private_key(user, password, pub_key)
 
     p_nonce = generate_nonce(16)
-    perm_digest_sha = generate_perm_digest_sha(granted_fields_str, schema_id,  p_nonce, consumer)
+    perm_digest_sha = generate_perm_digest_sha(
+        granted_fields_str, schema_id,  p_nonce, consumer)
 
     # sign permission changes
     eosk = UnifEosKey(private_key)
@@ -359,7 +361,8 @@ def modify_permissions(user, password, provider, consumer, perm='active'):
         field_perms[f] = True
         click.echo(f"{f} = True")
 
-    perm_action = input("Type field name to toggle permission, or 's' to send: ")
+    perm_action = input(
+        "Type field name to toggle permission, or 's' to send: ")
 
     while perm_action != 's':
         if perm_action in field_perms:
@@ -370,7 +373,8 @@ def modify_permissions(user, password, provider, consumer, perm='active'):
         for n, v in field_perms.items():
             click.echo(f"{n} = {v}")
 
-        perm_action = input("Type field name to toggle permission, or 's' to send: ")
+        perm_action = input(
+            "Type field name to toggle permission, or 's' to send: ")
 
     granted_fields = []
     for n, v in field_perms.items():
