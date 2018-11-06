@@ -4,7 +4,7 @@ import sqlite3
 import time
 from pathlib import Path
 
-from haiku_node.permissions.permissions import UnifPermissions
+
 from haiku_node.utils.utils import generate_nonce
 
 
@@ -73,6 +73,8 @@ class PermissionBatcher:
         return res
 
     def process_batch(self, num=10):
+        from haiku_node.permissions.permissions import UnifPermissions
+
         batch = self.get_unprocessed(num)
         permissions = UnifPermissions()
 
