@@ -59,6 +59,25 @@ class PermissionBatcher:
 
         return stash_id
 
+    def update_processed(self, op_id, stash_id=None, proof_tx=None):
+        self.__open_con()
+
+        if proof_tx is not None:
+            self.__c.execute(f"UPDATE permissions "
+                             f"SET processed='1',"
+                             f"proof_tx='{proof_tx}' "
+                             f"WHERE op_id='{op_id}'")
+        elif stash_id is not None:
+            self.__c.execute(f"UPDATE permissions "
+                             f"SET processed='1',"
+                             f"stash_id='{stash_id}' "
+                             f"WHERE op_id='{op_id}'")
+        else:
+            print("nowt")
+
+        self.__conn.commit()
+        self.__close_con()
+
     def get_unprocessed(self, num=10):
         self.__open_con()
         self.__c.execute(f'SELECT * FROM permissions '
@@ -104,25 +123,18 @@ class PermissionBatcher:
 
         ret_data = permissions.process()
 
-        self.__open_con()
         for b_p in processed:
             if b_p['is_added']:
                 ret_d = ret_data[b_p['consumer']]
                 if ret_d['bc']:
-                    self.__c.execute(f"UPDATE permissions "
-                                     f"SET processed='1',"
-                                     f"proof_tx='{ret_d['proof_tx']}' "
-                                     f"WHERE op_id='{b_p['op_id']}'")
+                    self.update_processed(b_p['op_id'], proof_tx=ret_d['proof_tx'])
                 else:
-                    self.__c.execute(f"UPDATE permissions "
-                                     f"SET processed='1',"
-                                     f"stash_id='{ret_d['stash_id']}' "
-                                     f"WHERE op_id='{b_p['op_id']}'")
+                    stash_id = self.stash_permission(ret_d['stash']['consumer'],
+                                                     ret_d['stash']['ipfs_hash'],
+                                                     ret_d['stash']['merkle_root'])
 
-                self.__conn.commit()
+                    self.update_processed(b_p['op_id'], stash_id=stash_id)
             # Todo - deal with failed operations
-
-        self.__close_con()
 
         print(ret_data)
 

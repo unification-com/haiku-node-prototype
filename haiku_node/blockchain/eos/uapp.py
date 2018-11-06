@@ -101,7 +101,7 @@ class UnificationUapp:
         ipfs_hash = None
         merkle_root = None
 
-        if table_data['rows'][0]:
+        if table_data['rows']:
             ipfs_hash = table_data['rows'][0]['ipfs_hash']
             merkle_root = table_data['rows'][0]['merkle_root']
 
