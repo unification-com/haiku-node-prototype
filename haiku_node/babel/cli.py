@@ -319,6 +319,9 @@ def post_permissions(user, password, perm, granted_fields_str: str,
         r = requests.post(f"{base}/modify_permission", json=payload, verify=False)
         d = r.json()
 
+        if r.status_code != 200:
+            raise Exception(d['message'])
+
         proc_id = d['proc_id']
         ret_app = d['app']
 

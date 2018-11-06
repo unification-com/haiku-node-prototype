@@ -11,6 +11,7 @@ from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.encryption.jwt.exceptions import (
     InvalidJWT, InvalidPublicKey, JWTSignatureMismatch)
 from haiku_node.encryption.jwt.jwt import UnifJWT
+from haiku_node.network.eos import get_eos_rpc_client
 from haiku_node.permissions.permission_batcher import PermissionBatcher, default_db
 from haiku_node.validation.validation import UnificationAppScValidation
 
@@ -38,10 +39,10 @@ def invalid_jwt(message):
     }), 401
 
 
-def generic_error():
+def generic_error(message='Internal Server Error'):
     return flask.jsonify({
         'success': False,
-        'message': 'Internal Server Error',
+        'message': message,
         'signature': None,
         'body': None
     }), 500
@@ -269,6 +270,24 @@ def modify_permission():
             return error_request_not_you()
 
         pl = unif_jwt.get_payload()
+
+        # Check field list sent matches fields in metadata schema
+        if len(pl['perms']) > 0:
+            field_list = pl['perms'].split(',')
+
+            uapp_sc = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
+            db_schema = uapp_sc.get_db_schema_by_pkey(int(pl['schema_id']))
+
+            if not db_schema:
+                return generic_error(f"Invalid Metadata Schema ID: {pl['schema_id']}")
+
+            valid_fields = []
+            for f in db_schema['schema']['fields']:
+                valid_fields.append(f['name'])
+
+            for pf in field_list:
+                if pf not in valid_fields:
+                    return generic_error(f"Invalid field list: {pl['perms']}")
 
         pb = PermissionBatcher(default_db())
 

@@ -61,16 +61,17 @@ class UnificationUapp:
             self.__acl_contract_acc,
             self.__acl_contract_acc, self.__db_schema_table, True, pkey, pkey + 1, 1)
 
-        td = table_data['rows'][0]
-        if td['pkey'] == pkey:
-            db_schema = {
-                'pkey': td['pkey'],
-                'schema_vers': td['schema_vers'],
-                'schema': json.loads(td['schema']),
-                'schedule': td['schedule'],
-                'price_sched': td['price_sched'],
-                'price_adhoc': td['price_adhoc']
-            }
+        if table_data['rows']:
+            td = table_data['rows'][0]
+            if td['pkey'] == pkey:
+                db_schema = {
+                    'pkey': td['pkey'],
+                    'schema_vers': td['schema_vers'],
+                    'schema': json.loads(td['schema']),
+                    'schedule': td['schedule'],
+                    'price_sched': td['price_sched'],
+                    'price_adhoc': td['price_adhoc']
+                }
 
         return db_schema
 
