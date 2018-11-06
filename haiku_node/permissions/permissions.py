@@ -137,5 +137,18 @@ class UnifPermissions:
 
         return consumer_txs
 
+    def check_and_process_stashed(self, consumer_account):
+        from haiku_node.permissions.perm_batch_db import (
+            PermissionBatchDatabase, default_db as pb_db)
+
+        pb = PermissionBatchDatabase(pb_db())
+
+        latest_stash = pb.get_stash(consumer_account)
+        if latest_stash is not None:
+            tx_id = self.__provider_uapp.update_userperms(
+                consumer_account, latest_stash['ipfs_hash'], latest_stash['merkle_root'])
+            pb.update_batch_stashes_with_tx(latest_stash['stash_id'], tx_id)
+            pb.delete_stash(latest_stash['stash_id'])
+
     def get_updates(self):
         return self.__updates

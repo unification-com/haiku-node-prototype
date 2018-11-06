@@ -133,7 +133,7 @@ class PermissionBatchDatabase:
     def update_batch_stashes_with_tx(self, stash_id, proof_tx):
         self.__open_con()
         self.__c.execute(f"UPDATE permissions "
-                         f"proof_tx='{proof_tx}' "
+                         f"SET proof_tx='{proof_tx}' "
                          f"WHERE stash_id='{stash_id}'")
 
         self.__conn.commit()

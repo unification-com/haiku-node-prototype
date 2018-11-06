@@ -13,6 +13,7 @@ from haiku_node.encryption.jwt.exceptions import (
 from haiku_node.encryption.jwt.jwt import UnifJWT
 from haiku_node.network.eos import get_eos_rpc_client, get_cleos
 from haiku_node.permissions.permission_batcher import PermissionBatcher
+from haiku_node.permissions.permissions import UnifPermissions
 from haiku_node.validation.validation import UnificationAppScValidation
 
 app = flask.Flask(__name__)
@@ -182,6 +183,11 @@ def data_request():
         if v.valid():
             users = bundle_d.get('users')
             request_id = bundle_d.get('request_id')
+
+            # before processing data, check for any stashed permissions
+            permissions = UnifPermissions()
+            permissions.check_and_process_stashed(sender)
+
             return obtain_data(
                 app.keystore, sender, eos_client, conf['acl_contract'],
                 users, request_id)
