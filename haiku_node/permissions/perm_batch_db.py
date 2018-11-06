@@ -39,16 +39,34 @@ class PermissionBatchDatabase:
         return batch_id
 
     def stash_permission(self, consumer_account, ipfs_hash, merkle_root):
+
+        stash = self.get_stash(consumer_account)
+
         self.__open_con()
-        self.__c.execute(f"INSERT INTO permission_stash "
-                         f"VALUES (NULL,"
-                         f"'{consumer_account}', "
-                         f"'{ipfs_hash}',"
-                         f"'{merkle_root}')")
 
-        self.__conn.commit()
+        if stash:
+            # update
+            self.__c.execute(f"UPDATE permission_stash "
+                             f"SET ipfs_hash='{ipfs_hash}', "
+                             f"merkle_root='{merkle_root}'"
+                             f"WHERE stash_id={stash['stash_id']}"
+                             f"AND consumer_account={consumer_account}")
 
-        stash_id = self.__c.lastrowid
+            self.__conn.commit()
+
+            stash_id = stash['stash_id']
+
+        else:
+            # add
+            self.__c.execute(f"INSERT INTO permission_stash "
+                             f"VALUES (NULL,"
+                             f"'{consumer_account}', "
+                             f"'{ipfs_hash}',"
+                             f"'{merkle_root}')")
+
+            self.__conn.commit()
+
+            stash_id = self.__c.lastrowid
 
         self.__close_con()
 
@@ -95,8 +113,8 @@ class PermissionBatchDatabase:
         self.__conn.commit()
         self.__close_con()
 
-    def get_latest_stash(self, consumer_account):
-        stash = {}
+    def get_stash(self, consumer_account):
+        stash = None
         self.__open_con()
         self.__c.execute(f'SELECT * FROM permission_stash '
                          f"WHERE consumer_account='{consumer_account}'"
@@ -111,6 +129,24 @@ class PermissionBatchDatabase:
             stash = res[0]
 
         return stash
+
+    def update_batch_stashes_with_tx(self, stash_id, proof_tx):
+        self.__open_con()
+        self.__c.execute(f"UPDATE permissions "
+                         f"proof_tx='{proof_tx}' "
+                         f"WHERE stash_id='{stash_id}'")
+
+        self.__conn.commit()
+        self.__close_con()
+
+    def delete_stash(self, stash_id):
+        self.__open_con()
+
+        self.__c.execute(f"DELETE FROM permission_stash "
+                         f"WHERE stash_id='{stash_id}'")
+
+        self.__conn.commit()
+        self.__close_con()
 
     def __open_con(self):
         self.__conn = sqlite3.connect(self.__db_name)

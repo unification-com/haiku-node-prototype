@@ -66,6 +66,10 @@ class PermissionBatcher:
                 ret_d = ret_data[b_p['consumer']]
                 if ret_d['bc']:
                     self.__pbdb.update_processed(b_p['op_id'], proof_tx=ret_d['proof_tx'])
+
+                    if ret_d['stash_id_committed'] is not None:
+                        self.__pbdb.update_batch_stashes_with_tx(ret_d['stash_id_committed'], ret_d['proof_tx'])
+                        self.__pbdb.delete_stash(ret_d['stash_id_committed'])
                 else:
                     stash_id = self.__pbdb.stash_permission(ret_d['stash']['consumer'],
                                                      ret_d['stash']['ipfs_hash'],

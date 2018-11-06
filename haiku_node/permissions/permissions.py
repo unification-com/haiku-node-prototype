@@ -57,18 +57,35 @@ class UnifPermissions:
             return False
 
     def process(self):
+        from haiku_node.permissions.perm_batch_db import (
+            PermissionBatchDatabase, default_db as pb_db)
+
+        pb = PermissionBatchDatabase(pb_db())
+
         consumer_txs = {}
         for consumer, perms in self.__updates.items():
             ipfs_hash, merkle_root = self.__provider_uapp.get_ipfs_perms_for_req_app(consumer)
-            d = {}
+            # defaults
+            d = {
+                'bc': False,
+                'proof_tx': None,
+                'stash': None,
+                'stash_id_committed': None
+            }
 
             if ipfs_hash is None:
                 print("no Provider -> Consumer relationship yet. Add to tmp storage")
 
-                # ToDo: check for existing stash and update
-                # ToDo: on first consumer request, sequentially process each stash, and record Tx in batch table
+                latest_stash = pb.get_stash(consumer)
+
+                if latest_stash is not None:
+                    # merge with latest stash
+                    perms = self.__merge_updates(latest_stash['ipfs_hash'], perms)
+
                 perms_json_str = json.dumps(perms)
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
+
+                # ToDo: on first consumer request, sequentially process each stash, and record Tx in batch table
                 # ToDo: Merkle tree
                 new_merkle_root = '0000000000000000000000000000000000000000000000'
                 stash = {
@@ -77,12 +94,22 @@ class UnifPermissions:
                     'merkle_root': new_merkle_root
                 }
 
-                d['bc'] = False
-                d['proof_tx'] = None
                 d['stash'] = stash
+
             elif ipfs_hash == '0000000000000000000000000000000000000000000000':
                 # relationship established, but not permissions stored yet
-                # ToDo: Check for stashed permissions
+                # Probably unnecessary, since this will be done on the first
+                # data request...
+
+                # check for stashed permissions
+                latest_stash = pb.get_stash(consumer)
+
+                if latest_stash is not None:
+                    # merge with latest stash
+                    perms = self.__merge_updates(latest_stash['ipfs_hash'], perms)
+                    # flag for deletion
+                    d['stash_id_committed'] = latest_stash['stash_id']
+
                 perms_json_str = json.dumps(perms)
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
                 # ToDo: Merkle tree
@@ -92,7 +119,6 @@ class UnifPermissions:
 
                 d['bc'] = True
                 d['proof_tx'] = tx_id
-                d['stash'] = None
             else:
                 # update existing permissions
                 print("update existing permissions")
@@ -106,7 +132,6 @@ class UnifPermissions:
 
                 d['bc'] = True
                 d['proof_tx'] = tx_id
-                d['stash'] = None
 
             consumer_txs[consumer] = d
 
