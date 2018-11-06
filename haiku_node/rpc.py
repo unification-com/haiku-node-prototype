@@ -296,7 +296,6 @@ def modify_permission():
 
         batcher = PermissionBatcher()
 
-        # ToDo: Validate permission list sent, against current metadata schema
         rowid = batcher.add_to_queue(issuer,
                                      payload['consumer'],
                                      payload['schema_id'],
