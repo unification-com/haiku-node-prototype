@@ -85,7 +85,6 @@ class UnifPermissions:
                 perms_json_str = json.dumps(perms)
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
 
-                # ToDo: on first consumer request, sequentially process each stash, and record Tx in batch table
                 # ToDo: Merkle tree
                 new_merkle_root = '0000000000000000000000000000000000000000000000'
                 stash = {
