@@ -10,7 +10,8 @@ from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.encryption.jwt.exceptions import (
     InvalidJWT, InvalidPublicKey, JWTSignatureMismatch)
 from haiku_node.encryption.jwt.jwt import UnifJWT
-from haiku_node.network.eos import get_eos_rpc_client, get_cleos
+from haiku_node.network.eos import get_eos_rpc_client, get_cleos, \
+    get_ipfs_client
 from haiku_node.permissions.permission_batcher import PermissionBatcher
 from haiku_node.permissions.permissions import UnifPermissions
 from haiku_node.validation.validation import UnificationAppScValidation
@@ -183,7 +184,8 @@ def data_request():
             request_id = bundle_d.get('request_id')
 
             # before processing data, check for any stashed permissions
-            permissions = UnifPermissions()
+            ipfs = get_ipfs_client()
+            permissions = UnifPermissions(ipfs)
             permissions.check_and_process_stashed(sender)
 
             return obtain_data(

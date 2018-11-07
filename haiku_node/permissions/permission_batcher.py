@@ -1,5 +1,6 @@
 import time
 
+from haiku_node.network.eos import get_ipfs_client
 from haiku_node.permissions.perm_batch_db import (
     PermissionBatchDatabase, default_db as pb_db)
 from haiku_node.utils.utils import generate_nonce
@@ -33,7 +34,9 @@ class PermissionBatcher:
         from haiku_node.permissions.permissions import UnifPermissions
 
         batch = self.__pbdb.get_unprocessed(num)
-        permissions = UnifPermissions()
+
+        ipfs = get_ipfs_client()
+        permissions = UnifPermissions(ipfs)
 
         processed = []
 
