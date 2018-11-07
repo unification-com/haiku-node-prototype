@@ -9,7 +9,6 @@ from eospy.utils import hex_to_int
 class UnifEosKey(EOSKey):
 
     def verify_pub_key(self, encoded_sig, digest, pub_key):
-        ''' '''
         # remove SIG_ prefix
         encoded_sig = encoded_sig[4:]
         # remove curve prefix
