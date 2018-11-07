@@ -2,6 +2,8 @@ import json
 
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 from haiku_node.utils.utils import generate_perm_digest_sha
+from haiku_node.permissions.perm_batch_db import (
+    PermissionBatchDatabase, default_db as pb_db)
 
 
 class UnifPermissions:
@@ -30,9 +32,6 @@ class UnifPermissions:
             return False
 
     def process_change_requests(self):
-        from haiku_node.permissions.perm_batch_db import (
-            PermissionBatchDatabase, default_db as pb_db)
-
         pb = PermissionBatchDatabase(pb_db())
 
         consumer_txs = {}
