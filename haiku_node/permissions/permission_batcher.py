@@ -12,24 +12,8 @@ class PermissionBatcher:
     def __init__(self, permissions_db):
         self.__pbdb = PermissionBatchDatabase(permissions_db)
 
-    def add_to_queue(self,
-                     user_account,
-                     consumer_account,
-                     schema_id,
-                     perms,
-                     p_nonce,
-                     p_sig,
-                     pub_key,
-                     bc_type='eos'):
-
-        return self.__pbdb.add(user_account,
-                               consumer_account,
-                               schema_id,
-                               perms,
-                               p_nonce,
-                               p_sig,
-                               pub_key,
-                               bc_type)
+    def add_to_queue(self, *kwargs):
+        return self.__pbdb.add(*kwargs)
 
     def process_batch_queue(self, num=10):
         from haiku_node.permissions.permissions import UnifPermissions
