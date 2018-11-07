@@ -12,6 +12,7 @@ from haiku_node.encryption.jwt.exceptions import (
 from haiku_node.encryption.jwt.jwt import UnifJWT
 from haiku_node.network.eos import (
     get_eos_rpc_client, get_cleos, get_ipfs_client)
+from haiku_node.permissions.perm_batch_db import default_db
 from haiku_node.permissions.permission_batcher import PermissionBatcher
 from haiku_node.permissions.permissions import UnifPermissions
 from haiku_node.validation.validation import UnificationAppScValidation
@@ -295,7 +296,7 @@ def modify_permission():
                     return generic_error(
                         f"Invalid field list: {payload['perms']}")
 
-        batcher = PermissionBatcher()
+        batcher = PermissionBatcher(default_db())
 
         rowid = batcher.add_to_queue(issuer,
                                      payload['consumer'],

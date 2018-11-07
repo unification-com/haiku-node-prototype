@@ -3,15 +3,14 @@ import time
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.config.config import UnificationConfig
 from haiku_node.network.eos import get_ipfs_client, get_eos_rpc_client
-from haiku_node.permissions.perm_batch_db import (
-    PermissionBatchDatabase, default_db as pb_db)
+from haiku_node.permissions.perm_batch_db import PermissionBatchDatabase
 from haiku_node.utils.utils import generate_nonce
 
 
 class PermissionBatcher:
 
-    def __init__(self):
-        self.__pbdb = PermissionBatchDatabase(pb_db())
+    def __init__(self, permissions_db):
+        self.__pbdb = PermissionBatchDatabase(permissions_db)
 
     def add_to_queue(self,
                      user_account,
