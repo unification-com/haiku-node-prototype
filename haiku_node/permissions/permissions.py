@@ -5,6 +5,8 @@ from haiku_node.utils.utils import generate_perm_digest_sha
 from haiku_node.permissions.perm_batch_db import (
     PermissionBatchDatabase, default_db as pb_db)
 
+ZERO_MASK = '0000000000000000000000000000000000000000000000'
+
 
 class UnifPermissions:
 
@@ -12,9 +14,9 @@ class UnifPermissions:
         self.__consumer_perms = {}
         self.__change_requests = {}
         self.__ipfs = ipfs
-        self.__provider_uapp = provider_uapp
+        self.__uapp = provider_uapp
 
-    def add_change_request(self, consumer, user, perms_obj):
+    def add_change_request(self, consumer, user, perms_obj: dict):
         if self.__verify_change_request(perms_obj):
             if consumer not in self.__change_requests:
                 self.__change_requests[consumer] = {}
@@ -22,10 +24,13 @@ class UnifPermissions:
             if user not in self.__change_requests[consumer]:
                 self.__change_requests[consumer][user] = {}
 
-            if perms_obj['schema_id'] not in self.__change_requests[consumer][user]:
-                self.__change_requests[consumer][user][perms_obj['schema_id']] = {}
+            if perms_obj['schema_id'] not in self.__change_requests[consumer][
+                user]:
+                self.__change_requests[consumer][user][
+                    perms_obj['schema_id']] = {}
 
-            self.__change_requests[consumer][user][perms_obj['schema_id']] = perms_obj
+            self.__change_requests[consumer][user][
+                perms_obj['schema_id']] = perms_obj
 
             return True
         else:
@@ -36,7 +41,8 @@ class UnifPermissions:
 
         consumer_txs = {}
         for consumer, perms in self.__change_requests.items():
-            ipfs_hash, merkle_root = self.__provider_uapp.get_ipfs_perms_for_req_app(consumer)
+            ipfs_hash, merkle_root = self.__uapp.get_ipfs_perms_for_req_app(
+                consumer)
             # defaults
             d = {
                 'bc': False,
@@ -60,7 +66,7 @@ class UnifPermissions:
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
 
                 # ToDo: Merkle tree
-                new_merkle_root = '0000000000000000000000000000000000000000000000'
+                new_merkle_root = ZERO_MASK
                 stash = {
                     'consumer': consumer,
                     'ipfs_hash': new_ipfs_hash,
@@ -69,7 +75,7 @@ class UnifPermissions:
 
                 d['stash'] = stash
 
-            elif ipfs_hash == '0000000000000000000000000000000000000000000000':
+            elif ipfs_hash == ZERO_MASK:
                 # relationship established, but not permissions stored yet
                 # Probably unnecessary, since this will be done on the first
                 # data request...
@@ -87,9 +93,9 @@ class UnifPermissions:
                 perms_json_str = json.dumps(perms)
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
                 # ToDo: Merkle tree
-                new_merkle_root = '0000000000000000000000000000000000000000000000'
+                new_merkle_root = ZERO_MASK
 
-                tx_id = self.__provider_uapp.update_userperms(
+                tx_id = self.__uapp.update_userperms(
                     consumer, new_ipfs_hash, new_merkle_root)
 
                 d['bc'] = True
@@ -101,9 +107,9 @@ class UnifPermissions:
                 perms_json_str = json.dumps(new_perms)
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
                 # ToDo: Merkle tree
-                new_merkle_root = '0000000000000000000000000000000000000000000000'
+                new_merkle_root = ZERO_MASK
 
-                tx_id = self.__provider_uapp.update_userperms(
+                tx_id = self.__uapp.update_userperms(
                     consumer, new_ipfs_hash, new_merkle_root)
 
                 d['bc'] = True
@@ -121,7 +127,7 @@ class UnifPermissions:
 
         latest_stash = pb.get_stash(consumer_account)
         if latest_stash is not None:
-            tx_id = self.__provider_uapp.update_userperms(
+            tx_id = self.__uapp.update_userperms(
                 consumer_account, latest_stash['ipfs_hash'],
                 latest_stash['merkle_root'])
             pb.update_batch_stashes_with_tx(latest_stash['stash_id'], tx_id)
@@ -130,16 +136,13 @@ class UnifPermissions:
     def get_change_requests(self):
         return self.__change_requests
 
-    def __verify_change_request(self, perm_obj: dict):
+    def __verify_change_request(self, perm: dict) -> bool:
         perm_digest_sha = generate_perm_digest_sha(
-            perm_obj['perms'],
-            perm_obj['schema_id'],
-            perm_obj['p_nonce'],
-            perm_obj['consumer'])
+            perm['perms'], perm['schema_id'],
+            perm['p_nonce'], perm['consumer'])
 
-        eosk = UnifEosKey()
-        return eosk.verify_pub_key(
-            perm_obj['p_sig'], perm_digest_sha, perm_obj['pub_key'])
+        return UnifEosKey().verify_pub_key(
+            perm['p_sig'], perm_digest_sha, perm['pub_key'])
 
     def __merge_change_requests(self, current_perms_hash, new_perms):
         current_permissions = json.loads(self.__ipfs.get_json(
