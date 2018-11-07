@@ -2,6 +2,7 @@ import logging
 import json
 
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
+from haiku_node.encryption.merkle.merkle_tree import MerkleTree, MerkleException
 from haiku_node.utils.utils import generate_perm_digest_sha
 from haiku_node.permissions.perm_batch_db import (
     PermissionBatchDatabase, default_db as pb_db)
@@ -69,8 +70,7 @@ class UnifPermissions:
                 perms_json_str = json.dumps(perms)
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
 
-                # ToDo: Merkle tree
-                new_merkle_root = ZERO_MASK
+                new_merkle_root = self.__generate_merkle(perms)
                 stash = {
                     'consumer': consumer,
                     'ipfs_hash': new_ipfs_hash,
@@ -96,8 +96,7 @@ class UnifPermissions:
 
                 perms_json_str = json.dumps(perms)
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
-                # ToDo: Merkle tree
-                new_merkle_root = ZERO_MASK
+                new_merkle_root = self.__generate_merkle(perms)
 
                 tx_id = self.__uapp.update_userperms(
                     consumer, new_ipfs_hash, new_merkle_root)
@@ -109,8 +108,7 @@ class UnifPermissions:
                 new_perms = self.__merge_change_requests(ipfs_hash, perms)
                 perms_json_str = json.dumps(new_perms)
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
-                # ToDo: Merkle tree
-                new_merkle_root = ZERO_MASK
+                new_merkle_root = self.__generate_merkle(new_perms)
 
                 tx_id = self.__uapp.update_userperms(
                     consumer, new_ipfs_hash, new_merkle_root)
@@ -152,6 +150,15 @@ class UnifPermissions:
             current_perms_hash))
         new_perms = {**current_permissions, **new_perms}
         return new_perms
+
+    def __generate_merkle(self, perms):
+        tree = MerkleTree()
+        for user, perm in perms.items():
+            tree.add_leaf(json.dumps(perm))
+
+        tree.grow_tree()
+
+        return tree.get_root_str()
 
     def load_perms(self, ipfs_hash):
         perms_str = self.__ipfs.get_json(ipfs_hash)
