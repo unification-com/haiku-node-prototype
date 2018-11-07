@@ -35,7 +35,7 @@ def test_merkle_root():
         '"pub_key": "EOS61HzbDSsDVpbCjEaNw4hWEwVRyKtHW4rBcUAwbnk4NGB67Cu6V", "schema_id": "0", "consumer": "app1", '
         '"user": "user7", "b_nonce": "5835621777972842", "b_time": 1541500298.2610202}}}')
 
-    target_root = '5d05eaac3902c7323bb996f25623aea201dbdc6985bb934f7b413acad51feea0'
+    target_root = '76fe3080c01e9fe1419c6fc03fd856ed4165437e0343eeacd47c7f6c52e8af4f'
 
     tree = MerkleTree()
 
@@ -47,3 +47,10 @@ def test_merkle_root():
     m_root = tree.get_root_str()
 
     assert m_root == target_root
+
+    for idx, node in tree.storage.items():
+        print(f'ID {idx}: {node.hash}, {node.position}, {node.is_leaf}, {node.level}')
+
+
+if __name__ == '__main__':
+    test_merkle_root()
