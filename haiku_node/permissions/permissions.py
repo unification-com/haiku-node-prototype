@@ -13,33 +13,6 @@ class UnifPermissions:
         self.__ipfs = ipfs
         self.__provider_uapp = provider_uapp
 
-    def __verify_change_request(self, perm_obj: dict):
-        perm_digest_sha = generate_perm_digest_sha(
-            perm_obj['perms'],
-            perm_obj['schema_id'],
-            perm_obj['p_nonce'],
-            perm_obj['consumer'])
-
-        eosk = UnifEosKey()
-        return eosk.verify_pub_key(
-            perm_obj['p_sig'], perm_digest_sha, perm_obj['pub_key'])
-
-    def __merge_change_requests(self, current_perms_hash, new_perms):
-        current_permissions = json.loads(self.__ipfs.get_json(
-            current_perms_hash))
-        new_perms = {**current_permissions, **new_perms}
-        return new_perms
-
-    def load_perms(self, ipfs_hash):
-        perms_str = self.__ipfs.get_json(ipfs_hash)
-        self.__consumer_perms = json.loads(perms_str)
-
-    def get_user_perms(self, user_account):
-        if user_account in self.__consumer_perms:
-            return self.__consumer_perms[user_account]
-        else:
-            return None
-
     def add_change_request(self, consumer, user, perms_obj):
         if self.__verify_change_request(perms_obj):
             if consumer not in self.__change_requests:
@@ -158,3 +131,30 @@ class UnifPermissions:
 
     def get_change_requests(self):
         return self.__change_requests
+
+    def __verify_change_request(self, perm_obj: dict):
+        perm_digest_sha = generate_perm_digest_sha(
+            perm_obj['perms'],
+            perm_obj['schema_id'],
+            perm_obj['p_nonce'],
+            perm_obj['consumer'])
+
+        eosk = UnifEosKey()
+        return eosk.verify_pub_key(
+            perm_obj['p_sig'], perm_digest_sha, perm_obj['pub_key'])
+
+    def __merge_change_requests(self, current_perms_hash, new_perms):
+        current_permissions = json.loads(self.__ipfs.get_json(
+            current_perms_hash))
+        new_perms = {**current_permissions, **new_perms}
+        return new_perms
+
+    def load_perms(self, ipfs_hash):
+        perms_str = self.__ipfs.get_json(ipfs_hash)
+        self.__consumer_perms = json.loads(perms_str)
+
+    def get_user_perms(self, user_account):
+        if user_account in self.__consumer_perms:
+            return self.__consumer_perms[user_account]
+        else:
+            return None
