@@ -7,7 +7,6 @@ from haiku_node.utils.utils import generate_perm_digest_sha
 class UnifPermissions:
 
     def __init__(self, ipfs, provider_uapp):
-
         self.__consumer_perms = {}
         self.__change_requests = {}
         self.__ipfs = ipfs

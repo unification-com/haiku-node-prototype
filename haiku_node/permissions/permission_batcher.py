@@ -1,9 +1,9 @@
 import time
 
-from haiku_node.blockchain.eos.uapp import UnificationUapp
-from haiku_node.config.config import UnificationConfig
-from haiku_node.network.eos import get_ipfs_client, get_eos_rpc_client
+from haiku_node.blockchain.eos.uapp import get_self_uapp
+from haiku_node.network.eos import get_ipfs_client
 from haiku_node.permissions.perm_batch_db import PermissionBatchDatabase
+from haiku_node.permissions.permissions import UnifPermissions
 from haiku_node.utils.utils import generate_nonce
 
 
@@ -11,19 +11,15 @@ class PermissionBatcher:
 
     def __init__(self, permissions_db):
         self.db = PermissionBatchDatabase(permissions_db)
+        self.ipfs = get_ipfs_client()
 
     def add_to_queue(self, *kwargs):
         return self.db.add(*kwargs)
 
     def process_batch_queue(self, num=10):
-        from haiku_node.permissions.permissions import UnifPermissions
 
-        ipfs = get_ipfs_client()
-        eos_client = get_eos_rpc_client()
-
-        conf = UnificationConfig()
-        provider_uapp = UnificationUapp(eos_client, conf['acl_contract'])
-        permissions = UnifPermissions(ipfs, provider_uapp)
+        provider_uapp = get_self_uapp()
+        permissions = UnifPermissions(self.ipfs, provider_uapp)
 
         processed = []
 
