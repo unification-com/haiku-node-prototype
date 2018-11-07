@@ -2,7 +2,6 @@ import flask
 import hashlib
 
 from cryptography.exceptions import InvalidSignature
-from eosapi import Client
 
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.blockchain.eos.uapp import UnificationUapp
@@ -164,8 +163,7 @@ def data_request():
 
         bundle_d = unbundle(app.keystore, sender, d)
 
-        eos_client = Client(
-            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+        eos_client = get_eos_rpc_client()
 
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP. Since we only need to validate the app at this point,
@@ -217,8 +215,7 @@ def data_ingest():
         recipient = conf['acl_contract']
         bundle_d = unbundle(app.keystore, sender, d)
 
-        eos_client = Client(
-            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+        eos_client = get_eos_rpc_client()
 
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP. Since we only need to validate the app at this point,
