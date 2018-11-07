@@ -1,3 +1,4 @@
+import logging
 import json
 
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
@@ -6,6 +7,9 @@ from haiku_node.permissions.perm_batch_db import (
     PermissionBatchDatabase, default_db as pb_db)
 
 ZERO_MASK = '0000000000000000000000000000000000000000000000'
+
+
+log = logging.getLogger(__name__)
 
 
 class UnifPermissions:
@@ -37,7 +41,7 @@ class UnifPermissions:
             return False
 
     def process_change_requests(self):
-        pb = PermissionBatchDatabase(pb_db())
+        permission_db = PermissionBatchDatabase(pb_db())
 
         consumer_txs = {}
         for consumer, perms in self.__change_requests.items():
@@ -52,10 +56,10 @@ class UnifPermissions:
             }
 
             if ipfs_hash is None:
-                print("no Provider -> Consumer relationship yet. "
-                      "Add to tmp storage")
+                log.info("no Provider -> Consumer relationship yet. "
+                         "Add to tmp storage")
 
-                latest_stash = pb.get_stash(consumer)
+                latest_stash = permission_db.get_stash(consumer)
 
                 if latest_stash is not None:
                     # merge with latest stash
@@ -81,7 +85,7 @@ class UnifPermissions:
                 # data request...
 
                 # check for stashed permissions
-                latest_stash = pb.get_stash(consumer)
+                latest_stash = permission_db.get_stash(consumer)
 
                 if latest_stash is not None:
                     # merge with latest stash
@@ -101,8 +105,7 @@ class UnifPermissions:
                 d['bc'] = True
                 d['proof_tx'] = tx_id
             else:
-                # update existing permissions
-                print("update existing permissions")
+                log.info("update existing permissions")
                 new_perms = self.__merge_change_requests(ipfs_hash, perms)
                 perms_json_str = json.dumps(new_perms)
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
