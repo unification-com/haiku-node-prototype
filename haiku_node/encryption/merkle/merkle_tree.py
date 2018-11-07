@@ -62,7 +62,7 @@ class MerkleTree:
         pos = self.__get_posistion(self.leaves)
         leaf = MerkleNode(data, position=pos)
         self.leaves.append(leaf)
-        self.__store(leaf)
+        self.__store_node(leaf)
         self.last_leaf = leaf
 
     def grow_tree(self):
@@ -74,7 +74,7 @@ class MerkleTree:
             # generate the end leaf from the hash of it's sibling leaf,
             # to avoid duplicate idx in storage
             last_leaf = MerkleNode(bytes_to_hex(self.last_leaf.hash).decode(), position='r')
-            self.__store(last_leaf)
+            self.__store_node(last_leaf)
             self.leaves.append(last_leaf)
 
         self.__calculate_num_levels()
@@ -84,7 +84,7 @@ class MerkleTree:
             layer = self.__grow(layer)
 
         self.merkle_root = layer[0]
-        self.__set_item_in_storage(bytes_to_hex(self.merkle_root.hash).decode(), 'is_root', True)
+        self.__set_node_in_storage(bytes_to_hex(self.merkle_root.hash).decode(), 'is_root', True)
 
     def get_root(self):
         if self.merkle_root is not None:
@@ -94,11 +94,11 @@ class MerkleTree:
         if self.merkle_root is not None:
             return bytes_to_hex(self.merkle_root.hash).decode()
 
-    def __store(self, node):
+    def __store_node(self, node):
         idx = bytes_to_hex(node.hash).decode()
         self.storage[idx] = node
 
-    def __set_item_in_storage(self, idx, key, val):
+    def __set_node_in_storage(self, idx, key, val):
         self.storage[idx][key] = val
 
     def __grow(self, nodes):
@@ -120,9 +120,9 @@ class MerkleTree:
 
             new_level.append(new_node)
 
-            self.__store(new_node)
-            self.__set_item_in_storage(l_hash, 'parent', new_node.hash)
-            self.__set_item_in_storage(r_hash, 'parent', new_node.hash)
+            self.__store_node(new_node)
+            self.__set_node_in_storage(l_hash, 'parent', new_node.hash)
+            self.__set_node_in_storage(r_hash, 'parent', new_node.hash)
 
         return new_level
 
