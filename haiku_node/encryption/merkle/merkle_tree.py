@@ -21,6 +21,7 @@ class MerkleException(Exception):
 
 class MerkleNode:
     def __init__(self, data: str, prefix_byte='0x00'):
+        # prefix byte to help prevent second preimage attack
         node = prefix_byte + data
         node_hash = sha256(sha256(node))
         self.hash = hex_to_bytes(node_hash)
@@ -75,7 +76,7 @@ class MerkleTree:
             new_node = MerkleNode(
                 bytes_to_hex(nodes[i].hash).decode() + bytes_to_hex(nodes[i + 1].hash).decode(),
                 self.levels_prefix)
-            
+
             new_level.append(new_node)
         return new_level
 
