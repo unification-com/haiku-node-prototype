@@ -49,8 +49,8 @@ class PermissionBatchDatabase:
             self.__c.execute(f"UPDATE permission_stash "
                              f"SET ipfs_hash='{ipfs_hash}', "
                              f"merkle_root='{merkle_root}'"
-                             f"WHERE stash_id={stash['stash_id']}"
-                             f"AND consumer_account={consumer_account}")
+                             f"WHERE stash_id='{stash['stash_id']}' "
+                             f"AND consumer_account='{consumer_account}'")
 
             self.__conn.commit()
 
