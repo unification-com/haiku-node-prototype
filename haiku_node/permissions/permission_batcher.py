@@ -1,6 +1,8 @@
 import time
 
-from haiku_node.network.eos import get_ipfs_client
+from haiku_node.blockchain.eos.uapp import UnificationUapp
+from haiku_node.config.config import UnificationConfig
+from haiku_node.network.eos import get_ipfs_client, get_eos_rpc_client
 from haiku_node.permissions.perm_batch_db import (
     PermissionBatchDatabase, default_db as pb_db)
 from haiku_node.utils.utils import generate_nonce
@@ -36,7 +38,11 @@ class PermissionBatcher:
         batch = self.__pbdb.get_unprocessed(num)
 
         ipfs = get_ipfs_client()
-        permissions = UnifPermissions(ipfs)
+        eos_client = get_eos_rpc_client()
+
+        conf = UnificationConfig()
+        provider_uapp = UnificationUapp(eos_client, conf['acl_contract'])
+        permissions = UnifPermissions(ipfs, provider_uapp)
 
         processed = []
 

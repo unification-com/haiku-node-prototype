@@ -1,22 +1,16 @@
 import json
 
-from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
-from haiku_node.config.config import UnificationConfig
-from haiku_node.network.eos import get_eos_rpc_client
 from haiku_node.utils.utils import generate_perm_digest_sha
 
 
 class UnifPermissions:
-    def __init__(self, ipfs):
+    def __init__(self, ipfs, provider_uapp):
 
         self.__consumer_perms = {}
         self.__change_requests = {}
         self.__ipfs = ipfs
-
-        conf = UnificationConfig()
-        eos_client = get_eos_rpc_client()
-        self.__provider_uapp = UnificationUapp(eos_client, conf['acl_contract'])
+        self.__provider_uapp = provider_uapp
 
     def __verify_change_request(self, perm_obj):
         perm_digest_sha = generate_perm_digest_sha(perm_obj['perms'],
