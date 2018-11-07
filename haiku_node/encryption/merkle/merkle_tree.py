@@ -40,6 +40,12 @@ class MerkleNode:
             self.is_leaf = False
             self.level = level
 
+    def __setitem__(self, item, value):
+        self.__dict__[item] = value
+
+    def __getitem__(self, item):
+        return self.__dict__[item]
+
 
 class MerkleTree:
 
@@ -76,7 +82,7 @@ class MerkleTree:
             layer = self.__grow(layer)
 
         self.merkle_root = layer[0]
-        self.storage[bytes_to_hex(self.merkle_root.hash).decode()].is_root = True
+        self.__set_item_in_storage(bytes_to_hex(self.merkle_root.hash).decode(), 'is_root', True)
 
     def get_root(self):
         if self.merkle_root is not None:
@@ -89,6 +95,9 @@ class MerkleTree:
     def __store(self, node):
         idx = bytes_to_hex(node.hash).decode()
         self.storage[idx] = node
+
+    def __set_item_in_storage(self, idx, key, val):
+        self.storage[idx][key] = val
 
     def __grow(self, nodes):
         new_level = []
@@ -110,8 +119,8 @@ class MerkleTree:
             new_level.append(new_node)
 
             self.__store(new_node)
-            self.storage[l_hash].parent = new_node.hash
-            self.storage[r_hash].parent = new_node.hash
+            self.__set_item_in_storage(l_hash, 'parent', new_node.hash)
+            self.__set_item_in_storage(r_hash, 'parent', new_node.hash)
 
         return new_level
 
