@@ -71,6 +71,8 @@ class MerkleTree:
 
         # if odd number of leaves, duplicate last leaf
         if len(self.leaves) % 2 != 0:
+            # generate the end leaf from the hash of it's sibling leaf,
+            # to avoid duplicate idx in storage
             last_leaf = MerkleNode(bytes_to_hex(self.last_leaf.hash).decode(), position='r')
             self.__store(last_leaf)
             self.leaves.append(last_leaf)
