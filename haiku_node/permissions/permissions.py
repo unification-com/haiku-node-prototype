@@ -5,6 +5,7 @@ from haiku_node.utils.utils import generate_perm_digest_sha
 
 
 class UnifPermissions:
+
     def __init__(self, ipfs, provider_uapp):
 
         self.__consumer_perms = {}
@@ -12,16 +13,20 @@ class UnifPermissions:
         self.__ipfs = ipfs
         self.__provider_uapp = provider_uapp
 
-    def __verify_change_request(self, perm_obj):
-        perm_digest_sha = generate_perm_digest_sha(perm_obj['perms'],
-                                                   perm_obj['schema_id'],
-                                                   perm_obj['p_nonce'],
-                                                   perm_obj['consumer'])
+    def __verify_change_request(self, perm_obj: dict):
+        perm_digest_sha = generate_perm_digest_sha(
+            perm_obj['perms'],
+            perm_obj['schema_id'],
+            perm_obj['p_nonce'],
+            perm_obj['consumer'])
+
         eosk = UnifEosKey()
-        return eosk.verify_pub_key(perm_obj['p_sig'], perm_digest_sha, perm_obj['pub_key'])
+        return eosk.verify_pub_key(
+            perm_obj['p_sig'], perm_digest_sha, perm_obj['pub_key'])
 
     def __merge_change_requests(self, current_perms_hash, new_perms):
-        current_permissions = json.loads(self.__ipfs.get_json(current_perms_hash))
+        current_permissions = json.loads(self.__ipfs.get_json(
+            current_perms_hash))
         new_perms = {**current_permissions, **new_perms}
         return new_perms
 
@@ -70,13 +75,15 @@ class UnifPermissions:
             }
 
             if ipfs_hash is None:
-                print("no Provider -> Consumer relationship yet. Add to tmp storage")
+                print("no Provider -> Consumer relationship yet. "
+                      "Add to tmp storage")
 
                 latest_stash = pb.get_stash(consumer)
 
                 if latest_stash is not None:
                     # merge with latest stash
-                    perms = self.__merge_change_requests(latest_stash['ipfs_hash'], perms)
+                    perms = self.__merge_change_requests(
+                        latest_stash['ipfs_hash'], perms)
 
                 perms_json_str = json.dumps(perms)
                 new_ipfs_hash = self.__ipfs.add_json(perms_json_str)
@@ -101,7 +108,8 @@ class UnifPermissions:
 
                 if latest_stash is not None:
                     # merge with latest stash
-                    perms = self.__merge_change_requests(latest_stash['ipfs_hash'], perms)
+                    perms = self.__merge_change_requests(
+                        latest_stash['ipfs_hash'], perms)
                     # flag for deletion
                     d['stash_id_committed'] = latest_stash['stash_id']
 
@@ -110,7 +118,8 @@ class UnifPermissions:
                 # ToDo: Merkle tree
                 new_merkle_root = '0000000000000000000000000000000000000000000000'
 
-                tx_id = self.__provider_uapp.update_userperms(consumer, new_ipfs_hash, new_merkle_root)
+                tx_id = self.__provider_uapp.update_userperms(
+                    consumer, new_ipfs_hash, new_merkle_root)
 
                 d['bc'] = True
                 d['proof_tx'] = tx_id
@@ -123,7 +132,8 @@ class UnifPermissions:
                 # ToDo: Merkle tree
                 new_merkle_root = '0000000000000000000000000000000000000000000000'
 
-                tx_id = self.__provider_uapp.update_userperms(consumer, new_ipfs_hash, new_merkle_root)
+                tx_id = self.__provider_uapp.update_userperms(
+                    consumer, new_ipfs_hash, new_merkle_root)
 
                 d['bc'] = True
                 d['proof_tx'] = tx_id
@@ -141,7 +151,8 @@ class UnifPermissions:
         latest_stash = pb.get_stash(consumer_account)
         if latest_stash is not None:
             tx_id = self.__provider_uapp.update_userperms(
-                consumer_account, latest_stash['ipfs_hash'], latest_stash['merkle_root'])
+                consumer_account, latest_stash['ipfs_hash'],
+                latest_stash['merkle_root'])
             pb.update_batch_stashes_with_tx(latest_stash['stash_id'], tx_id)
             pb.delete_stash(latest_stash['stash_id'])
 
