@@ -233,6 +233,9 @@ class MerkleTree:
             self.__set_node_in_storage(l_hash, 'sibling', hex_to_bytes(r_hash))
 
         if shift_node is not None:
+            if len(new_level) % 2 != 0:
+                # new level size will be even after appending this. Set pos to 'r'
+                shift_node['position'] = 'r'
             new_level.append(shift_node)
 
         return new_level
