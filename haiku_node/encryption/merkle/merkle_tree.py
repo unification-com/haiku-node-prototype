@@ -39,6 +39,38 @@ class MerkleNode:
             self.is_leaf = False
             self.level = level
 
+    def to_string(self):
+        parent = self.parent
+        if parent:
+            parent = bytes_to_hex(self.parent).decode()
+
+        sibling = self.sibling
+        if sibling:
+            sibling = bytes_to_hex(self.sibling).decode()
+
+        left_child = self.left_child
+        if left_child:
+            left_child = bytes_to_hex(self.left_child).decode()
+
+        right_child = self.right_child
+        if right_child:
+            right_child = bytes_to_hex(self.right_child).decode()
+
+        rank = 'Branch'
+        if self.is_leaf:
+            rank = 'Leaf'
+        if self.is_root:
+            rank = 'Root'
+
+        return f'Hash: {bytes_to_hex(self.hash).decode()},\n' \
+               f'Level: {self.level},\n' \
+               f'Pos: {self.position},\n' \
+               f'Parent: {parent},\n' \
+               f'Sibling: {sibling},\n' \
+               f'Left Child: {left_child},\n' \
+               f'Right Child: {right_child},\n' \
+               f'rank: {rank}\n'
+
     def __setitem__(self, item, value):
         self.__dict__[item] = value
 
@@ -89,6 +121,23 @@ class MerkleTree:
         if self.merkle_root is not None:
             return bytes_to_hex(self.merkle_root.hash).decode()
 
+    def get_proof(self, leaf_idx: str, is_hashed=True):
+
+        if not is_hashed:
+            leaf = '0x00' + leaf_idx
+            leaf_idx = sha256(sha256(leaf))
+
+        if leaf_idx not in self.storage:
+            raise MerkleException(f"Leaf ID {leaf_idx} not found in tree")
+
+        leaf_node = self.storage[leaf_idx]
+        if not leaf_node.is_leaf:
+            raise MerkleException(f"Provided ID {leaf_idx} is not a leaf node")
+
+    def print_tree(self):
+        for idx, node in self.storage.items():
+            print(node.to_string())
+
     def __store_node(self, node):
         idx = bytes_to_hex(node.hash).decode()
         self.storage[idx] = node
@@ -123,8 +172,8 @@ class MerkleTree:
             self.__store_node(new_node)
             self.__set_node_in_storage(l_hash, 'parent', new_node.hash)
             self.__set_node_in_storage(r_hash, 'parent', new_node.hash)
-            self.__set_node_in_storage(r_hash, 'sibling', l_hash)
-            self.__set_node_in_storage(l_hash, 'sibling', r_hash)
+            self.__set_node_in_storage(r_hash, 'sibling', hex_to_bytes(l_hash))
+            self.__set_node_in_storage(l_hash, 'sibling', hex_to_bytes(r_hash))
 
         if shift_node is not None:
             new_level.append(shift_node)

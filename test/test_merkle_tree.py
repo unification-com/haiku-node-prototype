@@ -58,8 +58,7 @@ def test_merkle_root():
 
     assert m_root == target_root
 
-    for idx, node in tree.storage.items():
-        print(f'ID {idx}: {node.hash}, {node.position}, {node.is_leaf}, {node.level}, {node.is_root}')
+    tree.print_tree()
 
 
 if __name__ == '__main__':
