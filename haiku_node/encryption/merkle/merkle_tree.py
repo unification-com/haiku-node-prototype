@@ -150,9 +150,8 @@ class MerkleTree:
             ancestor = {}
             parent_node = self.storage[parent]
             parent_sibling_hash = bytes_to_hex(parent_node.sibling).decode()
-            parent_sibling = self.storage[parent_sibling_hash]
             ancestor['hash'] = parent_sibling_hash
-            ancestor['pos'] = parent_sibling.position
+            ancestor['pos'] = self.storage[parent_sibling_hash].position
             ancestors.append(ancestor)
 
             parent = bytes_to_hex(parent_node.parent).decode()
