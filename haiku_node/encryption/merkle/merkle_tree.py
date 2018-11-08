@@ -48,7 +48,7 @@ class MerkleNode:
 
 class MerkleTree:
 
-    def __init__(self):
+    def __init__(self, storage_seed=None):
         self.leaves = []
         self.num_levels = 0
         self.current_level = 1
@@ -56,6 +56,10 @@ class MerkleTree:
         self.last_leaf = None
         self.levels_prefix = '0x00'
         self.merkle_root = None
+
+        if storage_seed is not None:
+            self.storage = storage_seed
+            self.__grow_from_seed()
 
     def add_leaf(self, data: str):
         pos = self.__determine_posistion(self.leaves)
@@ -103,6 +107,7 @@ class MerkleTree:
     def __grow(self, nodes):
         new_level = []
         self.current_level = self.current_level + 1
+
         for i in range(0, len(nodes), 2):
             pos = self.__determine_posistion(new_level)
 
@@ -126,6 +131,18 @@ class MerkleTree:
             self.__set_node_in_storage(l_hash, 'sibling', r_hash)
 
         return new_level
+
+    def __grow_from_seed(self):
+
+        for idx, node in self.storage.items():
+            if node.is_leaf:
+                self.leaves.append(node)
+            if node.is_root:
+                self.merkle_root = node
+                self.current_level = node.level
+
+        self.__calculate_num_levels()
+        self.last_leaf = self.leaves[-1]
 
     def __determine_posistion(self, obj):
         if len(obj) % 2 != 0:
