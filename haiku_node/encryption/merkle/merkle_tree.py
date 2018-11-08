@@ -92,14 +92,18 @@ class MerkleTree:
         pos = self.__determine_posistion(self.leaves)
         leaf = MerkleNode(data, position=pos)
         self.leaves.append(leaf)
-        self.__store_node(leaf)
         self.last_leaf = leaf
 
     def grow_tree(self):
         if not self.leaves:
             raise MerkleException('No leaves found')
 
+        self.storage = {}
+
         self.__calculate_num_levels()
+
+        for leaf in self.leaves:
+            self.__store_node(leaf)
 
         layer = self.leaves
         while len(layer) != 1:
@@ -112,11 +116,25 @@ class MerkleTree:
             True)
 
     def get_root(self):
-        if self.merkle_root is not None:
+        if self.merkle_root is None:
+            if not self.leaves:
+                raise MerkleException('No leaves found')
+            elif not self.storage:
+                raise MerkleException("No tree stored. Grow from seed, or generate new tree")
+            else:
+                raise MerkleException('Not entirely sure what is happening...')
+        else:
             return bytes_to_hex(self.merkle_root.hash)
 
     def get_root_str(self):
-        if self.merkle_root is not None:
+        if self.merkle_root is None:
+            if not self.leaves:
+                raise MerkleException('No leaves found')
+            elif not self.storage:
+                raise MerkleException("No tree stored. Grow from seed, or generate new tree")
+            else:
+                raise MerkleException('Not entirely sure what is happening...')
+        else:
             return bytes_to_hex_str(self.merkle_root.hash)
 
     def get_proof(self, leaf_idx: str, is_hashed=True, as_json=False):
@@ -200,11 +218,11 @@ class MerkleTree:
     def get_seed(self, as_json=False):
         seed = {}
         for idx, node in self.storage.items():
-            node_obj = vars(node)
+            node_obj = vars(node).copy()
             for key, val in node_obj.items():
                 if isinstance(val, bytearray):
                     node_obj[key] = bytes_to_hex_str(val)
-            seed[idx] = vars(node)
+            seed[idx] = node_obj
 
         if as_json:
             return json.dumps(seed)
