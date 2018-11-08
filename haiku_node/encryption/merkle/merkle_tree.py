@@ -202,6 +202,20 @@ class MerkleTree:
         for idx, node in self.storage.items():
             print(node.to_string())
 
+    def get_seed(self, as_json=False):
+        seed = {}
+        for idx, node in self.storage.items():
+            node_obj = vars(node)
+            for key, val in node_obj.items():
+                if isinstance(val, bytearray):
+                    node_obj[key] = bytes_to_hex(val).decode()
+            seed[idx] = vars(node)
+
+        if as_json:
+            return json.dumps(seed)
+        else:
+            return seed
+
     def __store_node(self, node):
         idx = bytes_to_hex(node.hash).decode()
         self.storage[idx] = node

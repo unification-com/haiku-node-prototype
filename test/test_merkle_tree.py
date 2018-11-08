@@ -70,6 +70,9 @@ def test_merkle_root():
 
     print("Valid: ", is_good)
 
+    seed = tree.get_seed(as_json=True)
+    print(seed)
+
     # print(tree.num_levels)
     # print(tree.levels_prefix)
     #
