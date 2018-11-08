@@ -44,36 +44,15 @@ class MerkleNode:
             self.level = level
 
     def to_string(self):
-        parent = self.parent
-        if parent:
-            parent = bytes_to_hex(self.parent).decode()
 
-        sibling = self.sibling
-        if sibling:
-            sibling = bytes_to_hex(self.sibling).decode()
+        string = ""
 
-        left_child = self.left_child
-        if left_child:
-            left_child = bytes_to_hex(self.left_child).decode()
-
-        right_child = self.right_child
-        if right_child:
-            right_child = bytes_to_hex(self.right_child).decode()
-
-        rank = 'Branch'
-        if self.is_leaf:
-            rank = 'Leaf'
-        if self.is_root:
-            rank = 'Root'
-
-        return f'Hash: {bytes_to_hex(self.hash).decode()},\n' \
-               f'Level: {self.level},\n' \
-               f'Pos: {self.position},\n' \
-               f'Parent: {parent},\n' \
-               f'Sibling: {sibling},\n' \
-               f'Left Child: {left_child},\n' \
-               f'Right Child: {right_child},\n' \
-               f'rank: {rank}\n'
+        for key, val in vars(self).items():
+            if isinstance(val, bytearray):
+                string += f'{key} = {bytes_to_hex(val).decode()}\n'
+            else:
+                string += f'{key} = {val}\n'
+        return string
 
     def __setitem__(self, item, value):
         self.__dict__[item] = value
