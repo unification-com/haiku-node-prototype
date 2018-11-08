@@ -253,11 +253,13 @@
             "req_apps": [
               {
                 "account": "app2",
-                "granted": true
+                "granted": true,
+                "fields": "DataBlob,BlobSize"
               },
               {
                 "account": "app3",
-                "granted": true
+                "granted": true,
+                "fields": "Image"
               }
             ]
           },
@@ -266,11 +268,13 @@
             "req_apps": [
               {
                 "account": "app1",
-                "granted": true
+                "granted": true,
+                "fields": "Heartrate,GeoLocation,TimeStamp,Pulse"
               },
               {
                 "account": "app3",
-                "granted": false
+                "granted": false,
+                "fields": "Image"
               }
             ]
           },
@@ -279,11 +283,13 @@
             "req_apps": [
               {
                 "account": "app1",
-                "granted": true
+                "granted": true,
+                "fields": "Heartrate,GeoLocation,TimeStamp,Pulse"
               },
               {
                 "account": "app2",
-                "granted": true
+                "granted": true,
+                "fields": "DataBlob,BlobSize"
               }
             ]
           }
@@ -297,11 +303,13 @@
             "req_apps": [
               {
                 "account": "app2",
-                "granted": true
+                "granted": true,
+                "fields": "DataBlob,BlobSize"
               },
               {
                 "account": "app3",
-                "granted": true
+                "granted": true,
+                "fields": "Image"
               }
             ]
           },
@@ -310,11 +318,13 @@
             "req_apps": [
               {
                 "account": "app1",
-                "granted": false
+                "granted": false,
+                "fields": "Heartrate,GeoLocation,TimeStamp,Pulse"
               },
               {
                 "account": "app3",
-                "granted": true
+                "granted": true,
+                "fields": "Image"
               }
             ]
           },
@@ -323,11 +333,13 @@
             "req_apps": [
               {
                 "account": "app1",
-                "granted": true
+                "granted": true,
+                "fields": "Heartrate,GeoLocation,TimeStamp,Pulse"
               },
               {
                 "account": "app2",
-                "granted": true
+                "granted": true,
+                "fields": "DataBlob,BlobSize"
               }
             ]
           }
@@ -341,11 +353,13 @@
             "req_apps": [
               {
                 "account": "app2",
-                "granted": false
+                "granted": false,
+                "fields": "DataBlob,BlobSize"
               },
               {
                 "account": "app3",
-                "granted": false
+                "granted": false,
+                "fields": "Image"
               }
             ]
           },
@@ -354,11 +368,13 @@
             "req_apps": [
               {
                 "account": "app1",
-                "granted": true
+                "granted": true,
+                "fields": "Heartrate,GeoLocation,TimeStamp,Pulse"
               },
               {
                 "account": "app3",
-                "granted": true
+                "granted": true,
+                "fields": "Image"
               }
             ]
           },
@@ -367,11 +383,13 @@
             "req_apps": [
               {
                 "account": "app1",
-                "granted": true
+                "granted": true,
+                "fields": "Heartrate,GeoLocation,TimeStamp,Pulse"
               },
               {
                 "account": "app2",
-                "granted": true
+                "granted": true,
+                "fields": "DataBlob,BlobSize"
               }
             ]
           }
