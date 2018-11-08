@@ -139,7 +139,7 @@ class MerkleTree:
         if not leaf_node.is_leaf:
             raise MerkleException(f"Provided ID {leaf_idx} is not a leaf node")
 
-        proof['leaf'] = leaf_idx
+        # proof['leaf'] = leaf_idx
         proof['leaf_pos'] = leaf_node.position
         proof['sibling'] = bytes_to_hex(leaf_node.sibling).decode()
 
@@ -160,6 +160,36 @@ class MerkleTree:
         proof['ancestors'] = ancestors
 
         return proof
+
+    def verify_leaf(self, leaf_idx: str, target_root: str, proof, is_hashed=True):
+        if not is_hashed:
+            leaf = LEAF_PREFIX_BYTE + leaf_idx
+            leaf_idx = sha256(sha256(leaf))
+            
+        hash_prefix = f"0x0{len(proof['ancestors']) + 2}"
+
+        if proof['leaf_pos'] == 'l':
+            l_hash = leaf_idx
+            r_hash = proof['sibling']
+        else:
+            l_hash = proof['sibling']
+            r_hash = leaf_idx
+
+        node_parent = MerkleNode(l_hash + r_hash,
+                                 prefix_byte=hash_prefix)
+
+        for ancestor in proof['ancestors']:
+            if ancestor['pos'] == 'l':
+                l_hash = ancestor['hash']
+                r_hash = bytes_to_hex(node_parent.hash).decode()
+            else:
+                l_hash = bytes_to_hex(node_parent.hash).decode()
+                r_hash = ancestor['hash']
+
+            node_parent = MerkleNode(l_hash + r_hash,
+                                     prefix_byte=hash_prefix)
+
+        return target_root == bytes_to_hex(node_parent.hash).decode()
 
     def print_tree(self):
         for idx, node in self.storage.items():

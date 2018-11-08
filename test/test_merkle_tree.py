@@ -64,6 +64,16 @@ def test_merkle_root():
 
     print(proof)
 
+    is_good = tree.verify_leaf(json.dumps(leaf_json['user2']),
+                               '48a4bed33f44f02da9fe41991e7ee23a6429d27b7532bb11dd1204819f0e662b',
+                               proof, is_hashed=False)
+
+    print("Valid: ", is_good)
+
+    # print(tree.num_levels)
+    # print(tree.levels_prefix)
+    #
+    # print(len(proof['ancestors']))
 
 if __name__ == '__main__':
     test_merkle_root()
