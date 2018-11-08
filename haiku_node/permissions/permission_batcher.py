@@ -24,7 +24,7 @@ class PermissionBatcher:
     def process_batch_queue(self, num=10):
 
         provider_uapp = get_self_uapp()
-        permissions = UnifPermissions(self.ipfs, provider_uapp)
+        permissions = UnifPermissions(self.ipfs, provider_uapp, self.db)
 
         processed = []
 

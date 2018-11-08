@@ -12,7 +12,8 @@ from haiku_node.encryption.jwt.exceptions import (
 from haiku_node.encryption.jwt.jwt import UnifJWT
 from haiku_node.network.eos import (
     get_eos_rpc_client, get_cleos, get_ipfs_client)
-from haiku_node.permissions.perm_batch_db import default_db
+from haiku_node.permissions.perm_batch_db import (
+    default_db, PermissionBatchDatabase)
 from haiku_node.permissions.permission_batcher import PermissionBatcher
 from haiku_node.permissions.permissions import UnifPermissions
 from haiku_node.validation.validation import UnificationAppScValidation
@@ -188,7 +189,8 @@ def data_request():
             ipfs = get_ipfs_client()
             provider_uapp = UnificationUapp(eos_client, conf['acl_contract'])
 
-            permissions = UnifPermissions(ipfs, provider_uapp)
+            permission_db = PermissionBatchDatabase(default_db())
+            permissions = UnifPermissions(ipfs, provider_uapp, permission_db)
             permissions.check_and_process_stashed(sender)
 
             return obtain_data(

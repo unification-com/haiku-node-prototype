@@ -1,5 +1,6 @@
 import logging
 import tempfile
+from pathlib import Path
 
 from unittest.mock import patch, MagicMock
 
@@ -46,7 +47,7 @@ def test_perm_batches(get_ipfs_client, get_self_uapp):
     f = tempfile.NamedTemporaryFile(mode='w', delete=False)
     log.info(f"Writing to {f.name}")
 
-    _create_perm_batch_db(f.name)
+    _create_perm_batch_db(f)
 
     private_key = '5JcVWg7GsNWoaUs6pso3RaE5oe1HQCRt87qmPCU7sLS3EiaT2gZ'
     public_key = 'EOS8RuGsSmG54KxQh8nrH6jcp2AVjsNboVpofBuPwF8odjNXXW4Uk'
@@ -69,7 +70,7 @@ def test_perm_batches(get_ipfs_client, get_self_uapp):
     issuer = unif_jwt.get_issuer()
     payload = unif_jwt.get_payload()
 
-    batcher = PermissionBatcher(f.name)
+    batcher = PermissionBatcher(f)
     rowid = batcher.add_to_queue(issuer,
                                  payload['consumer'],
                                  payload['schema_id'],
