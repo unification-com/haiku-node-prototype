@@ -23,6 +23,7 @@ class MerkleException(Exception):
 
 
 class MerkleNode:
+
     def __init__(self, data: str, prefix_byte=LEAF_PREFIX_BYTE, position=None, level=1):
         # prefix byte to help prevent second preimage attack
         node = prefix_byte + data
@@ -122,7 +123,10 @@ class MerkleTree:
             layer = self.__grow(layer)
 
         self.merkle_root = layer[0]
-        self.__set_node_in_storage(bytes_to_hex(self.merkle_root.hash).decode(), 'is_root', True)
+        self.__set_node_in_storage(
+            bytes_to_hex(self.merkle_root.hash).decode(),
+            'is_root',
+            True)
 
     def get_root(self):
         if self.merkle_root is not None:
@@ -271,7 +275,11 @@ class MerkleTree:
 
     def __grow_from_seed(self, storage_seed):
 
-        to_convert = ['hash', 'parent', 'sibling', 'left_child', 'right_child']
+        to_convert = ['hash',
+                      'parent',
+                      'sibling',
+                      'left_child',
+                      'right_child']
 
         if isinstance(storage_seed, str):
             seed = json.loads(storage_seed)
