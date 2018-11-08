@@ -1,5 +1,6 @@
 import logging
 import time
+from pathlib import Path
 
 from haiku_node.blockchain.eos.uapp import get_self_uapp
 from haiku_node.network.eos import get_ipfs_client
@@ -13,7 +14,7 @@ log = logging.getLogger(__name__)
 
 class PermissionBatcher:
 
-    def __init__(self, permissions_db):
+    def __init__(self, permissions_db: Path):
         self.db = PermissionBatchDatabase(permissions_db)
         self.ipfs = get_ipfs_client()
 

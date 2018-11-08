@@ -14,10 +14,10 @@ def test_root() -> Path:
     return Path(os.path.dirname(os.path.abspath(__file__)))
 
 
-def app_sqlite_target(app_name: str) -> str:
+def app_sqlite_target(app_name: str) -> Path:
     db_path = Path(test_root() / Path(
         f'data/perm_batch/{app_name}.perm_batches.db'))
-    return str(db_path.resolve())
+    return db_path.resolve()
 
 
 def create_perm_batch_db(app_name: str):
@@ -34,8 +34,8 @@ def create_perm_batch_db(app_name: str):
     _create_perm_batch_db(db_name)
 
 
-def _create_perm_batch_db(db_name):
-    conn = sqlite3.connect(db_name)
+def _create_perm_batch_db(db_name: Path):
+    conn = sqlite3.connect(str(db_name))
     c = conn.cursor()
     c.execute('''CREATE TABLE permissions (op_id INTEGER PRIMARY KEY, 
                  end_user_account text, 
