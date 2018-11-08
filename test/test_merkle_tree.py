@@ -60,6 +60,10 @@ def test_merkle_root():
 
     tree.print_tree()
 
+    proof = tree.get_proof(json.dumps(leaf_json['user2']), is_hashed=False)
+
+    print(proof)
+
 
 if __name__ == '__main__':
     test_merkle_root()

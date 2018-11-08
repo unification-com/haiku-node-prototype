@@ -1,6 +1,8 @@
 import binascii
 import hashlib
 
+LEAF_PREFIX_BYTE = '0x00'
+
 
 def sha256(data: str):
     return hashlib.sha256(data.encode('utf-8')).hexdigest()
@@ -20,7 +22,7 @@ class MerkleException(Exception):
 
 
 class MerkleNode:
-    def __init__(self, data: str, prefix_byte='0x00', position=None, level=1):
+    def __init__(self, data: str, prefix_byte=LEAF_PREFIX_BYTE, position=None, level=1):
         # prefix byte to help prevent second preimage attack
         node = prefix_byte + data
         node_hash = sha256(sha256(node))
@@ -32,7 +34,7 @@ class MerkleNode:
         self.right_child = None
         self.is_root = False
 
-        if prefix_byte == '0x00':
+        if prefix_byte == LEAF_PREFIX_BYTE:
             self.is_leaf = True
             self.level = 1
         else:
@@ -86,7 +88,7 @@ class MerkleTree:
         self.current_level = 1
         self.storage = {}
         self.last_leaf = None
-        self.levels_prefix = '0x00'
+        self.levels_prefix = LEAF_PREFIX_BYTE
         self.merkle_root = None
 
         if storage_seed is not None:
@@ -123,8 +125,11 @@ class MerkleTree:
 
     def get_proof(self, leaf_idx: str, is_hashed=True):
 
+        proof = {}
+        root = bytes_to_hex(self.merkle_root.hash).decode()
+
         if not is_hashed:
-            leaf = '0x00' + leaf_idx
+            leaf = LEAF_PREFIX_BYTE + leaf_idx
             leaf_idx = sha256(sha256(leaf))
 
         if leaf_idx not in self.storage:
@@ -133,6 +138,29 @@ class MerkleTree:
         leaf_node = self.storage[leaf_idx]
         if not leaf_node.is_leaf:
             raise MerkleException(f"Provided ID {leaf_idx} is not a leaf node")
+
+        proof['leaf'] = leaf_idx
+        proof['leaf_pos'] = leaf_node.position
+        proof['sibling'] = bytes_to_hex(leaf_node.sibling).decode()
+
+        parent = bytes_to_hex(leaf_node.parent).decode()
+        ancestors = []
+        level_count = 0
+        while parent != root and level_count <= self.num_levels:
+            ancestor = {}
+            parent_node = self.storage[parent]
+            parent_sibling_hash = bytes_to_hex(parent_node.sibling).decode()
+            parent_sibling = self.storage[parent_sibling_hash]
+            ancestor['hash'] = parent_sibling_hash
+            ancestor['pos'] = parent_sibling.position
+            ancestors.append(ancestor)
+
+            parent = bytes_to_hex(parent_node.parent).decode()
+            level_count = level_count + 1
+
+        proof['ancestors'] = ancestors
+
+        return proof
 
     def print_tree(self):
         for idx, node in self.storage.items():
