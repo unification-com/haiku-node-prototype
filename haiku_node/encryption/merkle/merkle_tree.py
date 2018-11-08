@@ -27,8 +27,7 @@ class MerkleNode:
         self.hash = hex_to_bytes(node_hash)
         self.position = position  # l | r
         self.parent = None
-        self.left_sibling = None
-        self.right_sibling = None
+        self.sibling = None
         self.left_child = None
         self.right_child = None
         self.is_root = False
@@ -59,7 +58,7 @@ class MerkleTree:
         self.merkle_root = None
 
     def add_leaf(self, data: str):
-        pos = self.__get_posistion(self.leaves)
+        pos = self.__determine_posistion(self.leaves)
         leaf = MerkleNode(data, position=pos)
         self.leaves.append(leaf)
         self.__store_node(leaf)
@@ -105,7 +104,7 @@ class MerkleTree:
         new_level = []
         self.current_level = self.current_level + 1
         for i in range(0, len(nodes), 2):
-            pos = self.__get_posistion(new_level)
+            pos = self.__determine_posistion(new_level)
 
             l_hash = bytes_to_hex(nodes[i].hash).decode()
             r_hash = bytes_to_hex(nodes[i + 1].hash).decode()
@@ -123,10 +122,12 @@ class MerkleTree:
             self.__store_node(new_node)
             self.__set_node_in_storage(l_hash, 'parent', new_node.hash)
             self.__set_node_in_storage(r_hash, 'parent', new_node.hash)
+            self.__set_node_in_storage(r_hash, 'sibling', l_hash)
+            self.__set_node_in_storage(l_hash, 'sibling', r_hash)
 
         return new_level
 
-    def __get_posistion(self, obj):
+    def __determine_posistion(self, obj):
         if len(obj) % 2 != 0:
             return 'r'
         else:
@@ -134,11 +135,13 @@ class MerkleTree:
 
     def __calculate_num_levels(self):
         num_nodes = len(self.leaves)
+        num_levels = 0
         if num_nodes > 0:
-            self.num_levels = 1
+            num_levels = 1
 
             while num_nodes > 1:
-                self.num_levels = self.num_levels + 1
+                num_levels = num_levels + 1
                 num_nodes = num_nodes / 2
 
+        self.num_levels = num_levels
         self.levels_prefix = f'0x0{self.num_levels}'
