@@ -281,8 +281,11 @@ def post_permissions(user, password, perm, granted_fields_str: str,
 
     # ToDo: find better way to get public key from EOS account
     private_key = cleos.get_private_key(user, password, pub_key)
+    cleos.lock_wallet(user)
+
     if len(private_key) < 0:
         click.echo(bold(f'Could not get private key for {pub_key}'))
+
         return
 
     p_nonce = generate_nonce(16)
@@ -304,8 +307,6 @@ def post_permissions(user, password, perm, granted_fields_str: str,
         'p_nonce': p_nonce,
         'p_sig': p_sig
     }
-
-    cleos.lock_wallet(user)
 
     unif_jwt = UnifJWT()
     unif_jwt.generate(jwt_payload)
