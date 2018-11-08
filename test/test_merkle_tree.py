@@ -33,9 +33,17 @@ def test_merkle_root():
         '"BlobSize", "p_nonce": "0238349944470721", "p_sig": '
         '"SIG_K1_KXNTfnzMvDPGnYLGRcnWrV3FsrGWBnaD2vH886jsT5UkVd9J2v82sp7BHDkzR2m6rJzGcLAvt5dQ3GCFscGauH1eY9MAix", '
         '"pub_key": "EOS61HzbDSsDVpbCjEaNw4hWEwVRyKtHW4rBcUAwbnk4NGB67Cu6V", "schema_id": "0", "consumer": "app1", '
-        '"user": "user7", "b_nonce": "5835621777972842", "b_time": 1541500298.2610202}}}')
+        '"user": "user7", "b_nonce": "5835621777972842", "b_time": 1541500298.2610202}}, "user8": {"0": {"perms": '
+        '"BlobSize", "p_nonce": "0238349944470721", "p_sig": '
+        '"SIG_K1_KXNTfnzMvDPGnYLGRcnWrV3FsrGWBnaD2vH886jsT5UkVd9J2v82sp7BHDkzR2m6rJzGcLAvt5dQ3GCFscGauH1eY9MAix", '
+        '"pub_key": "EOS61HzbDSsDVpbCjEaNw4hWEwVRyKtHW4rBcUAwbnk4NGB67Cu6V", "schema_id": "0", "consumer": "app1", '
+        '"user": "user8", "b_nonce": "5835621777972842", "b_time": 1541500298.2610202}}, "user9": {"0": {"perms": '
+        '"BlobSize", "p_nonce": "0238349944470721", "p_sig": '
+        '"SIG_K1_KXNTfnzMvDPGnYLGRcnWrV3FsrGWBnaD2vH886jsT5UkVd9J2v82sp7BHDkzR2m6rJzGcLAvt5dQ3GCFscGauH1eY9MAix", '
+        '"pub_key": "EOS61HzbDSsDVpbCjEaNw4hWEwVRyKtHW4rBcUAwbnk4NGB67Cu6V", "schema_id": "0", "consumer": "app1", '
+        '"user": "user9", "b_nonce": "5835621777972842", "b_time": 1541500298.2610202}}}')
 
-    target_root = '76fe3080c01e9fe1419c6fc03fd856ed4165437e0343eeacd47c7f6c52e8af4f'
+    target_root = '48a4bed33f44f02da9fe41991e7ee23a6429d27b7532bb11dd1204819f0e662b'
 
     tree = MerkleTree()
 
@@ -45,6 +53,8 @@ def test_merkle_root():
     tree.grow_tree()
 
     m_root = tree.get_root_str()
+
+    print(m_root)
 
     assert m_root == target_root
 

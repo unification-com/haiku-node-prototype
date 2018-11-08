@@ -72,14 +72,6 @@ class MerkleTree:
         if not self.leaves:
             raise MerkleException('No leaves found')
 
-        # if odd number of leaves, duplicate last leaf
-        if len(self.leaves) % 2 != 0:
-            # generate the end leaf from the hash of it's sibling leaf,
-            # to avoid duplicate idx in storage
-            last_leaf = MerkleNode(bytes_to_hex(self.last_leaf.hash).decode(), position='r')
-            self.__store_node(last_leaf)
-            self.leaves.append(last_leaf)
-
         self.__calculate_num_levels()
 
         layer = self.leaves
@@ -106,7 +98,11 @@ class MerkleTree:
 
     def __grow(self, nodes):
         new_level = []
+        shift_node = None
         self.current_level = self.current_level + 1
+
+        if len(nodes) % 2 != 0:
+            shift_node = nodes.pop(-1)
 
         for i in range(0, len(nodes), 2):
             pos = self.__determine_posistion(new_level)
@@ -119,8 +115,8 @@ class MerkleTree:
                                   position=pos,
                                   level=self.current_level)
 
-            new_node.left_child = nodes[i].hash
-            new_node.right_child = nodes[i + 1].hash
+            new_node['left_child'] = nodes[i].hash
+            new_node['right_child'] = nodes[i + 1].hash
 
             new_level.append(new_node)
 
@@ -129,6 +125,9 @@ class MerkleTree:
             self.__set_node_in_storage(r_hash, 'parent', new_node.hash)
             self.__set_node_in_storage(r_hash, 'sibling', l_hash)
             self.__set_node_in_storage(l_hash, 'sibling', r_hash)
+
+        if shift_node is not None:
+            new_level.append(shift_node)
 
         return new_level
 
