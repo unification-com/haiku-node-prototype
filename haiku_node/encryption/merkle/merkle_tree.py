@@ -17,6 +17,10 @@ def bytes_to_hex(bytes_data: bytearray):
     return binascii.hexlify(bytes_data)
 
 
+def bytes_to_hex_str(bytes_data: bytearray):
+    return bytes_to_hex(bytes_data).decode()
+
+
 class MerkleException(Exception):
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)
@@ -49,7 +53,7 @@ class MerkleNode:
 
         for key, val in vars(self).items():
             if isinstance(val, bytearray):
-                string += f'{key} = {bytes_to_hex(val).decode()}\n'
+                string += f'{key} = {bytes_to_hex_str(val)}\n'
             else:
                 string += f'{key} = {val}\n'
         return string
@@ -103,7 +107,7 @@ class MerkleTree:
 
         self.merkle_root = layer[0]
         self.__set_node_in_storage(
-            bytes_to_hex(self.merkle_root.hash).decode(),
+            bytes_to_hex_str(self.merkle_root.hash),
             'is_root',
             True)
 
@@ -113,7 +117,7 @@ class MerkleTree:
 
     def get_root_str(self):
         if self.merkle_root is not None:
-            return bytes_to_hex(self.merkle_root.hash).decode()
+            return bytes_to_hex_str(self.merkle_root.hash)
 
     def get_proof(self, leaf_idx: str, is_hashed=True, as_json=False):
 
@@ -121,7 +125,7 @@ class MerkleTree:
             raise MerkleException("No tree stored. Grow from seed, or generate new tree")
 
         proof = {}
-        root = bytes_to_hex(self.merkle_root.hash).decode()
+        root = bytes_to_hex_str(self.merkle_root.hash)
 
         if not is_hashed:
             leaf = LEAF_PREFIX_BYTE + leaf_idx
@@ -136,20 +140,20 @@ class MerkleTree:
 
         # proof['leaf'] = leaf_idx
         proof['leaf_pos'] = leaf_node.position
-        proof['sibling'] = bytes_to_hex(leaf_node.sibling).decode()
+        proof['sibling'] = bytes_to_hex_str(leaf_node.sibling)
 
-        parent = bytes_to_hex(leaf_node.parent).decode()
+        parent = bytes_to_hex_str(leaf_node.parent)
         ancestors = []
         level_count = 0
         while parent != root and level_count <= self.num_levels:
             ancestor = {}
             parent_node = self.storage[parent]
-            parent_sibling_hash = bytes_to_hex(parent_node.sibling).decode()
+            parent_sibling_hash = bytes_to_hex_str(parent_node.sibling)
             ancestor['hash'] = parent_sibling_hash
             ancestor['pos'] = self.storage[parent_sibling_hash].position
             ancestors.append(ancestor)
 
-            parent = bytes_to_hex(parent_node.parent).decode()
+            parent = bytes_to_hex_str(parent_node.parent)
             level_count = level_count + 1
 
         proof['ancestors'] = ancestors
@@ -163,7 +167,7 @@ class MerkleTree:
         if not is_hashed:
             leaf = LEAF_PREFIX_BYTE + leaf_idx
             leaf_idx = sha256(sha256(leaf))
-            
+
         hash_prefix = f"0x0{len(proof['ancestors']) + 2}"
 
         if proof['leaf_pos'] == 'l':
@@ -179,15 +183,15 @@ class MerkleTree:
         for ancestor in proof['ancestors']:
             if ancestor['pos'] == 'l':
                 l_hash = ancestor['hash']
-                r_hash = bytes_to_hex(node_parent.hash).decode()
+                r_hash = bytes_to_hex_str(node_parent.hash)
             else:
-                l_hash = bytes_to_hex(node_parent.hash).decode()
+                l_hash = bytes_to_hex_str(node_parent.hash)
                 r_hash = ancestor['hash']
 
             node_parent = MerkleNode(l_hash + r_hash,
                                      prefix_byte=hash_prefix)
 
-        return target_root == bytes_to_hex(node_parent.hash).decode()
+        return target_root == bytes_to_hex_str(node_parent.hash)
 
     def print_tree(self):
         for idx, node in self.storage.items():
@@ -199,7 +203,7 @@ class MerkleTree:
             node_obj = vars(node)
             for key, val in node_obj.items():
                 if isinstance(val, bytearray):
-                    node_obj[key] = bytes_to_hex(val).decode()
+                    node_obj[key] = bytes_to_hex_str(val)
             seed[idx] = vars(node)
 
         if as_json:
@@ -208,7 +212,7 @@ class MerkleTree:
             return seed
 
     def __store_node(self, node):
-        idx = bytes_to_hex(node.hash).decode()
+        idx = bytes_to_hex_str(node.hash)
         self.storage[idx] = node
 
     def __set_node_in_storage(self, idx, key, val):
@@ -225,8 +229,8 @@ class MerkleTree:
         for i in range(0, len(nodes), 2):
             pos = self.__determine_posistion(new_level)
 
-            l_hash = bytes_to_hex(nodes[i].hash).decode()
-            r_hash = bytes_to_hex(nodes[i + 1].hash).decode()
+            l_hash = bytes_to_hex_str(nodes[i].hash)
+            r_hash = bytes_to_hex_str(nodes[i + 1].hash)
 
             new_node = MerkleNode(l_hash + r_hash,
                                   prefix_byte=self.levels_prefix,
