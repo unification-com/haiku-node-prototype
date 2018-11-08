@@ -93,8 +93,16 @@ class MerkleTree:
         self.merkle_root = None
 
         if storage_seed is not None:
-            self.storage = storage_seed
-            self.__grow_from_seed()
+            self.__grow_from_seed(storage_seed)
+
+    def clear(self):
+        self.leaves = []
+        self.num_levels = 0
+        self.current_level = 1
+        self.storage = {}
+        self.last_leaf = None
+        self.levels_prefix = LEAF_PREFIX_BYTE
+        self.merkle_root = None
 
     def add_leaf(self, data: str):
         pos = self.__determine_posistion(self.leaves)
@@ -261,14 +269,35 @@ class MerkleTree:
 
         return new_level
 
-    def __grow_from_seed(self):
+    def __grow_from_seed(self, storage_seed):
 
-        for idx, node in self.storage.items():
-            if node.is_leaf:
+        to_convert = ['hash', 'parent', 'sibling', 'left_child', 'right_child']
+
+        if isinstance(storage_seed, str):
+            seed = json.loads(storage_seed)
+        else:
+            seed = storage_seed
+
+        for idx, seed_node in seed.items():
+            node = MerkleNode('0x00')
+
+            for key, val in seed_node.items():
+                if key in to_convert:
+                    if seed_node[key] is not None:
+                        node[key] = hex_to_bytes(seed_node[key])
+                    else:
+                        node[key] = None
+                else:
+                    node[key] = seed_node[key]
+
+            if seed_node['is_leaf']:
                 self.leaves.append(node)
-            if node.is_root:
+
+            if seed_node['is_root']:
                 self.merkle_root = node
                 self.current_level = node.level
+
+            self.__store_node(node)
 
         self.__calculate_num_levels()
         self.last_leaf = self.leaves[-1]

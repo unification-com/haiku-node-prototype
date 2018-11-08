@@ -73,6 +73,17 @@ def test_merkle_root():
     seed = tree.get_seed(as_json=True)
     print(seed)
 
+
+    tree_2 = MerkleTree(seed)
+    tree_2.print_tree()
+    proof_2 = tree_2.get_proof(json.dumps(leaf_json['user2']), is_hashed=False)
+
+    is_good = tree_2.verify_leaf(json.dumps(leaf_json['user2']),
+                               '48a4bed33f44f02da9fe41991e7ee23a6429d27b7532bb11dd1204819f0e662b',
+                                 proof_2, is_hashed=False)
+
+    print("Valid: ", is_good)
+
     # print(tree.num_levels)
     # print(tree.levels_prefix)
     #
