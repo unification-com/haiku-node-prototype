@@ -1,5 +1,6 @@
 import binascii
 import hashlib
+import json
 
 LEAF_PREFIX_BYTE = '0x00'
 
@@ -123,7 +124,10 @@ class MerkleTree:
         if self.merkle_root is not None:
             return bytes_to_hex(self.merkle_root.hash).decode()
 
-    def get_proof(self, leaf_idx: str, is_hashed=True):
+    def get_proof(self, leaf_idx: str, is_hashed=True, as_json=False):
+
+        if not self.storage:
+            raise MerkleException("No tree stored. Grow from seed, or generate new tree")
 
         proof = {}
         root = bytes_to_hex(self.merkle_root.hash).decode()
@@ -159,7 +163,10 @@ class MerkleTree:
 
         proof['ancestors'] = ancestors
 
-        return proof
+        if as_json:
+            return json.dumps(proof)
+        else:
+            return proof
 
     def verify_leaf(self, leaf_idx: str, target_root: str, proof, is_hashed=True):
         if not is_hashed:
