@@ -6,6 +6,7 @@ from unittest.mock import patch, MagicMock
 from create_perm_batch_dbs import _create_perm_batch_db
 
 from haiku_node.permissions.permission_batcher import PermissionBatcher
+from haiku_node.permissions.permissions import ZERO_MASK
 
 log = logging.getLogger(__name__)
 
@@ -18,7 +19,7 @@ def mock_get_ipfs():
 
 def mock_get_self_uapp():
     m = MagicMock()
-    m.get_ipfs_perms_for_req_app.return_value = (0, 0)
+    m.get_ipfs_perms_for_req_app.return_value = (ZERO_MASK, 0)
     m.update_userperms.return_value = 1
     return m
 
