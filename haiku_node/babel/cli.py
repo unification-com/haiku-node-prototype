@@ -312,7 +312,7 @@ def post_permissions(user, password, perm, granted_fields_str: str,
 
 
 def generate_payload(user, private_key, provider, consumer, granted_fields_str,
-                     perm, schema_id, ):
+                     perm, schema_id):
     p_nonce = generate_nonce(16)
     perm_digest_sha = generate_perm_digest_sha(
         granted_fields_str, schema_id, p_nonce, consumer)
