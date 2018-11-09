@@ -94,11 +94,27 @@ class AccountManager:
         print(ret.stdout)
 
     def lock_account_permissions(self, username, smart_contract, contract_action, perm_name):
-        log.info(f"Lock permission {perm_name} for {username} to action {contract_action} in contract {smart_contract}")
+        log.info(f"Lock permission {perm_name} for {username} to "
+                 f"action {contract_action} in contract {smart_contract}")
         ret = self.cleos.run(["set", "action", "permission", username,
                           smart_contract, contract_action, perm_name, '-p', f'{username}@active'])
 
         print(ret.stdout)
+
+    def init_permission_structures(self, appnames):
+        for consumer in appnames:
+            for provider in appnames:
+                if consumer != provider:
+                    self.init_permission_struct(provider, consumer)
+
+    def init_permission_struct(self, provider, consumer):
+        log.debug(f'init_permission_struct Provider {provider}, Consumer {consumer}')
+        d = {
+            'consumer_id': consumer
+        }
+        self.cleos.run(
+            ['push', 'action', provider, 'initperm',
+             json.dumps(d), '-p', f'{consumer}@modreq'])
 
     def mother_contract(self, username):
         log.info('Associating mother contracts')
@@ -428,6 +444,7 @@ def make_default_accounts(
                 for prov_app in appnames:
                     if prov_app != appname:
                         manager.lock_account_permissions(appname, prov_app, 'initperm', app_account_perm)
+                        time.sleep(BLOCK_SLEEP)
 
         manager.set_schema(demo_apps, appname)
         print("Wait for transactions to process")
@@ -436,6 +453,10 @@ def make_default_accounts(
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
         manager.issue_unds(demo_apps, appname)
+        print("Wait for transactions to process")
+        time.sleep(BLOCK_SLEEP)
+
+    manager.init_permission_structures(appnames)
 
     for username in usernames:
         if username not in ['unif.mother', 'unif.token']:  # Todo: maybe have sys_users list?
