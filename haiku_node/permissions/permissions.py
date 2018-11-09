@@ -141,7 +141,7 @@ class UnifPermissions:
     def load_consumer_perms(self, consumer):
         log.info(f'load_consumer_perms for {consumer}')
         self.__clear_perms()
-        
+
         ipfs_hash, merkle_root = self.__uapp.get_ipfs_perms_for_req_app(
             consumer)
 
@@ -167,6 +167,9 @@ class UnifPermissions:
             return self.__consumer_perms[user_account]
         else:
             return None
+
+    def get_all_perms(self):
+        return self.__consumer_perms
 
     def __clear_perms(self):
         self.__consumer_perms = {}
