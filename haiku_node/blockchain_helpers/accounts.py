@@ -269,6 +269,18 @@ class AccountManager:
             print("Wait for transactions to process")
             time.sleep(BLOCK_SLEEP)
 
+    def request_permission_change(self, user, app_permission_list, private_key):
+        log.info(f"Process {user} permission change requests")
+        for consumer, providers in app_permission_list.items():
+            for provider, permissions in providers.items():
+                granted = permissions['granted']
+                fields = permissions['fields']
+                schema_id = permissions['schema_id']
+
+                log.debug(f'request_permission_change {user} requesting {provider} '
+                          f'update perms for {consumer} in schema {schema_id}: {granted} {fields}')
+
+
     def run_test_mother(self, app, demo_apps):
         print("Contacting MOTHER FOR: ", app)
 
@@ -404,6 +416,9 @@ def make_default_accounts(
             pub_key, priv_key = manager.create_key()
             manager.wallet_import_key(username, priv_key)
             manager.create_account_permissions(username, 'modperms', pub_key)
+            manager.request_permission_change(username,
+                                              demo_config['demo_permissions_new'][username],
+                                              priv_key)
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)

@@ -397,6 +397,122 @@
       }
     ]
   },
+  "demo_permissions_new": {
+    "user1": {
+      "app1": {
+        "app2": {
+          "granted": true,
+          "fields": "DataBlob,BlobSize",
+          "schema_id": "0"
+        },
+        "app3": {
+          "granted": true,
+          "fields": "Image",
+          "schema_id": "0"
+        }
+      },
+      "app2": {
+        "app1": {
+          "granted": true,
+          "fields": "Heartrate,GeoLocation,TimeStamp,Pulse",
+          "schema_id": "0"
+        },
+        "app3": {
+          "granted": false,
+          "fields": "Image",
+          "schema_id": "0"
+        }
+      },
+      "app3": {
+        "app1": {
+          "granted": true,
+          "fields": "Heartrate,GeoLocation,TimeStamp,Pulse",
+          "schema_id": "0"
+        },
+        "app2": {
+          "granted": true,
+          "fields": "DataBlob,BlobSize",
+          "schema_id": "0"
+        }
+      }
+    },
+    "user2": {
+      "app1": {
+        "app2": {
+          "granted": true,
+          "fields": "DataBlob,BlobSize",
+          "schema_id": "0"
+        },
+        "app3": {
+          "granted": true,
+          "fields": "Image",
+          "schema_id": "0"
+        }
+      },
+      "app2": {
+        "app1": {
+          "granted": false,
+          "fields": "Heartrate,GeoLocation,TimeStamp,Pulse",
+          "schema_id": "0"
+        },
+        "app3": {
+          "granted": true,
+          "fields": "Image",
+          "schema_id": "0"
+        }
+      },
+      "app3": {
+        "app1": {
+          "granted": true,
+          "fields": "Heartrate,GeoLocation,TimeStamp,Pulse",
+          "schema_id": "0"
+        },
+        "app2": {
+          "granted": true,
+          "fields": "DataBlob,BlobSize",
+          "schema_id": "0"
+        }
+      }
+    },
+    "user3": {
+      "app1": {
+        "app2": {
+          "granted": false,
+          "fields": "DataBlob,BlobSize",
+          "schema_id": "0"
+        },
+        "app3": {
+          "granted": false,
+          "fields": "Image",
+          "schema_id": "0"
+        }
+      },
+      "app2": {
+        "app1": {
+          "granted": true,
+          "fields": "Heartrate,GeoLocation,TimeStamp,Pulse",
+          "schema_id": "0"
+        },
+        "app3": {
+          "granted": true,
+          "fields": "Image",
+          "schema_id": "0"
+        }
+      },
+      "app3": {
+        "app1": {
+          "granted": true,
+          "fields": "Heartrate,GeoLocation,TimeStamp,Pulse",
+          "schema_id": "0"
+        },
+        "app2": {
+          "granted": true,
+          "fields": "DataBlob,BlobSize",
+          "schema_id": "0"
+        }
+      }
+    }
+  },
   "wallet_passwords": {
     "app1": {
       "wallet_password": "PW5KJb4QW78rwKvqSDpt2of5RjieAECUvAYDYYvbL74U4mJtbGJJZ"
