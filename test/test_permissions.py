@@ -32,28 +32,36 @@ class MockIPFSDataStore:
         raise NotImplemented('Consider dropping in the original interface')
 
 
-def mock_get_self_uapp():
-    m = MagicMock()
-    m.get_ipfs_perms_for_req_app.return_value = (ZERO_MASK, 0)
-    m.update_userperms.return_value = 1
-    return m
+class MockUApp:
+
+    def get_ipfs_perms_for_req_app(self, consumer):
+        return (ZERO_MASK, 0)
+
+    def update_userperms(self, consumer, new_ipfs_hash, new_merkle_root):
+        return 1
 
 
 @patch('haiku_node.permissions.permission_batcher.get_ipfs_client',
        return_value=MockIPFSDataStore())
 @patch('haiku_node.permissions.permission_batcher.get_self_uapp',
-       return_value=mock_get_self_uapp())
+       return_value=MockUApp())
 def test_perm_batches(get_ipfs_client, get_self_uapp):
     f = tempfile.NamedTemporaryFile(mode='w', delete=False)
     log.info(f"Writing to {f.name}")
 
     _create_perm_batch_db(f)
+    batcher = PermissionBatcher(f)
 
+    add_to_queue(batcher, 'DataBlob')
+    add_to_queue(batcher, 'BlobSize')
+
+    batcher.process_batch_queue()
+
+
+def add_to_queue(batcher, granted_fields_str):
     private_key = '5JcVWg7GsNWoaUs6pso3RaE5oe1HQCRt87qmPCU7sLS3EiaT2gZ'
     public_key = 'EOS8RuGsSmG54KxQh8nrH6jcp2AVjsNboVpofBuPwF8odjNXXW4Uk'
-
     user = 'user1'
-    granted_fields_str = 'DataBlob'
     schema_id = 0
     consumer = 'app1'
     provider = 'app2'
@@ -70,7 +78,6 @@ def test_perm_batches(get_ipfs_client, get_self_uapp):
     issuer = unif_jwt.get_issuer()
     payload = unif_jwt.get_payload()
 
-    batcher = PermissionBatcher(f)
     rowid = batcher.add_to_queue(issuer,
                                  payload['consumer'],
                                  payload['schema_id'],
@@ -78,5 +85,3 @@ def test_perm_batches(get_ipfs_client, get_self_uapp):
                                  payload['p_nonce'],
                                  payload['p_sig'],
                                  public_key)
-
-    batcher.process_batch_queue()
