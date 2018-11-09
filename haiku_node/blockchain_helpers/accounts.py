@@ -12,6 +12,7 @@ from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.client import Provider
 from haiku_node.network.eos import get_cleos, get_eos_rpc_client
+from haiku_node.permissions.utils import generate_payload
 
 BLOCK_SLEEP = 0.5
 
@@ -272,8 +273,6 @@ class AccountManager:
             time.sleep(BLOCK_SLEEP)
 
     def request_permission_change(self, user, app_permission_list, private_key):
-        from haiku_node.babel.cli import generate_payload  # tests fail if imported globally
-
         log.info(f"Process {user} permission change requests")
         for consumer, providers in app_permission_list.items():
             for provider, permissions in providers.items():
