@@ -138,29 +138,6 @@ class UnifPermissions:
     def get_change_requests(self):
         return self.__change_requests
 
-    def __verify_change_request(self, perm: dict) -> bool:
-        perm_digest_sha = generate_perm_digest_sha(
-            perm['perms'], perm['schema_id'],
-            perm['p_nonce'], perm['consumer'])
-
-        return UnifEosKey().verify_pub_key(
-            perm['p_sig'], perm_digest_sha, perm['pub_key'])
-
-    def __merge_change_requests(self, current_perms_hash, new_perms):
-        current_permissions = json.loads(self.__ipfs.get_json(
-            current_perms_hash))
-        new_perms = {**current_permissions, **new_perms}
-        return new_perms
-
-    def __generate_merkle(self, perms):
-        tree = MerkleTree()
-        for user, perm in perms.items():
-            tree.add_leaf(json.dumps(perm))
-
-        tree.grow_tree()
-
-        return tree.get_root_str()
-
     def load_consumer_perms(self, consumer):
         log.info(f'load_consumer_perms for {consumer}')
         ipfs_hash, merkle_root = self.__uapp.get_ipfs_perms_for_req_app(
@@ -188,3 +165,26 @@ class UnifPermissions:
             return self.__consumer_perms[user_account]
         else:
             return None
+
+    def __verify_change_request(self, perm: dict) -> bool:
+        perm_digest_sha = generate_perm_digest_sha(
+            perm['perms'], perm['schema_id'],
+            perm['p_nonce'], perm['consumer'])
+
+        return UnifEosKey().verify_pub_key(
+            perm['p_sig'], perm_digest_sha, perm['pub_key'])
+
+    def __merge_change_requests(self, current_perms_hash, new_perms):
+        current_permissions = json.loads(self.__ipfs.get_json(
+            current_perms_hash))
+        new_perms = {**current_permissions, **new_perms}
+        return new_perms
+
+    def __generate_merkle(self, perms):
+        tree = MerkleTree()
+        for user, perm in perms.items():
+            tree.add_leaf(json.dumps(perm))
+
+        tree.grow_tree()
+
+        return tree.get_root_str()
