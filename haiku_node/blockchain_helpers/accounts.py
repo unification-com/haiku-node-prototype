@@ -2,12 +2,12 @@ import json
 import logging
 import time
 
-from pathlib import Path
 from eosapi import Client
+from pathlib import Path
 
-from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
+from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 
 
@@ -48,7 +48,7 @@ class AccountManager:
 
         print(ret.stdout)
 
-    def create_account_permissions(self, username, perm_name, public_key):
+    def create_account_permissions(self, username, perm_name, public_key, eosio_code=False):
         log.info(f"Creating permission {perm_name} for {username} with key {public_key}")
 
         keys = []
@@ -59,10 +59,30 @@ class AccountManager:
 
         keys.append(k)
 
-        d = {
-            'threshold': 1,
-            'keys': keys
-        }
+        if eosio_code:
+            # cleos set account permission app2 modreq
+            # '{"threshold": 1,"keys": [{"key": "EOS6aj3Bc71sVMeAzAU7BQXcSv8zcSjUecXVW2YecD5dnFJs9ERPJ","weight": 1}],
+            # "accounts": [{"permission":{"actor":"app2","permission":"eosio.code"},"weight":1}]}' -p app2@active
+            accounts = []
+            actor = {
+                'actor': username,
+                'permission': 'eosio.code'
+            }
+            acc = {
+                'permission': actor,
+                'weight': 1
+            }
+            accounts.append(acc)
+            d = {
+                'threshold': 1,
+                'keys': keys,
+                'accounts': accounts
+            }
+        else:
+            d = {
+                'threshold': 1,
+                'keys': keys
+            }
 
         ret = self.cleos.run(
             ["set", "account", "permission", username, perm_name,
@@ -354,6 +374,7 @@ def make_default_accounts(
                 contract_actions = modperms_actions
             elif app_account_perm == 'modreq':
                 contract_actions = modreq_actions
+                manager.create_account_permissions(appname, app_account_perm, pub_key, True)
             elif app_account_perm == 'modrsakey':
                 contract_actions = modrsakey_actions
             else:
@@ -361,6 +382,12 @@ def make_default_accounts(
 
             for contract_action in contract_actions:
                 manager.lock_account_permissions(appname, appname, contract_action, app_account_perm)
+                # ToDo: This is probably better suited as a temporary assignment, set in the client
+                if app_account_perm == 'modreq':
+                    # need to set for initperm for consumer in provider contracts
+                    for prov_app in appnames:
+                        if prov_app != appname:
+                            manager.lock_account_permissions(appname, prov_app, 'initperm', app_account_perm)
 
         manager.set_schema(demo_apps, appname)
         print("Wait for transactions to process")
