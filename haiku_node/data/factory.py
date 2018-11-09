@@ -6,8 +6,12 @@ from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.config.config import UnificationConfig
 from haiku_node.data.transform_data2 import TransformDataJSON
-from haiku_node.lookup.eos_lookup import UnificationLookup, default_db
-from haiku_node.network.eos import get_cleos
+from haiku_node.lookup.eos_lookup import \
+    (UnificationLookup, default_db as default_lookup_db)
+from haiku_node.network.eos import get_cleos, get_ipfs_client
+from haiku_node.permissions.perm_batch_db import\
+    (PermissionBatchDatabase, default_db as default_pb_db)
+from haiku_node.permissions.permissions import UnifPermissions
 
 log = logging.getLogger(__name__)
 
@@ -27,12 +31,13 @@ class UnificationDataFactory:
         self.__my_mother = UnificationMother(
             eos_client, acl_contract_acc, get_cleos())
         self.__my_uapp_sc = UnificationUapp(eos_client, acl_contract_acc)
-        self.__my_lookup = UnificationLookup(default_db())
+        self.__my_lookup = UnificationLookup(default_lookup_db())
         self.__users = None if len(users) == 0 else users
 
         self.__my_db_schemas = self.__my_uapp_sc.get_all_db_schemas()
         self.__db_schema_maps = {}
         self.__granted = []
+        self.__granted_field_lookup = {}
         self.__revoked = []
         self.__raw_data = None
 
@@ -46,6 +51,29 @@ class UnificationDataFactory:
 
     def get_raw_data(self):
         return self.__raw_data
+
+    def __build_permissions(self):
+        granted = []
+        revoked = []
+        granted_field_lookup = {}
+        pbdb = PermissionBatchDatabase(default_pb_db())
+        permissions = UnifPermissions(get_ipfs_client(), self.__my_uapp_sc, pbdb)
+        permissions.load_consumer_perms(self.__requesting_app)
+
+        permission_obj = permissions.get_all_perms()
+        # schema_id = self.__my_db_schemas[0]['pkey']  # tmp - only 1 db schema
+
+        for user, perms in permission_obj['permissions'].items():
+            log.debug(perms)
+            schema_perms = perms['0']  # tmp - only 1 db schema
+            if schema_perms['perms'] == '':
+                revoked.append(eosio_account.string_to_name(user))
+            else:
+                granted.append(eosio_account.string_to_name(user))
+                native_id = self.__my_lookup.get_native_user_id(user)
+                granted_field_lookup[native_id] = schema_perms['perms'].split(',')
+
+        return granted, revoked, granted_field_lookup
 
     def __generate_user_list(self):
         native_user_ids = []
@@ -66,8 +94,10 @@ class UnificationDataFactory:
         return native_user_ids
 
     def __generate_data(self):
-        self.__granted, self.__revoked = \
-            self.__my_uapp_sc.get_perms_for_req_app(self.__requesting_app)
+        # self.__granted, self.__revoked = \
+        #     self.__my_uapp_sc.get_perms_for_req_app(self.__requesting_app)
+
+        self.__granted, self.__revoked, self.__granted_field_lookup = self.__build_permissions()
 
         native_user_ids = self.__generate_user_list()
 
@@ -111,7 +141,8 @@ class UnificationDataFactory:
             'native_user_ids': native_user_ids,
             'base64_encode_cols': base64_encode_cols,
             'providing_app': self.__acl_contract_acc,
-            'db_schema': db_schema
+            'db_schema': db_schema,
+            'granted_field_lookup': self.__granted_field_lookup
         }
 
         # grab list of EOS account names
