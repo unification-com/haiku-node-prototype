@@ -159,6 +159,7 @@ class MerkleTree:
         # proof['leaf'] = leaf_idx
         proof['leaf_pos'] = leaf_node.position
         proof['sibling'] = bytes_to_hex_str(leaf_node.sibling)
+        proof['levels'] = self.num_levels
 
         parent = bytes_to_hex_str(leaf_node.parent)
         ancestors = []
@@ -186,7 +187,7 @@ class MerkleTree:
             leaf = LEAF_PREFIX_BYTE + leaf_idx
             leaf_idx = sha256(sha256(leaf))
 
-        hash_prefix = f"0x0{len(proof['ancestors']) + 2}"
+        hash_prefix = f"0x0{proof['levels']}"
 
         if proof['leaf_pos'] == 'l':
             l_hash = leaf_idx
