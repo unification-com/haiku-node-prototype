@@ -19,7 +19,10 @@ from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.payload import bundle
 from haiku_node.keystore.keystore import UnificationKeystore
-from haiku_node.network.eos import get_eos_rpc_client, get_cleos
+from haiku_node.network.eos import get_eos_rpc_client, get_cleos, get_ipfs_client
+from haiku_node.permissions.perm_batch_db import (
+    default_db as pb_default_db, PermissionBatchDatabase)
+from haiku_node.permissions.permissions import UnifPermissions
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
@@ -257,6 +260,36 @@ def systest_process_permission_batches():
             log.error(f'systest_process_permission_batches failed: {e}')
 
 
+def systest_check_permission_requests():
+
+    ipfs = get_ipfs_client()
+    users = []
+    consumers = []
+    providers = []
+
+    for user, app_permission_list in demo_config['demo_permissions_new'].items():
+        if user not in users:
+            users.append(user)
+        for consumer, providers in app_permission_list.items():
+            if consumer not in consumers:
+                consumers.append(consumer)
+            for provider, permissions in providers.items():
+                if provider not in providers:
+                    providers.append(provider)
+
+    for provider in providers:
+        log.debug(f'run systest_check_permission_requests for {provider}')
+
+        provider_uapp = UnificationUapp(get_eos_rpc_client(), provider)
+
+        permission_db = PermissionBatchDatabase(pb_default_db())
+        permissions = UnifPermissions(ipfs, provider_uapp, permission_db)
+
+        for consumer in consumers:
+            permissions.load_consumer_perms(consumer)
+            log.debug(permissions.get_all_perms())
+
+
 def completion_banner():
     return '\n' \
            '==============================================\n' \
@@ -290,6 +323,10 @@ def wait():
     systest_user_permissions()
 
     systest_process_permission_batches()
+
+    time.sleep(3)
+
+    systest_check_permission_requests()
 
     manager = AccountManager(host=False)
 
