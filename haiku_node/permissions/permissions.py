@@ -174,6 +174,9 @@ class UnifPermissions:
     def __clear_perms(self):
         self.__consumer_perms = {}
 
+    def verify_permission(self, perm: dict):
+        return self.__verify_change_request(perm)
+
     def __verify_change_request(self, perm: dict) -> bool:
         perm_digest_sha = generate_perm_digest_sha(
             perm['perms'], perm['schema_id'],

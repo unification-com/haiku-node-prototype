@@ -278,7 +278,7 @@ def systest_check_permission_requests():
                     providers.append(provider)
 
     for provider in providers:
-        log.debug(f'run systest_check_permission_requests for {provider}')
+        log.debug(f'run systest_check_permission_requests for Provider {provider}')
 
         provider_uapp = UnificationUapp(get_eos_rpc_client(), provider)
 
@@ -286,8 +286,17 @@ def systest_check_permission_requests():
         permissions = UnifPermissions(ipfs, provider_uapp, permission_db)
 
         for consumer in consumers:
-            permissions.load_consumer_perms(consumer)
-            log.debug(permissions.get_all_perms())
+            if consumer != provider:
+                log.debug(f'Provider {provider}: load permissions for Consumer {consumer}')
+                permissions.load_consumer_perms(consumer)
+                for user in users:
+                    user_permissions = permissions.get_user_perms(user)
+                    for schema_id, user_perms in user_permissions.items():
+                        log.debug(f'User {user}, Schema {schema_id}: {user_perms}')
+                        is_valid = permissions.verify_permission(user_perms)
+                        log.debug(f'Perm sig valid: {is_valid}')
+
+                        assert is_valid
 
 
 def completion_banner():
