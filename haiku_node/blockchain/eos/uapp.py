@@ -133,7 +133,8 @@ class UnificationUapp:
         data_requests = {}
         table_data = self.__eos_rpc_client.get_table_rows(
             self.__acl_contract_acc,
-            self.__acl_contract_acc, self.__data_requests_table, True, 0, -1, -1)
+            self.__acl_contract_acc,
+            self.__data_requests_table, True, 0, -1, -1)
 
         for i in table_data['rows']:
             key = i['pkey']
