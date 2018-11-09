@@ -9,7 +9,7 @@ from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
-
+from haiku_node.network.eos import get_cleos
 
 BLOCK_SLEEP = 0.5
 
@@ -273,7 +273,7 @@ class AccountManager:
         print("Contacting MOTHER FOR: ", app)
 
         eos_client = Client(nodes=[self.cleos.get_nodeos_url()])
-        um = UnificationMother(eos_client, app)
+        um = UnificationMother(eos_client, app, get_cleos())
         print("Valid app: ", um.valid_app())
         assert um.valid_app() is True
 
