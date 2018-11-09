@@ -297,6 +297,23 @@ def systest_check_permission_requests():
                         log.debug(f'Perm sig valid: {is_valid}')
 
                         assert is_valid
+                        
+                        demo_conf_check = demo_config['demo_permissions_new'][user][consumer][provider]
+
+                        demo_conf_fields = demo_conf_check['fields']
+                        demo_conf_granted = demo_conf_check['granted']
+                        demo_conf_schema_id = demo_conf_check['schema_id']
+
+                        assert int(demo_conf_schema_id) == int(schema_id)
+
+                        if demo_conf_granted:
+                            log.debug("Permission granted")
+                            log.debug(f"Demo fields: {demo_conf_fields}, recorded fields: {user_perms['perms']}")
+                            assert demo_conf_fields == user_perms['perms']
+                        else:
+                            log.debug("Permission not granted. Recorded perms should be empty")
+                            log.debug(f"Recorded fields: {user_perms['perms']}")
+                            assert user_perms['perms'] == ''
 
 
 def completion_banner():
