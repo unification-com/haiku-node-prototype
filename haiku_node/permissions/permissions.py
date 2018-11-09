@@ -161,7 +161,25 @@ class UnifPermissions:
 
         return tree.get_root_str()
 
-    def load_perms(self, ipfs_hash):
+    def load_consumer_perms(self, consumer):
+        log.info(f'load_consumer_perms for {consumer}')
+        ipfs_hash, merkle_root = self.__uapp.get_ipfs_perms_for_req_app(
+            consumer)
+
+        if ipfs_hash is None or ipfs_hash == ZERO_MASK:
+            log.info("no Provider -> Consumer relationship yet, or Zero mask. Check stash")
+
+            latest_stash = self.__permission_db.get_stash(
+                consumer)
+
+            if latest_stash is not None:
+                ipfs_hash = latest_stash['ipfs_hash']
+                merkle_root = latest_stash['merkle_root']
+
+        if ipfs_hash is not None:
+            self.load_perms_from_ipfs(ipfs_hash)
+
+    def load_perms_from_ipfs(self, ipfs_hash):
         perms_str = self.__ipfs.get_json(ipfs_hash)
         self.__consumer_perms = json.loads(perms_str)
 
