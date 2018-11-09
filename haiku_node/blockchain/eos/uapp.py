@@ -142,6 +142,8 @@ class UnificationUapp:
                 'pkey': i['pkey'],
                 'provider_name': i['provider_name'],
                 'schema_id': i['schema_id'],
+                'ts_created': i['ts_created'],
+                'ts_updated': i['ts_updated'],
                 'req_type': i['req_type'],
                 'query': i['query'],
                 'price': i['price'],
