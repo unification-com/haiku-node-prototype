@@ -19,3 +19,10 @@ class IPFSDataStore:
         """
         f = self.api.cat(file_hash)
         return f.replace(b"\\n", b"\n")
+
+    def add_json(self, json_str):
+        ipfs_hash = self.api.add_json(json_str)
+        return ipfs_hash
+
+    def get_json(self, json_hash):
+        return self.api.get_json(json_hash)

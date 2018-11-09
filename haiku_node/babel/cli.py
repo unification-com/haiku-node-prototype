@@ -2,17 +2,20 @@ import logging
 import subprocess
 import json
 import requests
+
 from itertools import product
 
 import click
-from eosapi import Client
 
+from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.encryption.jwt.jwt import UnifJWT
+from haiku_node.network.eos import get_eos_rpc_client, get_cleos
+from haiku_node.utils.utils import (generate_nonce, generate_perm_digest_sha)
 from haiku_node.validation.validation import UnificationAppScValidation
 
 
@@ -35,9 +38,7 @@ def permissions(user):
     \b
     :param user: The EOS user account name to query.
     """
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+    eos_client = get_eos_rpc_client()
 
     apps = []
 
@@ -71,9 +72,7 @@ def schemas(app_name):
     \b
     :param app_name: The EOS app account name to query.
     """
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+    eos_client = get_eos_rpc_client()
 
     uapp_sc = UnificationUapp(eos_client, app_name)
 
@@ -130,6 +129,7 @@ def revoke(provider, requester, user, password):
     """
     click.echo(f"{bold(user)} is revoking access from {bold(requester)} "
                f"to their data in held {bold(provider)}:")
+
     cleos = EosioCleos()
     accounts = AccountManager()
     cleos.unlock_wallet(user, password)
@@ -243,26 +243,8 @@ def get_balance(user):
     return my_balance
 
 
-@main.command()
-@click.argument('user')
-@click.argument('password')
-@click.argument('provider')
-@click.argument('consumer')
-def permissions(user, password, provider, consumer, perm='active'):
-    """
-    Modify permissions
-
-    \b
-    :param user: The EOS user account name.
-    :param password: Wallet password for user.
-    :param provider: Provider EOS account name
-    :param consumer: Consumer EOS account name
-    :param perm: EOS Permission level to use for acquiring keys
-    """
-
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+def get_schemas(provider):
+    eos_client = get_eos_rpc_client()
 
     uapp_sc = UnificationUapp(eos_client, provider)
 
@@ -283,47 +265,26 @@ def permissions(user, password, provider, consumer, perm='active'):
         click.echo(f"Schema ID {key}:")
         click.echo(', '.join(fields))
 
-    schema_id = int(input(f"Select Schema ID:"))
+    return schemas_map
 
-    schema_fields = schemas_map[schema_id]
 
-    # ToDo - get user's current permission levels from provider/IPFS etc.
-    field_perms = {}
-
-    for f in schema_fields:
-        field_perms[f] = True
-        click.echo(f"{f} = True")
-
-    perm_action = input("Type field name to toggle permission, or 's' to send: ")
-
-    while perm_action != 's':
-        if perm_action in field_perms:
-            field_perms[perm_action] = not field_perms[perm_action]
-        else:
-            click.echo("Invalid field name")
-
-        for n, v in field_perms.items():
-            click.echo(f"{n} = {v}")
-
-        perm_action = input("Type field name to toggle permission, or 's' to send: ")
-
-    granted_fields = []
-    for n, v in field_perms.items():
-        if v:
-            granted_fields.append(n)
-
-    granted_fields_str = ",".join(granted_fields)
-
-    click.echo(f"{user} is Requesting permission change: Granting access to {consumer} "
-               f"in Provider {provider} for fields {granted_fields_str}")
-
-    cleos = EosioCleos()
+def post_permissions(user, password, perm, granted_fields_str: str,
+                     schema_id: int, provider, consumer):
+    cleos = get_cleos()
     cleos.unlock_wallet(user, password)
 
     pub_key = cleos.get_public_key(user, perm)
 
     # ToDo: find better way to get public key from EOS account
     private_key = cleos.get_private_key(user, password, pub_key)
+
+    p_nonce = generate_nonce(16)
+    perm_digest_sha = generate_perm_digest_sha(
+        granted_fields_str, schema_id,  p_nonce, consumer)
+
+    # sign permission changes
+    eosk = UnifEosKey(private_key)
+    p_sig = eosk.sign(perm_digest_sha)
 
     if len(private_key) > 0:
         jwt_payload = {
@@ -332,8 +293,10 @@ def permissions(user, password, provider, consumer, perm='active'):
             'aud': provider,  # RFC 7519 4.1.3
             'eos_perm': perm,
             'consumer': consumer,
-            'schema': schema_id,
-            'perms': granted_fields_str
+            'schema_id': schema_id,
+            'perms': granted_fields_str,
+            'p_nonce': p_nonce,
+            'p_sig': p_sig
         }
 
         cleos.lock_wallet(user)
@@ -366,6 +329,95 @@ def permissions(user, password, provider, consumer, perm='active'):
 
     else:
         click.echo(bold(f'Could not get private key for {pub_key}'))
+
+
+@main.command()
+@click.argument('user')
+@click.argument('password')
+@click.argument('provider')
+@click.argument('consumer')
+def modify_permissions(user, password, provider, consumer, perm='active'):
+    """
+    Modify permissions
+
+    \b
+    :param user: The EOS user account name.
+    :param password: Wallet password for user.
+    :param provider: Provider EOS account name.
+    :param consumer: Consumer EOS account name.
+    :param perm: EOS Permission level to use for acquiring keys.
+    """
+
+    schemas_map = get_schemas(provider)
+
+    schema_id = int(input(f"Select Schema ID:"))
+
+    schema_fields = schemas_map[schema_id]
+
+    # ToDo - get user's current permission levels from provider/IPFS etc.
+    field_perms = {}
+
+    for f in schema_fields:
+        field_perms[f] = True
+        click.echo(f"{f} = True")
+
+    perm_action = input(
+        "Type field name to toggle permission, or 's' to send: ")
+
+    while perm_action != 's':
+        if perm_action in field_perms:
+            field_perms[perm_action] = not field_perms[perm_action]
+        else:
+            click.echo("Invalid field name")
+
+        for n, v in field_perms.items():
+            click.echo(f"{n} = {v}")
+
+        perm_action = input(
+            "Type field name to toggle permission, or 's' to send: ")
+
+    granted_fields = []
+    for n, v in field_perms.items():
+        if v:
+            granted_fields.append(n)
+
+    granted_fields_str = ",".join(granted_fields)
+
+    click.echo(f"{user} is Requesting permission change: Granting access to "
+               f"{consumer} in Provider {provider} for fields {granted_fields}")
+
+    post_permissions(
+        user, password, perm, granted_fields_str, schema_id, provider, consumer)
+
+
+@main.command()
+@click.argument('user')
+@click.argument('password')
+@click.argument('provider')
+@click.argument('consumer')
+@click.argument('schema_id')
+@click.argument('granted_fields')
+def modify_permissions_direct(
+        user, password, provider, consumer, schema_id, granted_fields):
+    """
+    Modify permissions
+
+    \b
+    :param user: The EOS user account name.
+    :param password: Wallet password for user.
+    :param provider: Provider EOS account name.
+    :param consumer: Consumer EOS account name.
+    :param schema_id: The ID of the schema.
+    :param granted_fields: Comma separated list of granted fields.
+    """
+    int(schema_id)
+
+    click.echo(f"{user} is Requesting permission change: Granting access to "
+               f"{consumer} in Provider {provider} for fields {granted_fields}")
+
+    perm = 'active'
+    post_permissions(
+        user, password, perm, granted_fields, schema_id, provider, consumer)
 
 
 if __name__ == "__main__":
