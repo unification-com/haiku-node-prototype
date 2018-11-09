@@ -237,6 +237,26 @@ def systest_user_permissions():
                 assert (config_granted == acl_perm) is True
 
 
+def systest_process_permission_batches():
+    appnames = ['app1', 'app2', 'app3']
+
+    for app_name in appnames:
+        log.debug(f'run systest_process_permission_batches for {app_name}')
+        mother = UnificationMother(get_eos_rpc_client(), app_name, get_cleos())
+        provider_obj = Provider(app_name, 'https', mother)
+
+        password = demo_config['system'][app_name]['password']
+        encoded_password = str.encode(password)
+        keystore = UnificationKeystore(encoded_password, app_name=app_name,
+                                   keystore_path=Path('data/keys'))
+
+        client = HaikuDataClient(keystore)
+        try:
+            client.process_permissions_batch(provider_obj)
+        except Exception as e:
+            log.error(f'systest_process_permission_batches failed: {e}')
+
+
 def completion_banner():
     return '\n' \
            '==============================================\n' \
@@ -268,6 +288,8 @@ def wait():
     systest_smart_contract_mother()
     systest_smart_contract_acl()
     systest_user_permissions()
+
+    systest_process_permission_batches()
 
     manager = AccountManager(host=False)
 

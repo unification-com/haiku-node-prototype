@@ -80,3 +80,5 @@ class PermissionBatcher:
                 self.db.delete_stash(ret_d['stash_id_committed'])
 
         log.debug(ret_data)
+
+        return ret_data
