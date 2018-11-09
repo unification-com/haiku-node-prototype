@@ -366,7 +366,7 @@ def systest_merkle_proof_permissions():
 
                     log.debug(f'Leaf is valid: {is_good}')
 
-                    # assert is_good
+                    assert is_good
 
 
 def completion_banner():
