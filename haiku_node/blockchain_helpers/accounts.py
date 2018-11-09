@@ -2,6 +2,7 @@ import json
 import logging
 import time
 
+import requests
 from eosapi import Client
 from pathlib import Path
 
@@ -9,7 +10,8 @@ from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
-from haiku_node.network.eos import get_cleos
+from haiku_node.client import Provider
+from haiku_node.network.eos import get_cleos, get_eos_rpc_client
 
 BLOCK_SLEEP = 0.5
 
@@ -270,16 +272,42 @@ class AccountManager:
             time.sleep(BLOCK_SLEEP)
 
     def request_permission_change(self, user, app_permission_list, private_key):
+        from haiku_node.babel.cli import generate_payload  # tests fail if imported globally
+
         log.info(f"Process {user} permission change requests")
         for consumer, providers in app_permission_list.items():
             for provider, permissions in providers.items():
                 granted = permissions['granted']
-                fields = permissions['fields']
-                schema_id = permissions['schema_id']
+                if granted:
+                    fields = permissions['fields']
+                else:
+                    fields = ''
+                schema_id = int(permissions['schema_id'])
 
                 log.debug(f'request_permission_change {user} requesting {provider} '
-                          f'update perms for {consumer} in schema {schema_id}: {granted} {fields}')
+                          f'update perms for {consumer} '
+                          f'in schema {schema_id}: {granted} {fields}')
 
+                payload = generate_payload(user, private_key, provider, consumer,
+                                           fields, 'modperms', schema_id)
+
+                log.debug(f'request_permission_change payload: {json.dumps(payload)}')
+
+                mother = UnificationMother(get_eos_rpc_client(), provider, get_cleos())
+                provider_obj = Provider(provider, 'https', mother)
+                url = f"{provider_obj.base_url()}/modify_permission"
+
+                r = requests.post(url, json=payload, verify=False)
+
+                d = r.json()
+
+                if r.status_code != 200:
+                    raise Exception(d['message'])
+
+                proc_id = d['proc_id']
+                ret_app = d['app']
+
+                log.debug(f"request_permission_change success: {ret_app}: Process ID {proc_id}")
 
     def run_test_mother(self, app, demo_apps):
         print("Contacting MOTHER FOR: ", app)
@@ -416,9 +444,14 @@ def make_default_accounts(
             pub_key, priv_key = manager.create_key()
             manager.wallet_import_key(username, priv_key)
             manager.create_account_permissions(username, 'modperms', pub_key)
-            manager.request_permission_change(username,
-                                              demo_config['demo_permissions_new'][username],
-                                              priv_key)
+            time.sleep(BLOCK_SLEEP)
+
+            try:
+                manager.request_permission_change(username,
+                                                  demo_config['demo_permissions_new'][username],
+                                                  priv_key)
+            except Exception as e:
+                log.error(f'request_permission_change Failed with error: {e}')
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
