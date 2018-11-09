@@ -17,6 +17,7 @@ from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.eos.und_rewards import UndRewards
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
+from haiku_node.encryption.merkle.merkle_tree import MerkleTree
 from haiku_node.encryption.payload import bundle
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.network.eos import get_eos_rpc_client, get_cleos, get_ipfs_client
@@ -260,9 +261,7 @@ def systest_process_permission_batches():
             log.error(f'systest_process_permission_batches failed: {e}')
 
 
-def systest_check_permission_requests():
-
-    ipfs = get_ipfs_client()
+def compile_actors():
     users = []
     consumers = []
     providers = []
@@ -276,6 +275,14 @@ def systest_check_permission_requests():
             for provider, permissions in providers.items():
                 if provider not in providers:
                     providers.append(provider)
+
+    return users, consumers, providers
+
+
+def systest_check_permission_requests():
+
+    ipfs = get_ipfs_client()
+    users, consumers, providers = compile_actors()
 
     for provider in providers:
         log.debug(f'run systest_check_permission_requests for Provider {provider}')
@@ -297,7 +304,7 @@ def systest_check_permission_requests():
                         log.debug(f'Perm sig valid: {is_valid}')
 
                         assert is_valid
-                        
+
                         demo_conf_check = demo_config['demo_permissions_new'][user][consumer][provider]
 
                         demo_conf_fields = demo_conf_check['fields']
@@ -314,6 +321,52 @@ def systest_check_permission_requests():
                             log.debug("Permission not granted. Recorded perms should be empty")
                             log.debug(f"Recorded fields: {user_perms['perms']}")
                             assert user_perms['perms'] == ''
+
+
+def systest_merkle_proof_permissions():
+    ipfs = get_ipfs_client()
+    users, consumers, providers = compile_actors()
+
+    for provider in providers:
+        log.debug(f'run systest_merkle_proof_permissions for Provider {provider}')
+
+        provider_uapp = UnificationUapp(get_eos_rpc_client(), provider)
+
+        permission_db = PermissionBatchDatabase(pb_default_db())
+        permissions = UnifPermissions(ipfs, provider_uapp, permission_db)
+
+        for consumer in consumers:
+            if consumer != provider:
+                log.debug(f'Provider {provider}: load permissions for Consumer {consumer}')
+                permissions.load_consumer_perms(consumer)
+
+                permissions_obj = permissions.get_all_perms()
+
+                tree = MerkleTree()
+
+                for user, perm in permissions_obj['permissions'].items():
+                    tree.add_leaf(json.dumps(perm))
+
+                tree.grow_tree()
+
+                log.debug(f"Generated merkle root: {tree.get_root_str()}")
+                log.debug(f"Recorded merkle root: {permissions_obj['merkle_root']}")
+
+                for user, perm in permissions_obj['permissions'].items():
+                    requested_leaf = json.dumps(perm)
+                    proof_chain = tree.get_proof(requested_leaf, is_hashed=False)
+                    log.debug(f'Permission leaf for {user}: {requested_leaf}')
+                    log.debug(f'Proof chain for {user} permission leaf: {json.dumps(proof_chain)}')
+
+                    # simulate only having access to leaf, root and proof chain for leaf
+                    verify_tree = MerkleTree()
+
+                    is_good = verify_tree.verify_leaf(requested_leaf, permissions_obj['merkle_root'],
+                                                      proof_chain, is_hashed=False)
+
+                    log.debug(f'Leaf is valid: {is_good}')
+
+                    # assert is_good
 
 
 def completion_banner():
@@ -353,6 +406,7 @@ def wait():
     time.sleep(3)
 
     systest_check_permission_requests()
+    systest_merkle_proof_permissions()
 
     manager = AccountManager(host=False)
 

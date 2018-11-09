@@ -18,6 +18,7 @@ class UnifPermissions:
                  permission_db: PermissionBatchDatabase):
         self.__permission_db = permission_db
         self.__consumer_perms = {}
+        self.__merkle_root_for_perms = None
         self.__change_requests = {}
         self.__ipfs = ipfs
         self.__uapp = provider_uapp
@@ -155,6 +156,8 @@ class UnifPermissions:
                 ipfs_hash = latest_stash['ipfs_hash']
                 merkle_root = latest_stash['merkle_root']
 
+        self.__merkle_root_for_perms = merkle_root
+
         if ipfs_hash is not None:
             self.load_perms_from_ipfs(ipfs_hash)
 
@@ -169,10 +172,15 @@ class UnifPermissions:
             return None
 
     def get_all_perms(self):
-        return self.__consumer_perms
+        permission_obj = {
+            'merkle_root': self.__merkle_root_for_perms,
+            'permissions': self.__consumer_perms
+        }
+        return permission_obj
 
     def __clear_perms(self):
         self.__consumer_perms = {}
+        self.__merkle_root_for_perms = None
 
     def verify_permission(self, perm: dict):
         return self.__verify_change_request(perm)
