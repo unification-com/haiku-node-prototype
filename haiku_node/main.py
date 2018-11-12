@@ -12,6 +12,7 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.network.eos import get_eos_rpc_client, get_cleos
+from haiku_node.permissions.perm_batch_db import default_db
 from haiku_node.permissions.permission_batcher import PermissionBatcher
 from haiku_node.rpc import app
 
@@ -111,14 +112,14 @@ def fetch(provider, request_hash, user):
 
     # tmp - get the price for the transfer from Schema[0] in provider's UApp SC
     # This will possibly be determined externally as part of the B2B agreement
-    provider_uapp_sc = UnificationUapp(eos_client, provider)
+    provider_uapp_sc = UnificationUapp(eos_client, provider.name)
     db_schema = provider_uapp_sc.get_db_schema_by_pkey(0)  # tmp - only 1 schema
     sched_price = db_schema['price_sched']
 
     # initiate request in Consumer's UApp SC
     consumer_uapp_sc = UnificationUapp(eos_client, requesting_app)
     latest_req_id = consumer_uapp_sc.init_data_request(
-        provider, "0", "0", sched_price)
+        provider.name, "0", "0", sched_price)
 
     client = HaikuDataClient(keystore)
     data_path = client.make_data_request(
@@ -216,7 +217,7 @@ def uapp_store():
 
 @main.command()
 def process_batch():
-    pb = PermissionBatcher()
+    pb = PermissionBatcher(default_db())
     pb.process_batch_queue()
 
 

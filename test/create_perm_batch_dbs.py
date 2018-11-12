@@ -31,9 +31,12 @@ def create_perm_batch_db(app_name: str):
         log.info(f"{db_name} exists. Delete")
         os.unlink(db_name)
 
+    _create_perm_batch_db(db_name)
+
+
+def _create_perm_batch_db(db_name):
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
-
     c.execute('''CREATE TABLE permissions (op_id INTEGER PRIMARY KEY, 
                  end_user_account text, 
                  consumer_account text, 
@@ -45,14 +48,11 @@ def create_perm_batch_db(app_name: str):
                  processed INTEGER,
                  proof_tx text NULL,
                  stash_id INTEGER NULL)''')
-
     conn.commit()
-
     c.execute('''CREATE TABLE permission_stash (stash_id INTEGER PRIMARY KEY,
                  consumer_account text,
                  ipfs_hash text,
                  merkle_root text)''')
-
     conn.commit()
     conn.close()
 

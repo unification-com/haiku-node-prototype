@@ -2,7 +2,6 @@ import flask
 import hashlib
 
 from cryptography.exceptions import InvalidSignature
-from eosapi import Client
 
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.blockchain.eos.uapp import UnificationUapp
@@ -11,7 +10,9 @@ from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.encryption.jwt.exceptions import (
     InvalidJWT, InvalidPublicKey, JWTSignatureMismatch)
 from haiku_node.encryption.jwt.jwt import UnifJWT
-from haiku_node.network.eos import get_eos_rpc_client, get_cleos
+from haiku_node.network.eos import (
+    get_eos_rpc_client, get_cleos, get_ipfs_client)
+from haiku_node.permissions.perm_batch_db import default_db
 from haiku_node.permissions.permission_batcher import PermissionBatcher
 from haiku_node.permissions.permissions import UnifPermissions
 from haiku_node.validation.validation import UnificationAppScValidation
@@ -164,8 +165,7 @@ def data_request():
 
         bundle_d = unbundle(app.keystore, sender, d)
 
-        eos_client = Client(
-            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+        eos_client = get_eos_rpc_client()
 
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP. Since we only need to validate the app at this point,
@@ -185,7 +185,10 @@ def data_request():
             request_id = bundle_d.get('request_id')
 
             # before processing data, check for any stashed permissions
-            permissions = UnifPermissions()
+            ipfs = get_ipfs_client()
+            provider_uapp = UnificationUapp(eos_client, conf['acl_contract'])
+
+            permissions = UnifPermissions(ipfs, provider_uapp)
             permissions.check_and_process_stashed(sender)
 
             return obtain_data(
@@ -217,8 +220,7 @@ def data_ingest():
         recipient = conf['acl_contract']
         bundle_d = unbundle(app.keystore, sender, d)
 
-        eos_client = Client(
-            nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+        eos_client = get_eos_rpc_client()
 
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP. Since we only need to validate the app at this point,
@@ -294,7 +296,7 @@ def modify_permission():
                     return generic_error(
                         f"Invalid field list: {payload['perms']}")
 
-        batcher = PermissionBatcher()
+        batcher = PermissionBatcher(default_db())
 
         rowid = batcher.add_to_queue(issuer,
                                      payload['consumer'],
