@@ -72,6 +72,8 @@ class UnificationDataFactory:
                 granted.append(eosio_account.string_to_name(user))
                 native_id = self.__my_lookup.get_native_user_id(user)
                 granted_field_lookup[native_id] = schema_perms['perms'].split(',')
+                # required
+                granted_field_lookup[native_id].append('account_name')
 
         return granted, revoked, granted_field_lookup
 

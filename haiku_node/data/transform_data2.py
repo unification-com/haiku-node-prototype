@@ -64,6 +64,11 @@ class TransformDataJSON:
                 file_read = file.read()
                 d[b64_col] = base64.encodebytes(file_read).decode('UTF-8')
 
+            # loop through fields and filter granted
+            for k, v in d.items():
+                if k not in self.__data_source_parms['granted_field_lookup'][nid]:
+                    d[k] = None
+
             prepared_dump.append(d)
 
         return prepared_dump
