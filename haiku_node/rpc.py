@@ -362,6 +362,7 @@ def get_proof():
     permissions.load_consumer_perms(consumer)
     proof = permissions.get_proof(user)
 
+    # ToDo: send as JWT
     return_d = {
         'proof': proof
     }

@@ -377,6 +377,7 @@ def proove_permission(user, provider, consumer):
     if r.status_code != 200:
         raise Exception(d['message'])
 
+    # ToDo: receive as JWT and verify
     proof_chain = d['proof']
 
     click.echo(f'IPFS Hash from {provider} SC: {ipfs_hash}')
