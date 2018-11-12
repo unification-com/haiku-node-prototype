@@ -208,39 +208,6 @@ def systest_smart_contract_acl():
             assert (conf_schema == acl_contract_schema['schema']) is True
 
 
-def systest_user_permissions():
-    log.info('Running systest user permissions')
-    d_conf = json.loads(Path('data/demo_config.json').read_text())
-    demo_permissions = d_conf['demo_permissions']
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
-
-    for user_perms in demo_permissions['permissions']:
-        user = user_perms['user']
-        user_acc_uint64 = eosio_account.string_to_name(user)
-
-        for haiku in user_perms['haiku_nodes']:
-            app = haiku['app']
-            uapp_sc = UnificationUapp(eos_client, app)
-            for req_app in haiku['req_apps']:
-                log.info(
-                    f"Check {user} permissions granted for {req_app} in {app}")
-                config_granted = req_app['granted']
-                acl_granted, acl_revoked = uapp_sc.get_perms_for_req_app(
-                    req_app['account'])
-                acl_perm = False
-                if user_acc_uint64 in acl_granted:
-                    acl_perm = True
-                elif user_acc_uint64 in acl_revoked:
-                    acl_perm = False
-
-                log.info(f"Expecting - config.json: {config_granted}")
-                log.info(f"Actual - ACL/Meta Data Smart Contract: {acl_perm}")
-
-                assert (config_granted == acl_perm) is True
-
-
 def systest_process_permission_batches():
     appnames = ['app1', 'app2', 'app3']
 
@@ -399,7 +366,6 @@ def wait():
     log.info('Ensure accounts are created, and contracts populated')
     systest_smart_contract_mother()
     systest_smart_contract_acl()
-    systest_user_permissions()
 
     systest_process_permission_batches()
 
