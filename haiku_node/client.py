@@ -3,7 +3,6 @@ import tempfile
 import hashlib
 
 from pathlib import Path
-from eosapi import Client
 
 import logging
 import requests
