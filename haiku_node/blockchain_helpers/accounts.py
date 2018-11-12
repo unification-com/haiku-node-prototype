@@ -247,15 +247,6 @@ class AccountManager:
             ['push', 'action', 'unif.mother', 'invalidate', json.dumps(d),
              '-p', 'unif.mother'])
 
-    def grant(self, provider, requester, user):
-        d = {
-            'user_account': user,
-            'requesting_app': requester,
-            'level': 1
-        }
-        return self.cleos.run(
-            ['push', 'action', provider, 'modifyperm', json.dumps(d), '-p', user])
-
     def set_rsa_pub_key_hash(self, public_key_hash, provider):
         d = {
             'rsa_key': public_key_hash
@@ -263,30 +254,6 @@ class AccountManager:
         return self.cleos.run(
             ['push', 'action', provider, 'setrsakey', json.dumps(d),
              '-p', f'{provider}@modrsakey'])
-
-
-    def revoke(self, provider, requester, user):
-        d = {
-            'user_account': user,
-            'requesting_app': requester,
-            'level': 0
-        }
-        return self.cleos.run(
-            ['push', 'action', provider, 'modifyperm', json.dumps(d), '-p', user])
-
-    def set_permissions(self, demo_permissions):
-        print("set_permissions")
-        for user_perms in demo_permissions['permissions']:
-            user = user_perms['user']
-            for haiku in user_perms['haiku_nodes']:
-                app = haiku['app']
-                for req_app in haiku['req_apps']:
-                    if req_app['granted']:
-                        self.grant(app, req_app['account'], user)
-                    else:
-                        self.revoke(app, req_app['account'], user)
-            print("Wait for transactions to process")
-            time.sleep(BLOCK_SLEEP)
 
     def request_permission_change(self, user, app_permission_list, private_key):
         log.info(f"Process {user} permission change requests")
@@ -463,10 +430,6 @@ def make_default_accounts(
                                                   priv_key)
             except Exception as e:
                 log.error(f'request_permission_change Failed with error: {e}')
-
-    print("Wait for transactions to process")
-    time.sleep(BLOCK_SLEEP)
-    manager.set_permissions(demo_permissions)
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
