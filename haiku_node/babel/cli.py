@@ -12,7 +12,8 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
-from haiku_node.network.eos import get_eos_rpc_client, get_cleos
+from haiku_node.encryption.merkle.merkle_tree import MerkleTree
+from haiku_node.network.eos import get_eos_rpc_client, get_cleos, get_ipfs_client
 from haiku_node.permissions.utils import generate_payload
 
 
@@ -339,9 +340,15 @@ def proove_permission(user, provider, consumer):
         'user': user
     }
 
-    mother = UnificationMother(get_eos_rpc_client(), provider, get_cleos())
+    eos_rpc_client = get_eos_rpc_client()
+    ipfs_client = get_ipfs_client()
+    uapp_sc = UnificationUapp(eos_rpc_client, provider)
+
+    ipfs_hash, merkle_root = uapp_sc.get_ipfs_perms_for_req_app(consumer)
+
+    mother = UnificationMother(eos_rpc_client, provider, get_cleos())
     provider_obj = Provider(provider, 'https', mother)
-    url = f"{provider_obj.base_url()}/modify_permission"
+    url = f"{provider_obj.base_url()}/get_proof"
 
     r = requests.post(url, json=payload, verify=False)
 
@@ -349,6 +356,26 @@ def proove_permission(user, provider, consumer):
 
     if r.status_code != 200:
         raise Exception(d['message'])
+
+    proof_chain = d['proof']
+
+    click.echo(f'IPFS Hash from {provider} SC: {ipfs_hash}')
+    click.echo(f'Merkle Root from {provider} SC: {merkle_root}')
+
+    permissions_str = ipfs_client.get_json(ipfs_hash)
+
+    permissions_json = json.loads(permissions_str)
+
+    requested_leaf = json.dumps(permissions_json[user])
+
+    click.echo(f'Current permissions in SC/IPFS: {requested_leaf}')
+    click.echo(f'Proof Chain from {url}: {proof_chain}')
+
+    verify_tree = MerkleTree()
+    is_good = verify_tree.verify_leaf(requested_leaf, merkle_root,
+                                      proof_chain, is_hashed=False)
+
+    click.echo(f'Permissions are valid: {is_good}')
 
     click.echo(d)
 
