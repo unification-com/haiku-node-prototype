@@ -233,7 +233,7 @@ def compile_actors():
     consumers = []
     providers = []
 
-    for user, app_permission_list in demo_config['demo_permissions_new'].items():
+    for user, app_permission_list in demo_config['demo_permissions'].items():
         if user not in users:
             users.append(user)
         for consumer, providers in app_permission_list.items():
@@ -272,7 +272,7 @@ def systest_check_permission_requests():
 
                         assert is_valid
 
-                        demo_conf_check = demo_config['demo_permissions_new'][user][consumer][provider]
+                        demo_conf_check = demo_config['demo_permissions'][user][consumer][provider]
 
                         demo_conf_fields = demo_conf_check['fields']
                         demo_conf_granted = demo_conf_check['granted']

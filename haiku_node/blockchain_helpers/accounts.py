@@ -331,7 +331,6 @@ class AccountManager:
 def make_default_accounts(
         manager: AccountManager, demo_config, appnames, usernames):
     demo_apps = demo_config['demo_apps']
-    demo_permissions = demo_config['demo_permissions']
     test_net = demo_config['test_net']
 
     for username in usernames + appnames:
@@ -423,7 +422,7 @@ def make_default_accounts(
 
             try:
                 manager.request_permission_change(username,
-                                                  demo_config['demo_permissions_new'][username],
+                                                  demo_config['demo_permissions'][username],
                                                   priv_key)
             except Exception as e:
                 log.error(f'request_permission_change Failed with error: {e}')
