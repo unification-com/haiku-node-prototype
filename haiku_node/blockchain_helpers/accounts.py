@@ -2,6 +2,7 @@ import json
 import logging
 import time
 
+import requests
 from eosapi import Client
 from pathlib import Path
 
@@ -9,7 +10,9 @@ from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
-from haiku_node.network.eos import get_cleos
+from haiku_node.client import Provider
+from haiku_node.network.eos import get_cleos, get_eos_rpc_client
+from haiku_node.permissions.utils import generate_payload
 
 BLOCK_SLEEP = 0.5
 
@@ -91,11 +94,27 @@ class AccountManager:
         print(ret.stdout)
 
     def lock_account_permissions(self, username, smart_contract, contract_action, perm_name):
-        log.info(f"Lock permission {perm_name} for {username} to action {contract_action} in contract {smart_contract}")
+        log.info(f"Lock permission {perm_name} for {username} to "
+                 f"action {contract_action} in contract {smart_contract}")
         ret = self.cleos.run(["set", "action", "permission", username,
                           smart_contract, contract_action, perm_name, '-p', f'{username}@active'])
 
         print(ret.stdout)
+
+    def init_permission_structures(self, appnames):
+        for consumer in appnames:
+            for provider in appnames:
+                if consumer != provider:
+                    self.init_permission_struct(provider, consumer)
+
+    def init_permission_struct(self, provider, consumer):
+        log.debug(f'init_permission_struct Provider {provider}, Consumer {consumer}')
+        d = {
+            'consumer_id': consumer
+        }
+        self.cleos.run(
+            ['push', 'action', provider, 'initperm',
+             json.dumps(d), '-p', f'{consumer}@modreq'])
 
     def mother_contract(self, username):
         log.info('Associating mother contracts')
@@ -269,6 +288,42 @@ class AccountManager:
             print("Wait for transactions to process")
             time.sleep(BLOCK_SLEEP)
 
+    def request_permission_change(self, user, app_permission_list, private_key):
+        log.info(f"Process {user} permission change requests")
+        for consumer, providers in app_permission_list.items():
+            for provider, permissions in providers.items():
+                granted = permissions['granted']
+                if granted:
+                    fields = permissions['fields']
+                else:
+                    fields = ''
+                schema_id = int(permissions['schema_id'])
+
+                log.debug(f'request_permission_change {user} requesting {provider} '
+                          f'update perms for {consumer} '
+                          f'in schema {schema_id}: {granted} {fields}')
+
+                payload = generate_payload(user, private_key, provider, consumer,
+                                           fields, 'modperms', schema_id)
+
+                log.debug(f'request_permission_change payload: {json.dumps(payload)}')
+
+                mother = UnificationMother(get_eos_rpc_client(), provider, get_cleos())
+                provider_obj = Provider(provider, 'https', mother)
+                url = f"{provider_obj.base_url()}/modify_permission"
+
+                r = requests.post(url, json=payload, verify=False)
+
+                d = r.json()
+
+                if r.status_code != 200:
+                    raise Exception(d['message'])
+
+                proc_id = d['proc_id']
+                ret_app = d['app']
+
+                log.debug(f"request_permission_change success: {ret_app}: Process ID {proc_id}")
+
     def run_test_mother(self, app, demo_apps):
         print("Contacting MOTHER FOR: ", app)
 
@@ -389,6 +444,7 @@ def make_default_accounts(
                 for prov_app in appnames:
                     if prov_app != appname:
                         manager.lock_account_permissions(appname, prov_app, 'initperm', app_account_perm)
+                        time.sleep(BLOCK_SLEEP)
 
         manager.set_schema(demo_apps, appname)
         print("Wait for transactions to process")
@@ -397,6 +453,10 @@ def make_default_accounts(
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
         manager.issue_unds(demo_apps, appname)
+        print("Wait for transactions to process")
+        time.sleep(BLOCK_SLEEP)
+
+    manager.init_permission_structures(appnames)
 
     for username in usernames:
         if username not in ['unif.mother', 'unif.token']:  # Todo: maybe have sys_users list?
@@ -404,6 +464,14 @@ def make_default_accounts(
             pub_key, priv_key = manager.create_key()
             manager.wallet_import_key(username, priv_key)
             manager.create_account_permissions(username, 'modperms', pub_key)
+            time.sleep(BLOCK_SLEEP)
+
+            try:
+                manager.request_permission_change(username,
+                                                  demo_config['demo_permissions_new'][username],
+                                                  priv_key)
+            except Exception as e:
+                log.error(f'request_permission_change Failed with error: {e}')
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)

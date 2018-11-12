@@ -105,6 +105,42 @@ permission_json = {
   }
 }
 
+permission_json_three = {
+  "user1": {
+    "0": {
+      "perms": "DataBlob,BlobSize",
+      "p_nonce": "1595621598716744",
+      "schema_id": "0",
+      "consumer": "app1",
+      "user": "user1",
+      "b_nonce": "5215208105881115",
+      "b_time": 1541500297.800053
+    }
+  },
+  "user2": {
+    "0": {
+      "perms": "DataBlob",
+      "p_nonce": "1917933605986945",
+      "schema_id": "0",
+      "consumer": "app1",
+      "user": "user2",
+      "b_nonce": "2322186965091853",
+      "b_time": 1541500298.0310578
+    }
+  },
+  "user3": {
+    "0": {
+      "perms": "BlobSize",
+      "p_nonce": "0238349944470722",
+      "schema_id": "0",
+      "consumer": "app1",
+      "user": "user3",
+      "b_nonce": "5835621777972842",
+      "b_time": 1541500298.2610202
+    }
+  }
+}
+
 
 def test_grow_no_leaves_exception():
     tree = MerkleTree()
@@ -209,6 +245,23 @@ def test_proof_new_tree():
     assert is_good
 
 
+def test_proof_all():
+    tree = MerkleTree()
+
+    for user, perm in permission_json.items():
+        tree.add_leaf(json.dumps(perm))
+
+    tree.grow_tree()
+
+    for user, perm in permission_json.items():
+        requested_leaf = json.dumps(permission_json[user])
+        proof = tree.get_proof(requested_leaf, is_hashed=False)
+        is_good = tree.verify_leaf(requested_leaf, tree.get_root_str(),
+                                   proof, is_hashed=False)
+
+        assert is_good
+
+
 def test_load_from_seed():
     tree = MerkleTree()
 
@@ -283,3 +336,19 @@ def test_leaf_proof_mismatch():
                                proof, is_hashed=False)
 
     assert not is_good
+
+
+def test_three_leaves():
+    tree = MerkleTree()
+    for user, perm in permission_json_three.items():
+        tree.add_leaf(json.dumps(perm))
+
+    tree.grow_tree()
+
+    for user, perm in permission_json_three.items():
+        requested_leaf = json.dumps(permission_json_three[user])
+        proof = tree.get_proof(requested_leaf, is_hashed=False)
+        is_good = tree.verify_leaf(requested_leaf, tree.get_root_str(),
+                                   proof, is_hashed=False)
+
+        assert is_good

@@ -18,6 +18,7 @@ class UnifPermissions:
                  permission_db: PermissionBatchDatabase):
         self.__permission_db = permission_db
         self.__consumer_perms = {}
+        self.__merkle_root_for_perms = None
         self.__change_requests = {}
         self.__ipfs = ipfs
         self.__uapp = provider_uapp
@@ -138,6 +139,52 @@ class UnifPermissions:
     def get_change_requests(self):
         return self.__change_requests
 
+    def load_consumer_perms(self, consumer):
+        log.info(f'load_consumer_perms for {consumer}')
+        self.__clear_perms()
+
+        ipfs_hash, merkle_root = self.__uapp.get_ipfs_perms_for_req_app(
+            consumer)
+
+        if ipfs_hash is None or ipfs_hash == ZERO_MASK:
+            log.info("no Provider -> Consumer relationship yet, or Zero mask. Check stash")
+
+            latest_stash = self.__permission_db.get_stash(
+                consumer)
+
+            if latest_stash is not None:
+                ipfs_hash = latest_stash['ipfs_hash']
+                merkle_root = latest_stash['merkle_root']
+
+        self.__merkle_root_for_perms = merkle_root
+
+        if ipfs_hash is not None:
+            self.load_perms_from_ipfs(ipfs_hash)
+
+    def load_perms_from_ipfs(self, ipfs_hash):
+        perms_str = self.__ipfs.get_json(ipfs_hash)
+        self.__consumer_perms = json.loads(perms_str)
+
+    def get_user_perms(self, user_account):
+        if user_account in self.__consumer_perms:
+            return self.__consumer_perms[user_account]
+        else:
+            return None
+
+    def get_all_perms(self):
+        permission_obj = {
+            'merkle_root': self.__merkle_root_for_perms,
+            'permissions': self.__consumer_perms
+        }
+        return permission_obj
+
+    def __clear_perms(self):
+        self.__consumer_perms = {}
+        self.__merkle_root_for_perms = None
+
+    def verify_permission(self, perm: dict):
+        return self.__verify_change_request(perm)
+
     def __verify_change_request(self, perm: dict) -> bool:
         perm_digest_sha = generate_perm_digest_sha(
             perm['perms'], perm['schema_id'],
@@ -160,13 +207,3 @@ class UnifPermissions:
         tree.grow_tree()
 
         return tree.get_root_str()
-
-    def load_perms(self, ipfs_hash):
-        perms_str = self.__ipfs.get_json(ipfs_hash)
-        self.__consumer_perms = json.loads(perms_str)
-
-    def get_user_perms(self, user_account):
-        if user_account in self.__consumer_perms:
-            return self.__consumer_perms[user_account]
-        else:
-            return None

@@ -16,7 +16,8 @@ data_source_parms = {
         'base64_encode_cols': [],
         'providing_app': 'app1',
         'unification_id_map': {'1': 'user1', '2': 'user2'},
-        'db_schema': {}
+        'db_schema': {},
+        'granted_field_lookup': {'1': ['Heartrate', 'Pulse'], '2': ['Heartrate', 'Pulse']}
     },
     'app2': {
         'userTable': 'BlobCreator',
@@ -28,7 +29,8 @@ data_source_parms = {
         'base64_encode_cols': [],
         'providing_app': 'app2',
         'unification_id_map': {'1': 'user1', '2': 'user2'},
-        'db_schema': {}
+        'db_schema': {},
+        'granted_field_lookup': {'1': ['DataBlob', 'BlobSize'], '2': ['DataBlob', 'BlobSize']}
     },
     'app3': {
         'userTable': 'ImageOwners',
@@ -40,7 +42,8 @@ data_source_parms = {
         'base64_encode_cols': [],
         'providing_app': 'app3',
         'unification_id_map': {'1': 'user1', '2': 'user2'},
-        'db_schema': {}
+        'db_schema': {},
+        'granted_field_lookup': {'1': ['Image'], '2': ['Image']}
     }
 }
 

@@ -13,7 +13,7 @@ from haiku_node.encryption.jwt.jwt import UnifJWT
 from haiku_node.network.eos import (
     get_eos_rpc_client, get_cleos, get_ipfs_client)
 from haiku_node.permissions.perm_batch_db import (
-    default_db, PermissionBatchDatabase)
+    default_db as pb_default_db, PermissionBatchDatabase)
 from haiku_node.permissions.permission_batcher import PermissionBatcher
 from haiku_node.permissions.permissions import UnifPermissions
 from haiku_node.validation.validation import UnificationAppScValidation
@@ -189,7 +189,7 @@ def data_request():
             ipfs = get_ipfs_client()
             provider_uapp = UnificationUapp(eos_client, conf['acl_contract'])
 
-            permission_db = PermissionBatchDatabase(default_db())
+            permission_db = PermissionBatchDatabase(pb_default_db())
             permissions = UnifPermissions(ipfs, provider_uapp, permission_db)
             permissions.check_and_process_stashed(sender)
 
@@ -298,7 +298,7 @@ def modify_permission():
                     return generic_error(
                         f"Invalid field list: {payload['perms']}")
 
-        batcher = PermissionBatcher(default_db())
+        batcher = PermissionBatcher(pb_default_db())
 
         rowid = batcher.add_to_queue(issuer,
                                      payload['consumer'],
@@ -330,3 +330,32 @@ def modify_permission():
     except Exception as e:
         logger.exception(e)
         return generic_error()
+
+
+@app.route('/process_permission_batch', methods=['POST'])
+def process_permission_batch():
+    try:
+        d = flask.request.get_json()
+        conf = app.unification_config
+
+        sender = d['eos_account_name']
+        me = conf['acl_contract']
+
+        if sender != me:
+            return generic_error(f'Only {me} can call this endpoint')
+
+        bundle_d = unbundle(app.keystore, sender, d)
+
+        if bundle_d['action'] != 'proc_perms':
+            return generic_error(f"Invalid action {bundle_d['action']} in payload")
+
+        if bundle_d['who'] != me:
+            return generic_error(f'Invalid caller {me} in payload')
+
+        pb = PermissionBatcher(pb_default_db())
+        result = pb.process_batch_queue()
+
+        return flask.jsonify(result), 200
+
+    except InvalidSignature:
+        return invalid_response()

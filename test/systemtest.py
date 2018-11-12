@@ -17,9 +17,13 @@ from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.eos.und_rewards import UndRewards
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.config.config import UnificationConfig
+from haiku_node.encryption.merkle.merkle_tree import MerkleTree
 from haiku_node.encryption.payload import bundle
 from haiku_node.keystore.keystore import UnificationKeystore
-from haiku_node.network.eos import get_eos_rpc_client, get_cleos
+from haiku_node.network.eos import get_eos_rpc_client, get_cleos, get_ipfs_client
+from haiku_node.permissions.perm_batch_db import (
+    default_db as pb_default_db, PermissionBatchDatabase)
+from haiku_node.permissions.permissions import UnifPermissions
 
 demo_config = json.loads(Path('data/demo_config.json').read_text())
 password_d = demo_config["system"]
@@ -237,6 +241,134 @@ def systest_user_permissions():
                 assert (config_granted == acl_perm) is True
 
 
+def systest_process_permission_batches():
+    appnames = ['app1', 'app2', 'app3']
+
+    for app_name in appnames:
+        log.debug(f'run systest_process_permission_batches for {app_name}')
+        mother = UnificationMother(get_eos_rpc_client(), app_name, get_cleos())
+        provider_obj = Provider(app_name, 'https', mother)
+
+        password = demo_config['system'][app_name]['password']
+        encoded_password = str.encode(password)
+        keystore = UnificationKeystore(encoded_password, app_name=app_name,
+                                   keystore_path=Path('data/keys'))
+
+        client = HaikuDataClient(keystore)
+        try:
+            client.process_permissions_batch(provider_obj)
+        except Exception as e:
+            log.error(f'systest_process_permission_batches failed: {e}')
+
+
+def compile_actors():
+    users = []
+    consumers = []
+    providers = []
+
+    for user, app_permission_list in demo_config['demo_permissions_new'].items():
+        if user not in users:
+            users.append(user)
+        for consumer, providers in app_permission_list.items():
+            if consumer not in consumers:
+                consumers.append(consumer)
+            for provider, permissions in providers.items():
+                if provider not in providers:
+                    providers.append(provider)
+
+    return users, consumers, providers
+
+
+def systest_check_permission_requests():
+
+    ipfs = get_ipfs_client()
+    users, consumers, providers = compile_actors()
+
+    for provider in providers:
+        log.debug(f'run systest_check_permission_requests for Provider {provider}')
+
+        provider_uapp = UnificationUapp(get_eos_rpc_client(), provider)
+
+        permission_db = PermissionBatchDatabase(pb_default_db())
+        permissions = UnifPermissions(ipfs, provider_uapp, permission_db)
+
+        for consumer in consumers:
+            if consumer != provider:
+                log.debug(f'Provider {provider}: load permissions for Consumer {consumer}')
+                permissions.load_consumer_perms(consumer)
+                for user in users:
+                    user_permissions = permissions.get_user_perms(user)
+                    for schema_id, user_perms in user_permissions.items():
+                        log.debug(f'User {user}, Schema {schema_id}: {user_perms}')
+                        is_valid = permissions.verify_permission(user_perms)
+                        log.debug(f'Perm sig valid: {is_valid}')
+
+                        assert is_valid
+
+                        demo_conf_check = demo_config['demo_permissions_new'][user][consumer][provider]
+
+                        demo_conf_fields = demo_conf_check['fields']
+                        demo_conf_granted = demo_conf_check['granted']
+                        demo_conf_schema_id = demo_conf_check['schema_id']
+
+                        assert int(demo_conf_schema_id) == int(schema_id)
+
+                        if demo_conf_granted:
+                            log.debug("Permission granted")
+                            log.debug(f"Demo fields: {demo_conf_fields}, recorded fields: {user_perms['perms']}")
+                            assert demo_conf_fields == user_perms['perms']
+                        else:
+                            log.debug("Permission not granted. Recorded perms should be empty")
+                            log.debug(f"Recorded fields: {user_perms['perms']}")
+                            assert user_perms['perms'] == ''
+
+
+def systest_merkle_proof_permissions():
+    ipfs = get_ipfs_client()
+    users, consumers, providers = compile_actors()
+
+    for provider in providers:
+        log.debug(f'run systest_merkle_proof_permissions for Provider {provider}')
+
+        provider_uapp = UnificationUapp(get_eos_rpc_client(), provider)
+
+        permission_db = PermissionBatchDatabase(pb_default_db())
+        permissions = UnifPermissions(ipfs, provider_uapp, permission_db)
+
+        for consumer in consumers:
+            if consumer != provider:
+                log.debug(f'Provider {provider}: load permissions for Consumer {consumer}')
+                permissions.load_consumer_perms(consumer)
+
+                permissions_obj = permissions.get_all_perms()
+
+                tree = MerkleTree()
+
+                for user, perm in permissions_obj['permissions'].items():
+                    tree.add_leaf(json.dumps(perm))
+
+                tree.grow_tree()
+
+                log.debug(f"Generated merkle root: {tree.get_root_str()}")
+                log.debug(f"Recorded merkle root: {permissions_obj['merkle_root']}")
+
+                for user, perm in permissions_obj['permissions'].items():
+                    requested_leaf = json.dumps(perm)
+                    proof_chain = tree.get_proof(requested_leaf, is_hashed=False)
+                    log.debug(f'Permission leaf for {user}: {requested_leaf}')
+                    log.debug(f'Proof chain for {user} permission leaf: {json.dumps(proof_chain)}')
+
+                    # simulate only having access to leaf, root and proof chain for leaf
+                    verify_tree = MerkleTree()
+
+                    is_good = verify_tree.verify_leaf(requested_leaf, permissions_obj['merkle_root'],
+                                                      proof_chain, is_hashed=False)
+
+                    log.debug(f'Leaf is valid: {is_good}')
+
+                    assert is_good
+
+
 def completion_banner():
     return '\n' \
            '==============================================\n' \
@@ -268,6 +400,13 @@ def wait():
     systest_smart_contract_mother()
     systest_smart_contract_acl()
     systest_user_permissions()
+
+    systest_process_permission_batches()
+
+    time.sleep(3)
+
+    systest_check_permission_requests()
+    systest_merkle_proof_permissions()
 
     manager = AccountManager(host=False)
 

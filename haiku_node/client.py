@@ -143,3 +143,22 @@ class HaikuDataClient:
 
         log.info(f'Decrypted content from persistence store: {decrypted_body}')
         return decrypted_body
+
+    def process_permissions_batch(self, providing_app: Provider):
+        body = {
+            'action': 'proc_perms',
+            'who': providing_app.name
+        }
+
+        payload = bundle(
+            self.keystore, providing_app.name,
+            providing_app.name, body, 'Process permission batch queue')
+
+        base = providing_app.base_url()
+        r = requests.post(f"{base}/process_permission_batch", json=payload, verify=False)
+        d = r.json()
+
+        if r.status_code != 200:
+            raise Exception(d['message'])
+
+        log.debug(d)
