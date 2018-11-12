@@ -1,4 +1,5 @@
 import json
+import time
 
 from haiku_node.config.config import UnificationConfig
 from haiku_node.network.eos import get_cleos, get_eos_rpc_client
@@ -8,6 +9,10 @@ def get_self_uapp():
     conf = UnificationConfig()
     eos_client = get_eos_rpc_client()
     return UnificationUapp(eos_client, conf['acl_contract'])
+
+
+def unix_timestamp():
+    return int(time.time() * 1000)
 
 
 class UnificationUapp:
@@ -128,7 +133,8 @@ class UnificationUapp:
         data_requests = {}
         table_data = self.__eos_rpc_client.get_table_rows(
             self.__acl_contract_acc,
-            self.__acl_contract_acc, self.__data_requests_table, True, 0, -1, -1)
+            self.__acl_contract_acc,
+            self.__data_requests_table, True, 0, -1, -1)
 
         for i in table_data['rows']:
             key = i['pkey']
@@ -136,6 +142,8 @@ class UnificationUapp:
                 'pkey': i['pkey'],
                 'provider_name': i['provider_name'],
                 'schema_id': i['schema_id'],
+                'ts_created': i['ts_created'],
+                'ts_updated': i['ts_updated'],
                 'req_type': i['req_type'],
                 'query': i['query'],
                 'price': i['price'],
@@ -285,17 +293,20 @@ class UnificationUapp:
 
         return ret
 
-    def init_data_request(self, provider_name, schema_id, req_type, price, query=None):
+    def init_data_request(self, provider_name, schema_id, req_type, price):
+        timestamp = unix_timestamp()
         d = {
             'provider_name': provider_name,
             'schema_id': schema_id,
+            'ts_created': timestamp,
+            'ts_updated': timestamp,
             'req_type': req_type,
             'query': 'test',
             'price': price
         }
-        ret = self.__cleos.run(
-            ['push', 'action', self.__acl_contract_acc, 'initreq', json.dumps(d), '-p',
-             f'{self.__acl_contract_acc}@modreq'])
+        self.__cleos.run(
+            ['push', 'action', self.__acl_contract_acc, 'initreq',
+             json.dumps(d), '-p', f'{self.__acl_contract_acc}@modreq'])
 
         data_requests = self.get_all_data_requests()
         latest_req_id = list(data_requests.keys())[-1]
@@ -307,12 +318,13 @@ class UnificationUapp:
             'provider_name': provider_name,
             'pkey': pkey,
             'hash': hash,
+            'ts_updated': unix_timestamp(),
             'aggr': aggr
         }
 
         ret = self.__cleos.run(
-            ['push', 'action', self.__acl_contract_acc, 'updatereq', json.dumps(d), '-p',
-             f'{provider_name}@modreq'])
+            ['push', 'action', self.__acl_contract_acc, 'updatereq',
+             json.dumps(d), '-p', f'{provider_name}@modreq'])
 
         # Todo: Once migrated to EOS RPC API, wait for transaction confirmation
         if ret.stderr.find("executed transaction") != -1:
