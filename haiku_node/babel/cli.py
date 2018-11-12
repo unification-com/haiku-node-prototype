@@ -3,7 +3,6 @@ import subprocess
 import json
 import requests
 
-
 import click
 
 from haiku_node.blockchain.eos.mother import UnificationMother
@@ -16,10 +15,11 @@ from haiku_node.encryption.merkle.merkle_tree import MerkleTree
 from haiku_node.network.eos import get_eos_rpc_client, get_cleos, get_ipfs_client
 from haiku_node.permissions.utils import generate_payload
 
-
 log = logging.getLogger(__name__)
 
 bold = lambda s: click.style(str(s), bold=True)
+
+ZERO_MASK = '0000000000000000000000000000000000000000000000'
 
 
 @click.group()
@@ -36,11 +36,12 @@ def permissions(user):
     \b
     :param user: The EOS user account name to query.
     """
-    eos_client = get_eos_rpc_client()
+    eos_rpc_client = get_eos_rpc_client()
+    ipfs_client = get_ipfs_client()
 
     apps = []
 
-    valid_apps = eos_client.get_table_rows(
+    valid_apps = eos_rpc_client.get_table_rows(
         "unif.mother", "unif.mother", "validapps", True, 0, -1,
         -1)
 
@@ -50,6 +51,26 @@ def permissions(user):
     click.echo(f"{bold(user)} Permissions overview:")
 
     # ToDo: get permissions from SC/IPFS
+    for provider in apps:
+        click.echo(f'Provider: {bold(provider)}')
+        for consumer in apps:
+            if consumer != provider:
+                click.echo(f'  Consumer: {bold(consumer)}')
+                uapp_sc = UnificationUapp(eos_rpc_client, provider)
+                ipfs_hash, merkle_root = uapp_sc.get_ipfs_perms_for_req_app(consumer)
+                if ipfs_hash is not None and ipfs_hash != ZERO_MASK:
+                    permissions_str = ipfs_client.get_json(ipfs_hash)
+                    permissions_json = json.loads(permissions_str)
+                    user_perms = permissions_json[user]
+                    for schema_id, permissions in user_perms.items():
+                        click.echo(f'    Schema ID: {schema_id}')
+                        if permissions['perms'] == '':
+                            click.echo('      Granted: False')
+                        else:
+                            click.echo('      Granted: True')
+                            click.echo(f"      Fields: {permissions['perms']}")
+                else:
+                    click.echo('Nothing set')
 
 
 @main.command()
@@ -131,7 +152,7 @@ def transfer(from_acc, to_acc, amount, password):
 
     cmd = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
            "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
-           'push', 'action', 'unif.token', 'transfer',  json.dumps(d), "-p", from_acc]
+           'push', 'action', 'unif.token', 'transfer', json.dumps(d), "-p", from_acc]
 
     ret = subprocess.run(
         cmd, stdout=subprocess.PIPE,
@@ -334,7 +355,6 @@ def modify_permissions_direct(
 @click.argument('provider')
 @click.argument('consumer')
 def proove_permission(user, provider, consumer):
-
     payload = {
         'consumer': consumer,
         'user': user
@@ -375,9 +395,7 @@ def proove_permission(user, provider, consumer):
     is_good = verify_tree.verify_leaf(requested_leaf, merkle_root,
                                       proof_chain, is_hashed=False)
 
-    click.echo(f'Permissions are valid: {is_good}')
-
-    click.echo(d)
+    click.echo(bold(f'Permissions are valid: {is_good}'))
 
 
 if __name__ == "__main__":
