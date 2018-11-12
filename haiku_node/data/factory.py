@@ -96,8 +96,6 @@ class UnificationDataFactory:
         return native_user_ids
 
     def __generate_data(self):
-        # self.__granted, self.__revoked = \
-        #     self.__my_uapp_sc.get_perms_for_req_app(self.__requesting_app)
 
         self.__granted, self.__revoked, self.__granted_field_lookup = self.__build_permissions()
 

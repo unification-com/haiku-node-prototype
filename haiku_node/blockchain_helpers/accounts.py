@@ -247,15 +247,6 @@ class AccountManager:
             ['push', 'action', 'unif.mother', 'invalidate', json.dumps(d),
              '-p', 'unif.mother'])
 
-    def grant(self, provider, requester, user):
-        d = {
-            'user_account': user,
-            'requesting_app': requester,
-            'level': 1
-        }
-        return self.cleos.run(
-            ['push', 'action', provider, 'modifyperm', json.dumps(d), '-p', user])
-
     def set_rsa_pub_key_hash(self, public_key_hash, provider):
         d = {
             'rsa_key': public_key_hash
@@ -263,30 +254,6 @@ class AccountManager:
         return self.cleos.run(
             ['push', 'action', provider, 'setrsakey', json.dumps(d),
              '-p', f'{provider}@modrsakey'])
-
-
-    def revoke(self, provider, requester, user):
-        d = {
-            'user_account': user,
-            'requesting_app': requester,
-            'level': 0
-        }
-        return self.cleos.run(
-            ['push', 'action', provider, 'modifyperm', json.dumps(d), '-p', user])
-
-    def set_permissions(self, demo_permissions):
-        print("set_permissions")
-        for user_perms in demo_permissions['permissions']:
-            user = user_perms['user']
-            for haiku in user_perms['haiku_nodes']:
-                app = haiku['app']
-                for req_app in haiku['req_apps']:
-                    if req_app['granted']:
-                        self.grant(app, req_app['account'], user)
-                    else:
-                        self.revoke(app, req_app['account'], user)
-            print("Wait for transactions to process")
-            time.sleep(BLOCK_SLEEP)
 
     def request_permission_change(self, user, app_permission_list, private_key):
         log.info(f"Process {user} permission change requests")
@@ -304,7 +271,7 @@ class AccountManager:
                           f'in schema {schema_id}: {granted} {fields}')
 
                 payload = generate_payload(user, private_key, provider, consumer,
-                                           fields, 'modperms', schema_id)
+                                           fields, 'active', schema_id)
 
                 log.debug(f'request_permission_change payload: {json.dumps(payload)}')
 
@@ -358,22 +325,12 @@ class AccountManager:
         print("Data Schemas:")
         print(u_uapp.get_all_db_schemas())
 
-        print("Check Permissions")
-        for req_app in appnames:
-            print("Check perms for Requesting App: ", req_app)
-            granted, revoked = u_uapp.get_perms_for_req_app(req_app)
-            print("Users who Granted:")
-            print(granted)
-            print("Users who Revoked:")
-            print(revoked)
-
         print("-----------------------------------")
 
 
 def make_default_accounts(
         manager: AccountManager, demo_config, appnames, usernames):
     demo_apps = demo_config['demo_apps']
-    demo_permissions = demo_config['demo_permissions']
     test_net = demo_config['test_net']
 
     for username in usernames + appnames:
@@ -410,11 +367,10 @@ def make_default_accounts(
         # Permission levels
         print(f"Create account permissions for app {appname}")
         # account permissions to be created
-        app_account_perms = ['modschema', 'modperms', 'modreq', 'modrsakey']
+        app_account_perms = ['modschema', 'modreq', 'modrsakey']
 
         # smart contract actions the permissions are allowed to use
         modschema_actions = ['addschema', 'editschema', 'setvers', 'setschedule', 'setminund', 'setschema']
-        modperms_actions = ['modifyperm', 'modifypermsg']
         modreq_actions = ['initreq', 'updatereq']
         modrsakey_actions = ['setrsakey']
         
@@ -425,8 +381,6 @@ def make_default_accounts(
 
             if app_account_perm == 'modschema':
                 contract_actions = modschema_actions
-            elif app_account_perm == 'modperms':
-                contract_actions = modperms_actions
             elif app_account_perm == 'modreq':
                 contract_actions = modreq_actions
                 manager.create_account_permissions(appname, app_account_perm, pub_key, True)
@@ -461,21 +415,17 @@ def make_default_accounts(
     for username in usernames:
         if username not in ['unif.mother', 'unif.token']:  # Todo: maybe have sys_users list?
             print(f"Create account permissions for user {username}")
-            pub_key, priv_key = manager.create_key()
-            manager.wallet_import_key(username, priv_key)
-            manager.create_account_permissions(username, 'modperms', pub_key)
-            time.sleep(BLOCK_SLEEP)
+            pub_key = manager.cleos.get_public_key(username, 'active')
+            priv_key = manager.cleos.get_private_key(username,
+                                                     demo_config['wallet_passwords'][username]['wallet_password'],
+                                                     pub_key)
 
             try:
                 manager.request_permission_change(username,
-                                                  demo_config['demo_permissions_new'][username],
+                                                  demo_config['demo_permissions'][username],
                                                   priv_key)
             except Exception as e:
                 log.error(f'request_permission_change Failed with error: {e}')
-
-    print("Wait for transactions to process")
-    time.sleep(BLOCK_SLEEP)
-    manager.set_permissions(demo_permissions)
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)

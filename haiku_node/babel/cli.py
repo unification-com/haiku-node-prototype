@@ -3,7 +3,6 @@ import subprocess
 import json
 import requests
 
-from itertools import product
 
 import click
 
@@ -12,11 +11,9 @@ from haiku_node.client import Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos import eosio_account
-from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.network.eos import get_eos_rpc_client, get_cleos
 from haiku_node.permissions.utils import generate_payload
-from haiku_node.validation.validation import UnificationAppScValidation
 
 
 log = logging.getLogger(__name__)
@@ -51,16 +48,7 @@ def permissions(user):
 
     click.echo(f"{bold(user)} Permissions overview:")
 
-    for requester, provider in product(apps, apps):
-        if requester == provider:
-            continue
-        v = UnificationAppScValidation(
-            eos_client, provider, requester, get_perms=True)
-        if v.app_has_user_permission(user):
-            grant = bold('GRANTED')
-        else:
-            grant = bold('NOT GRANTED')
-        click.echo(f"{requester} {grant} to read from {provider}")
+    # ToDo: get permissions from SC/IPFS
 
 
 @main.command()
@@ -81,64 +69,6 @@ def schemas(app_name):
     for key, schema in uapp_sc.get_all_db_schemas().items():
         click.echo(f"Schema ID {schema['pkey']}:")
         click.echo(schema['schema'])
-
-
-@main.command()
-@click.argument('provider')
-@click.argument('requester')
-@click.argument('user')
-@click.argument('password')
-def grant(provider, requester, user, password):
-    """
-    User grants data access between a provider and a requester.
-
-    \b
-    :param provider: The app name of the data provider.
-    :param requester: The app name of the data requester.
-    :param user: The EOS user account name that is granting access.
-    :param password: The EOS user account's password.
-    """
-    click.echo(f"{bold(user)} is granting {bold(requester)} "
-               f"access to their data held in {bold(provider)}:")
-
-    cleos = EosioCleos()
-    accounts = AccountManager()
-    cleos.unlock_wallet(user, password)
-    result = accounts.grant(provider, requester, user)
-    cleos.lock_wallet(user)
-    if result.returncode == 0:
-        click.echo(bold('Grant succeeded'))
-    else:
-        click.echo(bold('Grant failed'))
-
-
-@main.command()
-@click.argument('provider')
-@click.argument('requester')
-@click.argument('user')
-@click.argument('password')
-def revoke(provider, requester, user, password):
-    """
-    User revokes data access between a provider and a requester.
-
-    \b
-    :param provider: The app name of the data provider.
-    :param requester: The app name of the data requester.
-    :param user: The EOS user account name that is revoking access.
-    :param password: The EOS user account's password.
-    """
-    click.echo(f"{bold(user)} is revoking access from {bold(requester)} "
-               f"to their data in held {bold(provider)}:")
-
-    cleos = EosioCleos()
-    accounts = AccountManager()
-    cleos.unlock_wallet(user, password)
-    result = accounts.revoke(provider, requester, user)
-    cleos.lock_wallet(user)
-    if result.returncode == 0:
-        click.echo(bold('Revoke succeeded'))
-    else:
-        click.echo(bold('Revoke failed'))
 
 
 @main.command()

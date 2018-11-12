@@ -28,7 +28,6 @@ class UnificationUapp:
                class will retrieve data from the UApp smart contract
 
         """
-        self.__permission_rec_table = "permrecords"
         self.__ipfs_perm_table = "userperms"
         self.__rsa_pub_key_table = "rsapubkey"
         self.__db_schema_table = "dataschemas"
@@ -86,24 +85,6 @@ class UnificationUapp:
                 }
 
         return db_schema
-
-    def get_perms_for_req_app(self, requesting_app):
-        # TODO: run in loop and check JSON result for "more" value/pagination
-        table_data = self.__eos_rpc_client.get_table_rows(
-            requesting_app,
-            self.__acl_contract_acc, self.__permission_rec_table, True, 0, -1,
-            -1)
-
-        granted = []
-        revoked = []
-
-        for i in table_data['rows']:
-            if int(i['permission_granted']) >= 1:
-                granted.append(int(i['user_account']))
-            else:
-                revoked.append(int(i['user_account']))
-
-        return granted, revoked
 
     def get_ipfs_perms_for_req_app(self, requesting_app):
         table_data = self.__eos_rpc_client.get_table_rows(

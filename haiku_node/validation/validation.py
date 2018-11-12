@@ -1,6 +1,4 @@
 from haiku_node.blockchain.eos.mother import UnificationMother
-from haiku_node.blockchain.eos.uapp import UnificationUapp
-from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.network.eos import get_cleos
 
 """
@@ -8,46 +6,22 @@ Validation class for a single REQUESTING app.
 1) Loads UApp Data Smart Contract for THIS Haiku/App
 2) Loads data from MOTHER for REQUESTING APP
 3) Checks REQUESTING APP is valid according to MOTHER
-4) If REQUESTING APP is Valid, load permissions from THIS Haiku's ACL/Meta Data
-    Smart Contract for the REQUESTING APP
 """
 
 
 class UnificationAppScValidation:
 
-    def __init__(self, eos_client, acl_contract, requesting_app,
-                 get_perms=True):
+    def __init__(self, eos_client, acl_contract, requesting_app):
         """
         :param requesting_app: the eos account name of the requesting app
         """
-        self.__permission_rec_table = "permrecords"
-
         self.__requesting_app = requesting_app
         self.__eosClient = eos_client
         self.__acl_contract = acl_contract
-        self.__get_perms = get_perms
         self.__is_valid_app = False
         self.__is_valid_code = False
-        self.__granted = []
-        self.__revoked = []
 
         self.__run()
-
-    def app_has_user_permission(self, user_account):
-        has_permission = False
-
-        user_acc_uint64 = eosio_account.string_to_name(user_account)
-
-        if user_acc_uint64 in self.__granted:
-            has_permission = True
-
-        return has_permission
-
-    def users_granted(self):
-        return self.__granted
-
-    def users_revoked(self):
-        return self.__revoked
 
     def valid_app(self):
         return self.__is_valid_app
@@ -60,16 +34,6 @@ class UnificationAppScValidation:
             return True
         else:
             return False
-
-    def __get_app_permissions(self):
-        """
-        App checks it's own smart contract to see which users have granted
-        permission to the REQUESTING APP to access it's data.
-        """
-
-        uapp_sc = UnificationUapp(self.__eosClient, self.__acl_contract)
-        self.__granted, self.__revoked = uapp_sc.get_perms_for_req_app(
-            self.__requesting_app)
 
     def __check_req_app_valid(self):
         """
@@ -85,11 +49,6 @@ class UnificationAppScValidation:
 
     def __run(self):
         self.__check_req_app_valid()
-        if self.__is_valid_app and self.__is_valid_code and self.__get_perms:
-            self.__get_app_permissions()
-        else:
-            self.__granted = []
-            self.__revoked = []
 
 
 if __name__ == '__main__':
