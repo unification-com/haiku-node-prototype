@@ -271,7 +271,7 @@ class AccountManager:
                           f'in schema {schema_id}: {granted} {fields}')
 
                 payload = generate_payload(user, private_key, provider, consumer,
-                                           fields, 'modperms', schema_id)
+                                           fields, 'active', schema_id)
 
                 log.debug(f'request_permission_change payload: {json.dumps(payload)}')
 
@@ -368,11 +368,10 @@ def make_default_accounts(
         # Permission levels
         print(f"Create account permissions for app {appname}")
         # account permissions to be created
-        app_account_perms = ['modschema', 'modperms', 'modreq', 'modrsakey']
+        app_account_perms = ['modschema', 'modreq', 'modrsakey']
 
         # smart contract actions the permissions are allowed to use
         modschema_actions = ['addschema', 'editschema', 'setvers', 'setschedule', 'setminund', 'setschema']
-        modperms_actions = ['modifyperm', 'modifypermsg']
         modreq_actions = ['initreq', 'updatereq']
         modrsakey_actions = ['setrsakey']
         
@@ -383,8 +382,6 @@ def make_default_accounts(
 
             if app_account_perm == 'modschema':
                 contract_actions = modschema_actions
-            elif app_account_perm == 'modperms':
-                contract_actions = modperms_actions
             elif app_account_perm == 'modreq':
                 contract_actions = modreq_actions
                 manager.create_account_permissions(appname, app_account_perm, pub_key, True)
@@ -419,10 +416,10 @@ def make_default_accounts(
     for username in usernames:
         if username not in ['unif.mother', 'unif.token']:  # Todo: maybe have sys_users list?
             print(f"Create account permissions for user {username}")
-            pub_key, priv_key = manager.create_key()
-            manager.wallet_import_key(username, priv_key)
-            manager.create_account_permissions(username, 'modperms', pub_key)
-            time.sleep(BLOCK_SLEEP)
+            pub_key = manager.cleos.get_public_key(username, 'active')
+            priv_key = manager.cleos.get_private_key(username,
+                                                     demo_config['wallet_passwords'][username]['wallet_password'],
+                                                     pub_key)
 
             try:
                 manager.request_permission_change(username,
