@@ -1,10 +1,10 @@
-import json
-import tempfile
 import hashlib
+import json
+import logging
+import tempfile
 
 from pathlib import Path
 
-import logging
 import requests
 
 from haiku_node.blockchain.eos.mother import UnificationMother
