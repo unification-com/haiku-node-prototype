@@ -23,14 +23,12 @@ class EosioCleos:
         i.e. from the host machine)
         """
         self.host = host
-        if host:
-            self.nodeos = f"http://{NODEOS_IP}:{NODEOS_PORT}"
-            self.keosd = f"http://{KEOS_IP}:{KEOS_PORT}"
-            self.nodeos_ip = '127.0.0.1'
+        self.nodeos = f"http://{NODEOS_IP}:{NODEOS_PORT}"
+        self.keosd = f"http://{KEOS_IP}:{KEOS_PORT}"
 
+        if host:
+            self.nodeos_ip = '127.0.0.1'
         else:
-            self.nodeos = f"http://{NODEOS_IP}:{NODEOS_PORT}"
-            self.keosd = f"http://{KEOS_IP}:{KEOS_PORT}"
             self.nodeos_ip = NODEOS_IP
 
     def keos_url(self):
