@@ -51,16 +51,6 @@ def permissions(user):
     click.echo(f"{bold(user)} Permissions overview:")
 
     # ToDo: get permissions from SC/IPFS
-    # for requester, provider in product(apps, apps):
-    #     if requester == provider:
-    #         continue
-    #     v = UnificationAppScValidation(
-    #         eos_client, provider, requester, get_perms=True)
-    #     if v.app_has_user_permission(user):
-    #         grant = bold('GRANTED')
-    #     else:
-    #         grant = bold('NOT GRANTED')
-    #     click.echo(f"{requester} {grant} to read from {provider}")
 
 
 @main.command()
