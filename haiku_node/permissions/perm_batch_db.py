@@ -4,18 +4,19 @@ import sqlite3
 from pathlib import Path
 
 
-def default_db():
+def default_db() -> Path:
     currentdir = os.path.dirname(os.path.abspath(__file__))
     parentdir = os.path.dirname(currentdir)
     db_path = Path(parentdir + '/dbs/perm_batches.db')
-    return str(db_path.resolve())
+    return db_path.resolve()
 
 
 class PermissionBatchDatabase:
     def __init__(self, db_name: Path):
         self.__db_name = db_name
 
-    def add(self, user_account, consumer_account, schema_id, perms, p_nonce, p_sig, pub_key, bc_type='eos'):
+    def add(self, user_account, consumer_account, schema_id, perms, p_nonce,
+            p_sig, pub_key, bc_type='eos'):
         self.__open_con()
         self.__c.execute(f"INSERT INTO permissions "
                          f"VALUES (NULL,"
@@ -149,7 +150,7 @@ class PermissionBatchDatabase:
         self.__close_con()
 
     def __open_con(self):
-        self.__conn = sqlite3.connect(self.__db_name)
+        self.__conn = sqlite3.connect(str(self.__db_name))
         self.__c = self.__conn.cursor()
 
     def __close_con(self):

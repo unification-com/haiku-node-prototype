@@ -3,9 +3,8 @@ import json
 
 from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 from haiku_node.encryption.merkle.merkle_tree import MerkleTree, MerkleException
+from haiku_node.permissions.perm_batch_db import PermissionBatchDatabase
 from haiku_node.utils.utils import generate_perm_digest_sha
-from haiku_node.permissions.perm_batch_db import (
-    PermissionBatchDatabase, default_db as pb_db)
 
 ZERO_MASK = '0000000000000000000000000000000000000000000000'
 
@@ -15,7 +14,9 @@ log = logging.getLogger(__name__)
 
 class UnifPermissions:
 
-    def __init__(self, ipfs, provider_uapp):
+    def __init__(self, ipfs, provider_uapp,
+                 permission_db: PermissionBatchDatabase):
+        self.__permission_db = permission_db
         self.__consumer_perms = {}
         self.__change_requests = {}
         self.__ipfs = ipfs
@@ -42,8 +43,6 @@ class UnifPermissions:
             return False
 
     def process_change_requests(self):
-        permission_db = PermissionBatchDatabase(pb_db())
-
         consumer_txs = {}
         for consumer, perms in self.__change_requests.items():
             ipfs_hash, merkle_root = self.__uapp.get_ipfs_perms_for_req_app(
@@ -60,7 +59,8 @@ class UnifPermissions:
                 log.info("no Provider -> Consumer relationship yet. "
                          "Add to tmp storage")
 
-                latest_stash = permission_db.get_stash(consumer)
+                latest_stash = self.__permission_db.get_stash(
+                    consumer)
 
                 if latest_stash is not None:
                     # merge with latest stash
@@ -85,7 +85,8 @@ class UnifPermissions:
                 # data request...
 
                 # check for stashed permissions
-                latest_stash = permission_db.get_stash(consumer)
+                latest_stash = self.__permission_db.get_stash(
+                    consumer)
 
                 if latest_stash is not None:
                     # merge with latest stash

@@ -281,64 +281,69 @@ def post_permissions(user, password, perm, granted_fields_str: str,
 
     # ToDo: find better way to get public key from EOS account
     private_key = cleos.get_private_key(user, password, pub_key)
+    cleos.lock_wallet(user)
 
+    if len(private_key) < 0:
+        click.echo(bold(f'Could not get private key for {pub_key}'))
+        return
+
+    payload = generate_payload(
+        user, private_key, provider, consumer, granted_fields_str, perm,
+        schema_id)
+
+    mother = UnificationMother(eos_client, provider, cleos)
+    provider_obj = Provider(provider, 'https', mother)
+    url = f"{provider_obj.base_url()}/modify_permission"
+
+    r = requests.post(url, json=payload, verify=False)
+
+    d = r.json()
+
+    if r.status_code != 200:
+        raise Exception(d['message'])
+
+    proc_id = d['proc_id']
+    ret_app = d['app']
+
+    if ret_app == provider and proc_id > 0:
+        click.echo(f"Success. Process ID {proc_id} Queued by {ret_app}")
+    else:
+        click.echo("Something went wrong...")
+
+
+def generate_payload(user, private_key, provider, consumer, granted_fields_str,
+                     perm, schema_id):
     p_nonce = generate_nonce(16)
     perm_digest_sha = generate_perm_digest_sha(
-        granted_fields_str, schema_id,  p_nonce, consumer)
-
+        granted_fields_str, schema_id, p_nonce, consumer)
     # sign permission changes
     eosk = UnifEosKey(private_key)
     p_sig = eosk.sign(perm_digest_sha)
 
-    if len(private_key) > 0:
-        jwt_payload = {
-            'iss': user,  # RFC 7519 4.1.1
-            'sub': 'perm_request',  # RFC 7519 4.1.2
-            'aud': provider,  # RFC 7519 4.1.3
-            'eos_perm': perm,
-            'consumer': consumer,
-            'schema_id': schema_id,
-            'perms': granted_fields_str,
-            'p_nonce': p_nonce,
-            'p_sig': p_sig
-        }
+    jwt_payload = {
+        'iss': user,  # RFC 7519 4.1.1
+        'sub': 'perm_request',  # RFC 7519 4.1.2
+        'aud': provider,  # RFC 7519 4.1.3
+        'eos_perm': perm,
+        'consumer': consumer,
+        'schema_id': schema_id,
+        'perms': granted_fields_str,
+        'p_nonce': p_nonce,
+        'p_sig': p_sig
+    }
 
-        cleos.lock_wallet(user)
+    unif_jwt = UnifJWT()
+    unif_jwt.generate(jwt_payload)
+    unif_jwt.sign(private_key)
+    jwt = unif_jwt.to_jwt()
 
-        unif_jwt = UnifJWT()
-        unif_jwt.generate(jwt_payload)
-        unif_jwt.sign(private_key)
-
-        jwt = unif_jwt.to_jwt()
-
-        payload = {
-            'jwt': jwt,
-            'eos_perm': perm,
-            'user': user,
-            'provider': provider
-        }
-
-        mother = UnificationMother(eos_client, provider, cleos)
-        provider_obj = Provider(provider, 'https', mother)
-        url = f"{provider_obj.base_url()}/modify_permission"
-
-        r = requests.post(url, json=payload, verify=False)
-
-        d = r.json()
-
-        if r.status_code != 200:
-            raise Exception(d['message'])
-
-        proc_id = d['proc_id']
-        ret_app = d['app']
-
-        if ret_app == provider and proc_id > 0:
-            click.echo(f"Success. Process ID {proc_id} Queued by {ret_app}")
-        else:
-            click.echo("Something went wrong...")
-
-    else:
-        click.echo(bold(f'Could not get private key for {pub_key}'))
+    payload = {
+        'jwt': jwt,
+        'eos_perm': perm,
+        'user': user,
+        'provider': provider
+    }
+    return payload
 
 
 @main.command()
