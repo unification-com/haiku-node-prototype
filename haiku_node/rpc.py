@@ -11,7 +11,9 @@ from haiku_node.encryption.payload import bundle, unbundle
 from haiku_node.encryption.jwt.exceptions import (
     InvalidJWT, InvalidPublicKey, JWTSignatureMismatch)
 from haiku_node.encryption.jwt.jwt import UnifJWT
-from haiku_node.permissions.permission_batcher import PermissionBatcher, default_db
+from haiku_node.network.eos import get_eos_rpc_client, get_cleos
+from haiku_node.permissions.permission_batcher import PermissionBatcher
+from haiku_node.permissions.permissions import UnifPermissions
 from haiku_node.validation.validation import UnificationAppScValidation
 
 app = flask.Flask(__name__)
@@ -38,10 +40,10 @@ def invalid_jwt(message):
     }), 401
 
 
-def generic_error():
+def generic_error(message='Internal Server Error'):
     return flask.jsonify({
         'success': False,
-        'message': 'Internal Server Error',
+        'message': message,
         'signature': None,
         'body': None
     }), 500
@@ -181,6 +183,11 @@ def data_request():
         if v.valid():
             users = bundle_d.get('users')
             request_id = bundle_d.get('request_id')
+
+            # before processing data, check for any stashed permissions
+            permissions = UnifPermissions()
+            permissions.check_and_process_stashed(sender)
+
             return obtain_data(
                 app.keystore, sender, eos_client, conf['acl_contract'],
                 users, request_id)
@@ -252,13 +259,13 @@ def modify_permission():
         req_sender = d['user']
         jwt = d['jwt']
 
-        cleos = EosioCleos()
+        cleos = get_cleos()
+        eos_rpc_client = get_eos_rpc_client()
 
         # ToDo: find better way to get public key from EOS account
         public_key = cleos.get_public_key(req_sender, eos_perm)
 
         unif_jwt = UnifJWT(jwt, public_key)
-
         issuer = unif_jwt.get_issuer()
         audience = unif_jwt.get_audience()
 
@@ -268,18 +275,34 @@ def modify_permission():
         if req_sender != issuer:
             return error_request_not_you()
 
-        pl = unif_jwt.get_payload()
+        payload = unif_jwt.get_payload()
 
-        pb = PermissionBatcher(default_db())
+        # Check field list sent matches fields in metadata schema
+        if len(payload['perms']) > 0:
+            field_list = payload['perms'].split(',')
 
-        # ToDo: Validate permission list sent, against current metadata schema
-        rowid = pb.add(issuer,
-                       pl['consumer'],
-                       pl['schema_id'],
-                       pl['perms'],
-                       pl['p_nonce'],
-                       pl['p_sig'],
-                       public_key)
+            uapp_sc = UnificationUapp(eos_rpc_client, conf['acl_contract'])
+            db_schema = uapp_sc.get_db_schema_by_pkey(int(payload['schema_id']))
+
+            if not db_schema:
+                return generic_error(
+                    f"Invalid Metadata Schema ID: {payload['schema_id']}")
+
+            valid_fields = [f['name'] for f in db_schema['schema']['fields']]
+            for pf in field_list:
+                if pf not in valid_fields:
+                    return generic_error(
+                        f"Invalid field list: {payload['perms']}")
+
+        batcher = PermissionBatcher()
+
+        rowid = batcher.add_to_queue(issuer,
+                                     payload['consumer'],
+                                     payload['schema_id'],
+                                     payload['perms'],
+                                     payload['p_nonce'],
+                                     payload['p_sig'],
+                                     public_key)
 
         d = {
             'app': conf['acl_contract'],

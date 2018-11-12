@@ -1,63 +1,38 @@
-import json
-import os
-import sqlite3
 import time
-from pathlib import Path
 
-from haiku_node.permissions.permissions import UnifPermissions
+from haiku_node.permissions.perm_batch_db import (
+    PermissionBatchDatabase, default_db as pb_db)
 from haiku_node.utils.utils import generate_nonce
-
-
-def default_db():
-    currentdir = os.path.dirname(os.path.abspath(__file__))
-    parentdir = os.path.dirname(currentdir)
-    db_path = Path(parentdir + '/dbs/perm_batches.db')
-    return str(db_path.resolve())
 
 
 class PermissionBatcher:
 
-    def __init__(self, db_name: Path):
-        self.__db_name = db_name
+    def __init__(self):
+        self.__pbdb = PermissionBatchDatabase(pb_db())
 
-    def add(self, user_account, consumer_account, schema_id, perms, p_nonce, p_sig, pub_key, bc_type='eos'):
-        self.__open_con()
-        self.__c.execute(f"INSERT INTO permissions "
-                         f"VALUES (NULL,"
-                         f"'{user_account}', "
-                         f"'{consumer_account}',"
-                         f"'{schema_id}',"
-                         f"'{perms}',"
-                         f"'{p_nonce}',"
-                         f"'{p_sig}',"
-                         f"'{pub_key}',"
-                         f"0,"
-                         f"NULL,"
-                         f"NULL)")
+    def add_to_queue(self,
+                     user_account,
+                     consumer_account,
+                     schema_id,
+                     perms,
+                     p_nonce,
+                     p_sig,
+                     pub_key,
+                     bc_type='eos'):
 
-        self.__conn.commit()
+        return self.__pbdb.add(user_account,
+                               consumer_account,
+                               schema_id,
+                               perms,
+                               p_nonce,
+                               p_sig,
+                               pub_key,
+                               bc_type)
 
-        batch_id = self.__c.lastrowid
+    def process_batch_queue(self, num=10):
+        from haiku_node.permissions.permissions import UnifPermissions
 
-        self.__close_con()
-
-        return batch_id
-
-    def get_unprocessed(self, num=10):
-        self.__open_con()
-        self.__c.execute(f'SELECT * FROM permissions '
-                         f'WHERE processed=0 '
-                         f'ORDER BY consumer_account ASC '
-                         f'LIMIT {num}')
-        columns = [d[0] for d in self.__c.description]
-        res = [dict(zip(columns, row)) for row in self.__c.fetchall()]
-
-        self.__close_con()
-
-        return res
-
-    def process_batch(self, num=10):
-        batch = self.get_unprocessed(num)
+        batch = self.__pbdb.get_unprocessed(num)
         permissions = UnifPermissions()
 
         processed = []
@@ -74,7 +49,8 @@ class PermissionBatcher:
                 'b_nonce': generate_nonce(16),
                 'b_time': time.time()
             }
-            is_added = permissions.add_update(b['consumer_account'], b['end_user_account'], perm_obj)
+            is_added = permissions.add_change_request(
+                b['consumer_account'], b['end_user_account'], perm_obj)
 
             b_proc = {
                 'op_id': b['op_id'],
@@ -84,33 +60,32 @@ class PermissionBatcher:
 
             processed.append(b_proc)
 
-        ret_data = permissions.process()
+        ret_data = permissions.process_change_requests()
 
-        self.__open_con()
         for b_p in processed:
             if b_p['is_added']:
                 ret_d = ret_data[b_p['consumer']]
                 if ret_d['bc']:
-                    self.__c.execute(f"UPDATE permissions "
-                                     f"SET processed='1',"
-                                     f"proof_tx='{ret_d['proof_tx']}' "
-                                     f"WHERE op_id='{b_p['op_id']}'")
+                    self.__pbdb.update_processed(
+                        b_p['op_id'], proof_tx=ret_d['proof_tx'])
+
                 else:
-                    self.__c.execute(f"UPDATE permissions "
-                                     f"SET processed='1',"
-                                     f"stash_id='{ret_d['stash_id']}' "
-                                     f"WHERE op_id='{b_p['op_id']}'")
+                    stash_id = self.__pbdb.stash_permission(
+                        ret_d['stash']['consumer'],
+                        ret_d['stash']['ipfs_hash'],
+                        ret_d['stash']['merkle_root'])
 
-                self.__conn.commit()
-            # Todo - deal with failed operations
+                    self.__pbdb.update_processed(b_p['op_id'],
+                                                 stash_id=stash_id)
+            else:
+                # Currently fails if sig is invalid, so delete
+                self.__pbdb.delete_op(b_p['op_id'])
 
-        self.__close_con()
+        # cleanup stashes
+        for c, ret_d in ret_data.items():
+            if ret_d['stash_id_committed'] is not None:
+                self.__pbdb.update_batch_stashes_with_tx(
+                    ret_d['stash_id_committed'], ret_d['proof_tx'])
+                self.__pbdb.delete_stash(ret_d['stash_id_committed'])
 
         print(ret_data)
-
-    def __open_con(self):
-        self.__conn = sqlite3.connect(self.__db_name)
-        self.__c = self.__conn.cursor()
-
-    def __close_con(self):
-        self.__conn.close()

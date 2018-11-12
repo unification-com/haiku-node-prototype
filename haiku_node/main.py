@@ -12,8 +12,7 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.client import HaikuDataClient, Provider
 from haiku_node.keystore.keystore import UnificationKeystore
 from haiku_node.network.eos import get_eos_rpc_client, get_cleos
-from haiku_node.permissions.permission_batcher import (
-    PermissionBatcher, default_db)
+from haiku_node.permissions.permission_batcher import PermissionBatcher
 from haiku_node.rpc import app
 
 PORT = 8050
@@ -217,8 +216,8 @@ def uapp_store():
 
 @main.command()
 def process_batch():
-    pb = PermissionBatcher(default_db())
-    pb.process_batch()
+    pb = PermissionBatcher()
+    pb.process_batch_queue()
 
 
 def __request_from_uapp_store(data_request):
