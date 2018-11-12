@@ -84,64 +84,6 @@ def schemas(app_name):
 
 
 @main.command()
-@click.argument('provider')
-@click.argument('requester')
-@click.argument('user')
-@click.argument('password')
-def grant(provider, requester, user, password):
-    """
-    User grants data access between a provider and a requester.
-
-    \b
-    :param provider: The app name of the data provider.
-    :param requester: The app name of the data requester.
-    :param user: The EOS user account name that is granting access.
-    :param password: The EOS user account's password.
-    """
-    click.echo(f"{bold(user)} is granting {bold(requester)} "
-               f"access to their data held in {bold(provider)}:")
-
-    cleos = EosioCleos()
-    accounts = AccountManager()
-    cleos.unlock_wallet(user, password)
-    result = accounts.grant(provider, requester, user)
-    cleos.lock_wallet(user)
-    if result.returncode == 0:
-        click.echo(bold('Grant succeeded'))
-    else:
-        click.echo(bold('Grant failed'))
-
-
-@main.command()
-@click.argument('provider')
-@click.argument('requester')
-@click.argument('user')
-@click.argument('password')
-def revoke(provider, requester, user, password):
-    """
-    User revokes data access between a provider and a requester.
-
-    \b
-    :param provider: The app name of the data provider.
-    :param requester: The app name of the data requester.
-    :param user: The EOS user account name that is revoking access.
-    :param password: The EOS user account's password.
-    """
-    click.echo(f"{bold(user)} is revoking access from {bold(requester)} "
-               f"to their data in held {bold(provider)}:")
-
-    cleos = EosioCleos()
-    accounts = AccountManager()
-    cleos.unlock_wallet(user, password)
-    result = accounts.revoke(provider, requester, user)
-    cleos.lock_wallet(user)
-    if result.returncode == 0:
-        click.echo(bold('Revoke succeeded'))
-    else:
-        click.echo(bold('Revoke failed'))
-
-
-@main.command()
 @click.argument('user')
 @click.argument('password')
 def balance(user, password):
