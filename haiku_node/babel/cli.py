@@ -354,7 +354,7 @@ def modify_permissions_direct(
 @click.argument('user')
 @click.argument('provider')
 @click.argument('consumer')
-def proove_permission(user, provider, consumer):
+def prove_permission(user, provider, consumer):
     payload = {
         'consumer': consumer,
         'user': user
