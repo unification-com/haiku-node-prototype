@@ -3,7 +3,6 @@ import subprocess
 import json
 import requests
 
-from itertools import product
 
 import click
 
@@ -12,7 +11,6 @@ from haiku_node.client import Provider
 from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos import eosio_account
-from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.network.eos import get_eos_rpc_client, get_cleos
 from haiku_node.permissions.utils import generate_payload
