@@ -16,7 +16,6 @@ from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.network.eos import get_eos_rpc_client, get_cleos
 from haiku_node.permissions.utils import generate_payload
-from haiku_node.validation.validation import UnificationAppScValidation
 
 
 log = logging.getLogger(__name__)
@@ -51,16 +50,17 @@ def permissions(user):
 
     click.echo(f"{bold(user)} Permissions overview:")
 
-    for requester, provider in product(apps, apps):
-        if requester == provider:
-            continue
-        v = UnificationAppScValidation(
-            eos_client, provider, requester, get_perms=True)
-        if v.app_has_user_permission(user):
-            grant = bold('GRANTED')
-        else:
-            grant = bold('NOT GRANTED')
-        click.echo(f"{requester} {grant} to read from {provider}")
+    # ToDo: get permissions from SC/IPFS
+    # for requester, provider in product(apps, apps):
+    #     if requester == provider:
+    #         continue
+    #     v = UnificationAppScValidation(
+    #         eos_client, provider, requester, get_perms=True)
+    #     if v.app_has_user_permission(user):
+    #         grant = bold('GRANTED')
+    #     else:
+    #         grant = bold('NOT GRANTED')
+    #     click.echo(f"{requester} {grant} to read from {provider}")
 
 
 @main.command()

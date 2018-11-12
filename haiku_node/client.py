@@ -67,8 +67,7 @@ class HaikuDataClient:
         conf = UnificationConfig()
         eos_client = get_eos_rpc_client()
         v = UnificationAppScValidation(
-            eos_client, conf['acl_contract'], providing_app.name,
-            get_perms=True)
+            eos_client, conf['acl_contract'], providing_app.name)
 
         if not v.valid():
             raise Exception(f"Providing App {providing_app.name} is "

@@ -169,18 +169,12 @@ def data_request():
         eos_client = get_eos_rpc_client()
 
         # Init the validation class for THIS Haiku, and validate the
-        # REQUESTING APP. Since we only need to validate the app at this point,
-        # set get_perms=False
+        # REQUESTING APP.
         v = UnificationAppScValidation(
-            eos_client, conf['acl_contract'], d['eos_account_name'],
-            get_perms=True)
+            eos_client, conf['acl_contract'], d['eos_account_name'])
 
         # If the REQUESTING APP is valid according to MOTHER, then we can
         # generate the data. If not, return an invalid_app response
-        # Whatever obtain_data eventually uses to grab the data will also need
-        # to load the UnificationAppScValidation class, so it knows which users
-        # have granted permissions to the REQUESTING APP, and get the correct
-        # data
         if v.valid():
             users = bundle_d.get('users')
             request_id = bundle_d.get('request_id')
@@ -225,18 +219,12 @@ def data_ingest():
         eos_client = get_eos_rpc_client()
 
         # Init the validation class for THIS Haiku, and validate the
-        # REQUESTING APP. Since we only need to validate the app at this point,
-        # set get_perms=False
+        # REQUESTING APP.
         v = UnificationAppScValidation(
-            eos_client, conf['acl_contract'], d['eos_account_name'],
-            get_perms=True)
+            eos_client, conf['acl_contract'], d['eos_account_name'])
 
         # If the REQUESTING APP is valid according to MOTHER, then we can
         # generate the data. If not, return an invalid_app response
-        # Whatever obtain_data eventually uses to grab the data will also need
-        # to load the UnificationAppScValidation class, so it knows which users
-        # have granted permissions to the REQUESTING APP, and get the correct
-        # data
         if v.valid():
             users = bundle_d.get('users')
             return ingest_data(

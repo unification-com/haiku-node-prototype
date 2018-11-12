@@ -8,8 +8,6 @@ from haiku_node.validation.validation import UnificationAppScValidation
 
 
 def run_test(requesting_app):
-    #list of users to test - EOS account names.
-    users_to_test = ["user1", "user2", "user3"]
 
     conf = UnificationConfig()
     eos_client = Client(
@@ -32,25 +30,7 @@ def run_test(requesting_app):
 
     if both_valid:
 
-        print("App valid according to MOTHER. App code hash valid. "
-              "Check user permissions.")
-
-        users_granted = v.users_granted()
-        print("Users who granted permission for:", requesting_app)
-        print(users_granted)
-
-        users_revoked = v.users_revoked()
-        print("Users who revoked permission for:", requesting_app)
-        print(users_revoked)
-
-        for user in users_to_test:
-            if v.app_has_user_permission(user):
-                print(f"{user} GRANTED permission for {requesting_app} to "
-                      f"access data in {conf['acl_contract']}")
-            else:
-                print(
-                    f"{user} NOT GRANTED permission for {requesting_app} to "
-                    f"access data in {conf['acl_contract']}")
+        print("App valid according to MOTHER. App code hash valid.")
 
     else:
         if app_valid is False:
