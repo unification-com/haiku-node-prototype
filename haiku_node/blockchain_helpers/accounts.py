@@ -358,15 +358,6 @@ class AccountManager:
         print("Data Schemas:")
         print(u_uapp.get_all_db_schemas())
 
-        print("Check Permissions")
-        for req_app in appnames:
-            print("Check perms for Requesting App: ", req_app)
-            granted, revoked = u_uapp.get_perms_for_req_app(req_app)
-            print("Users who Granted:")
-            print(granted)
-            print("Users who Revoked:")
-            print(revoked)
-
         print("-----------------------------------")
 
 
