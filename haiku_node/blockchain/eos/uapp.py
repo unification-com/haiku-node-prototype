@@ -28,7 +28,6 @@ class UnificationUapp:
                class will retrieve data from the UApp smart contract
 
         """
-        self.__permission_rec_table = "permrecords"
         self.__ipfs_perm_table = "userperms"
         self.__rsa_pub_key_table = "rsapubkey"
         self.__db_schema_table = "dataschemas"
