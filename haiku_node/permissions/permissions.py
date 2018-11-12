@@ -185,6 +185,18 @@ class UnifPermissions:
     def verify_permission(self, perm: dict):
         return self.__verify_change_request(perm)
 
+    def get_proof(self, user):
+        user_permissions = self.__consumer_perms[user]
+        tree = MerkleTree()
+        for user, perm in self.__consumer_perms.items():
+            tree.add_leaf(json.dumps(perm))
+
+        tree.grow_tree()
+
+        proof = tree.get_proof(json.dumps(user_permissions), is_hashed=False)
+
+        return proof
+
     def __verify_change_request(self, perm: dict) -> bool:
         perm_digest_sha = generate_perm_digest_sha(
             perm['perms'], perm['schema_id'],

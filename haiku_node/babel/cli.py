@@ -328,5 +328,30 @@ def modify_permissions_direct(
         user, password, perm, granted_fields, schema_id, provider, consumer)
 
 
+@main.command()
+@click.argument('user')
+@click.argument('provider')
+@click.argument('consumer')
+def proove_permission(user, provider, consumer):
+
+    payload = {
+        'consumer': consumer,
+        'user': user
+    }
+
+    mother = UnificationMother(get_eos_rpc_client(), provider, get_cleos())
+    provider_obj = Provider(provider, 'https', mother)
+    url = f"{provider_obj.base_url()}/modify_permission"
+
+    r = requests.post(url, json=payload, verify=False)
+
+    d = r.json()
+
+    if r.status_code != 200:
+        raise Exception(d['message'])
+
+    click.echo(d)
+
+
 if __name__ == "__main__":
     main()

@@ -347,3 +347,23 @@ def process_permission_batch():
 
     except InvalidSignature:
         return invalid_response()
+
+
+@app.route('/get_proof', methods=['POST'])
+def get_proof():
+    conf = app.unification_config
+    d = flask.request.get_json()
+    user = d['user']
+    consumer = d['consumer']
+
+    provider_uapp = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
+    permission_db = PermissionBatchDatabase(pb_default_db())
+    permissions = UnifPermissions(get_ipfs_client(), provider_uapp, permission_db)
+    permissions.load_consumer_perms(consumer)
+    proof = permissions.get_proof(user)
+
+    return_d = {
+        'proof': proof
+    }
+
+    return flask.jsonify(return_d), 200
