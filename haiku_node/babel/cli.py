@@ -432,7 +432,7 @@ def modify_permissions(user, password, provider, consumer, perm='active'):
 @click.argument('provider')
 @click.argument('consumer')
 @click.argument('schema_id')
-@click.argument('granted_fields')
+@click.option('-f', '--fields', 'granted_fields', required=False, default='')
 def modify_permissions_direct(
         user, password, provider, consumer, schema_id, granted_fields):
     """
@@ -448,8 +448,13 @@ def modify_permissions_direct(
     """
     int(schema_id)
 
-    click.echo(f"{user} is Requesting permission change: Granting access to "
-               f"{consumer} in Provider {provider} for fields {granted_fields}")
+    if not granted_fields:
+        click.echo(f"{user} is Requesting permission change: Revoking access to "
+                   f"{consumer} in Provider {provider} for Schema {schema_id}")
+    else:
+        click.echo(f"{user} is Requesting permission change: Granting access to "
+                   f"{consumer} in Provider {provider} for fields {granted_fields}"
+                   f"in Schema {schema_id}")
 
     perm = 'active'
     post_permissions(
@@ -552,7 +557,12 @@ def check_change_request(user, request_id):
 
     leaf_to_prove = generate_leaf_to_prove(request_data, user)
 
-    click.echo(f"Verifying {request_data['perms']} were processed by "
+    if not request_data['perms']:
+        feedback = f'revoking access to Schema {schema_id}'
+    else:
+        feedback = f"granting access to fields {request_data['perms']} in Schema {schema_id}"
+
+    click.echo(f"Verifying {feedback} was processed by "
                f'Provider {provider} for Consumer {consumer}...')
 
     tx_is_good = verify_proof(tx_merkle_root, tx_proof_chain, leaf_to_prove)
@@ -568,7 +578,7 @@ def check_change_request(user, request_id):
     click.echo(f'Current IPFS Hash: {current_ipfs_hash}')
     click.echo(f'Current Merkle Root: {current_merkle_root}')
 
-    click.echo(f"Verifying {request_data['perms']} are currently honoured by "
+    click.echo(f"Verifying {feedback} is currently honoured by "
                f'Provider {provider} for Consumer {consumer}...')
 
     click.echo(bold(f'Current proof verified: {current_is_good}'))
