@@ -267,6 +267,10 @@ def post_permissions(user, password, perm, granted_fields_str: str,
     if ret_app == provider and proc_id > 0:
         babel_db.update_provider_process_id(request_id, proc_id)
         click.echo(f"Success. Process ID {proc_id} Queued by {ret_app}")
+        click.echo(f'Request ID: {request_id}')
+        click.echo(f'Check status, run:')
+        click.echo(f'babel check_change_request {user} {request_id}')
+
     else:
         click.echo("Something went wrong...")
 
@@ -308,6 +312,7 @@ def verify_proof(user, schema_id, ipfs_hash, merkle_root, proof_chain):
                                       proof_chain, is_hashed=False)
 
     return is_good
+
 
 @main.command()
 @click.argument('user')
