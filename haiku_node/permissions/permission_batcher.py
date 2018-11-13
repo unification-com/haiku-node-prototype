@@ -1,12 +1,10 @@
 import logging
-import time
 from pathlib import Path
 
 from haiku_node.blockchain.eos.uapp import get_self_uapp
 from haiku_node.network.eos import get_ipfs_client
 from haiku_node.permissions.perm_batch_db import PermissionBatchDatabase
 from haiku_node.permissions.permissions import UnifPermissions
-from haiku_node.utils.utils import generate_nonce
 
 
 log = logging.getLogger(__name__)
