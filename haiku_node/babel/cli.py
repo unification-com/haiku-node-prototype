@@ -2,6 +2,7 @@ import logging
 import subprocess
 import json
 import requests
+import urllib3
 
 import click
 
@@ -20,6 +21,8 @@ log = logging.getLogger(__name__)
 bold = lambda s: click.style(str(s), bold=True)
 
 ZERO_MASK = '0000000000000000000000000000000000000000000000'
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 @click.group()
 def main():
