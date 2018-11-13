@@ -346,7 +346,6 @@ def get_ipfs_merkle_from_proof_tx(proof_tx, provider, consumer):
                 and action['name'] == 'updateperm'
                 and action['data']['consumer_id'] == consumer
         ):
-            click.echo(f'Found change request process')
             ipfs_hash = action['data']['ipfs_hash']
             merkle_root = action['data']['merkle_root']
 
@@ -516,6 +515,14 @@ def check_change_request(user, request_id):
     consumer = request_data['consumer_account']
     schema_id = request_data['schema_id']
 
+    if not request_data['perms']:
+        feedback = f'revoking access to Schema {schema_id}'
+    else:
+        feedback = f"granting access to fields {request_data['perms']} in Schema {schema_id}"
+
+    click.echo(f"Verifying {feedback} was processed by "
+               f'Provider {provider} for Consumer {consumer}...')
+
     payload = {
         'user': user,
         'proc_id': proc_id
@@ -549,6 +556,10 @@ def check_change_request(user, request_id):
     tx_ipfs_hash, tx_merkle_root = get_ipfs_merkle_from_proof_tx(proof_tx,
                                                                  provider, consumer)
 
+    if tx_ipfs_hash is None:
+        click.echo('Could not find required information from proof Tx')
+        return
+
     click.echo(f'IPFS Hash at time of change request: {tx_ipfs_hash}')
     click.echo(f'Merkle Root at time of change request: {tx_merkle_root}')
 
@@ -557,16 +568,11 @@ def check_change_request(user, request_id):
 
     leaf_to_prove = generate_leaf_to_prove(request_data, user)
 
-    if not request_data['perms']:
-        feedback = f'revoking access to Schema {schema_id}'
-    else:
-        feedback = f"granting access to fields {request_data['perms']} in Schema {schema_id}"
-
-    click.echo(f"Verifying {feedback} was processed by "
-               f'Provider {provider} for Consumer {consumer}...')
-
     tx_is_good = verify_proof(tx_merkle_root, tx_proof_chain, leaf_to_prove)
     click.echo(bold(f'Tx proof verified: {tx_is_good}'))
+
+    click.echo(f"Verifying {feedback} is currently honoured by "
+               f'Provider {provider} for Consumer {consumer}...')
 
     current_ipfs_hash, current_merkle_root = get_current_ipfs_merkle(provider, consumer)
 
@@ -577,9 +583,6 @@ def check_change_request(user, request_id):
                                    current_proof_chain, leaf_to_prove)
     click.echo(f'Current IPFS Hash: {current_ipfs_hash}')
     click.echo(f'Current Merkle Root: {current_merkle_root}')
-
-    click.echo(f"Verifying {feedback} is currently honoured by "
-               f'Provider {provider} for Consumer {consumer}...')
 
     click.echo(bold(f'Current proof verified: {current_is_good}'))
 
