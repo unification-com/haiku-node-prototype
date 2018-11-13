@@ -254,6 +254,9 @@ def post_permissions(user, password, perm, granted_fields_str: str,
     if r.status_code != 200:
         raise Exception(d['message'])
 
+    # ToDo: Store returned values in local DB and use them for generating
+    # request_leaf for proof that permission change request has been honoured
+    # Need RPC server to return batch nonce etc. too
     proc_id = d['proc_id']
     ret_app = d['app']
 

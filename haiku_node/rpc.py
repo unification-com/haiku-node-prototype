@@ -296,6 +296,7 @@ def modify_permission():
                                      payload['p_sig'],
                                      public_key)
 
+        # ToDo: get batch nonce etc. as return values to send to user for storing
         d = {
             'app': conf['acl_contract'],
             'proc_id': rowid
