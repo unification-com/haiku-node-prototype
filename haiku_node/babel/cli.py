@@ -560,8 +560,10 @@ def check_change_request(user, request_id):
         click.echo('Could not find required information from proof Tx')
         return
 
-    click.echo(f'IPFS Hash at time of change request: {tx_ipfs_hash}')
-    click.echo(f'Merkle Root at time of change request: {tx_merkle_root}')
+    click.echo(f'IPFS Hash on blockchain at time of change request: {tx_ipfs_hash}')
+    click.echo(f'Merkle Root on blockchain at time of change request: {tx_merkle_root}')
+
+    click.echo(f'Requesting proof chain from {provider}')
 
     tx_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
                                      ipfs_hash=tx_ipfs_hash)
@@ -576,13 +578,15 @@ def check_change_request(user, request_id):
 
     current_ipfs_hash, current_merkle_root = get_current_ipfs_merkle(provider, consumer)
 
+    click.echo(f'Current IPFS Hash on blockchain: {current_ipfs_hash}')
+    click.echo(f'Current Merkle Root on blockchain: {current_merkle_root}')
+
+    click.echo(f'Requesting proof chain from {provider}')
     current_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
                                           ipfs_hash=current_ipfs_hash)
 
     current_is_good = verify_proof(current_merkle_root,
                                    current_proof_chain, leaf_to_prove)
-    click.echo(f'Current IPFS Hash: {current_ipfs_hash}')
-    click.echo(f'Current Merkle Root: {current_merkle_root}')
 
     click.echo(bold(f'Current proof verified: {current_is_good}'))
 
