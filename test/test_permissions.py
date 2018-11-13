@@ -68,7 +68,7 @@ def add_to_queue(batcher, granted_fields_str):
     perm = 'active'
 
     # Pack
-    d = generate_payload(
+    d, p_nonce, p_sig = generate_payload(
         user, private_key, provider, consumer, granted_fields_str, perm,
         schema_id)
 

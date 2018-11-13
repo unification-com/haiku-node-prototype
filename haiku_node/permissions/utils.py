@@ -36,4 +36,5 @@ def generate_payload(user, private_key, provider, consumer, granted_fields_str,
         'user': user,
         'provider': provider
     }
-    return payload
+
+    return payload, p_nonce, p_sig

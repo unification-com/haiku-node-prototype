@@ -51,7 +51,7 @@ class BabelDatabase:
     def update_processed(self, request_id, proof_tx=None):
         self.__open_con()
 
-        self.__c.execute(f"UPDATE permissions "
+        self.__c.execute(f"UPDATE perm_change_requests "
                          f"SET processed='1',"
                          f"proof_tx='{proof_tx}' "
                          f"WHERE req_id='{request_id}'")
@@ -61,7 +61,7 @@ class BabelDatabase:
 
     def get_unprocessed(self, num=10):
         self.__open_con()
-        self.__c.execute(f'SELECT * FROM permissions '
+        self.__c.execute(f'SELECT * FROM perm_change_requests '
                          f'WHERE processed=0 '
                          f'LIMIT {num}')
         columns = [d[0] for d in self.__c.description]
@@ -74,8 +74,8 @@ class BabelDatabase:
     def get_request_by_id(self, request_id):
         op_data = None
         self.__open_con()
-        self.__c.execute(f'SELECT * FROM permissions '
-                         f"WHERE request_id='{request_id}' "
+        self.__c.execute(f'SELECT * FROM perm_change_requests '
+                         f"WHERE req_id='{request_id}' "
                          f'LIMIT 1')
         columns = [d[0] for d in self.__c.description]
         res = [dict(zip(columns, row)) for row in self.__c.fetchall()]

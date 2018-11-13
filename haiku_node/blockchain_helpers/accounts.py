@@ -270,7 +270,7 @@ class AccountManager:
                           f'update perms for {consumer} '
                           f'in schema {schema_id}: {granted} {fields}')
 
-                payload = generate_payload(user, private_key, provider, consumer,
+                payload, p_nonce, p_sig = generate_payload(user, private_key, provider, consumer,
                                            fields, 'active', schema_id)
 
                 log.debug(f'request_permission_change payload: {json.dumps(payload)}')

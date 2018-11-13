@@ -6,6 +6,7 @@ import urllib3
 
 import click
 
+from haiku_node.babel.babel_db import (BabelDatabase, default_db as default_babel_db)
 from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.client import Provider
 from haiku_node.config.config import UnificationConfig
@@ -224,6 +225,9 @@ def get_schemas(provider):
 
 def post_permissions(user, password, perm, granted_fields_str: str,
                      schema_id: int, provider, consumer):
+
+    babel_db = BabelDatabase(default_babel_db(user))
+
     cleos = get_cleos()
     eos_client = get_eos_rpc_client()
 
@@ -239,9 +243,12 @@ def post_permissions(user, password, perm, granted_fields_str: str,
         click.echo(bold(f'Could not get private key for {pub_key}'))
         return
 
-    payload = generate_payload(
+    payload, p_nonce, p_sig = generate_payload(
         user, private_key, provider, consumer, granted_fields_str, perm,
         schema_id)
+
+    request_id = babel_db.add_change_request(user, consumer, schema_id,
+                                             granted_fields_str, p_nonce, p_sig)
 
     mother = UnificationMother(eos_client, provider, cleos)
     provider_obj = Provider(provider, 'https', mother)
@@ -254,13 +261,11 @@ def post_permissions(user, password, perm, granted_fields_str: str,
     if r.status_code != 200:
         raise Exception(d['message'])
 
-    # ToDo: Store returned values in local DB and use them for generating
-    # request_leaf for proof that permission change request has been honoured
-    # Need RPC server to return batch nonce etc. too
     proc_id = d['proc_id']
     ret_app = d['app']
 
     if ret_app == provider and proc_id > 0:
+        babel_db.update_provider_process_id(request_id, proc_id)
         click.echo(f"Success. Process ID {proc_id} Queued by {ret_app}")
     else:
         click.echo("Something went wrong...")
