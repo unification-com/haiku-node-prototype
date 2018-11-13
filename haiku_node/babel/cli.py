@@ -247,7 +247,7 @@ def post_permissions(user, password, perm, granted_fields_str: str,
         user, private_key, provider, consumer, granted_fields_str, perm,
         schema_id)
 
-    request_id = babel_db.add_change_request(user, consumer, schema_id,
+    request_id = babel_db.add_change_request(user, consumer, provider, schema_id,
                                              granted_fields_str, p_nonce, p_sig)
 
     mother = UnificationMother(eos_client, provider, cleos)

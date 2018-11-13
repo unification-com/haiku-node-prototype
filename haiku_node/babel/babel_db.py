@@ -15,12 +15,13 @@ class BabelDatabase:
     def __init__(self, db_name: Path):
         self.__db_name = db_name
 
-    def add_change_request(self, user_account, consumer_account,
+    def add_change_request(self, user_account, provider_account, consumer_account,
                            schema_id, perms, p_nonce, p_sig):
         self.__open_con()
         self.__c.execute(f"INSERT INTO perm_change_requests "
                          f"VALUES (NULL,"
                          f"'{user_account}', "
+                         f"'{provider_account}', "
                          f"'{consumer_account}',"
                          f"'{schema_id}',"
                          f"'{perms}',"
@@ -71,11 +72,12 @@ class BabelDatabase:
 
         return res
 
-    def get_request_by_id(self, request_id):
+    def get_request_by_id(self, request_id, user_account):
         op_data = None
         self.__open_con()
         self.__c.execute(f'SELECT * FROM perm_change_requests '
                          f"WHERE req_id='{request_id}' "
+                         f"AND end_user_account='{user_account}' "
                          f'LIMIT 1')
         columns = [d[0] for d in self.__c.description]
         res = [dict(zip(columns, row)) for row in self.__c.fetchall()]

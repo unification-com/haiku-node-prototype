@@ -39,6 +39,7 @@ def _create_babel_db(db_name: Path):
     c = conn.cursor()
     c.execute('''CREATE TABLE perm_change_requests (req_id INTEGER PRIMARY KEY, 
                  end_user_account text, 
+                 provider_account text,
                  consumer_account text, 
                  schema_id text,
                  perms text,
