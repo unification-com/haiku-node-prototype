@@ -25,6 +25,7 @@ ZERO_MASK = '0000000000000000000000000000000000000000000000'
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 @click.group()
 def main():
     pass
@@ -229,7 +230,6 @@ def post_permissions(user, password, perm, granted_fields_str: str,
     babel_db = BabelDatabase(default_babel_db(user))
 
     cleos = get_cleos()
-    eos_client = get_eos_rpc_client()
 
     cleos.unlock_wallet(user, password)
 
@@ -250,9 +250,7 @@ def post_permissions(user, password, perm, granted_fields_str: str,
     request_id = babel_db.add_change_request(user, provider, consumer, schema_id,
                                              granted_fields_str, p_nonce, p_sig, pub_key)
 
-    mother = UnificationMother(eos_client, provider, cleos)
-    provider_obj = Provider(provider, 'https', mother)
-    url = f"{provider_obj.base_url()}/modify_permission"
+    url = get_rpc_url(provider, 'modify_permission')
 
     r = requests.post(url, json=payload, verify=False)
 
@@ -283,10 +281,7 @@ def get_proof_chain(user, provider, schema_id='0', consumer=None, ipfs_hash=None
         'schema_id': schema_id
     }
 
-    eos_rpc_client = get_eos_rpc_client()
-    mother = UnificationMother(eos_rpc_client, provider, get_cleos())
-    provider_obj = Provider(provider, 'https', mother)
-    url = f"{provider_obj.base_url()}/get_proof"
+    url = get_rpc_url(provider, 'get_proof')
 
     r = requests.post(url, json=payload, verify=False)
 
@@ -468,17 +463,14 @@ def modify_permissions_direct(
 @click.argument('schema_id')
 def prove_permission(user, provider, consumer, schema_id):
     """
-    Verify a user's current permission state
+    Verify a user's current permission state on the blockchain
     :param user: End User's EOS account name
     :param provider: Provider's EOS account name
     :param consumer: Consumer's EOS account name
     :param schema_id: Schema ID to check
     """
 
-    eos_rpc_client = get_eos_rpc_client()
-    uapp_sc = UnificationUapp(eos_rpc_client, provider)
-
-    ipfs_hash, merkle_root = uapp_sc.get_ipfs_perms_for_req_app(consumer)
+    ipfs_hash, merkle_root = get_current_ipfs_merkle(provider, consumer)
 
     proof_chain = get_proof_chain(user, provider, schema_id=schema_id, consumer=consumer)
 
@@ -549,7 +541,8 @@ def check_change_request(user, request_id):
 
     click.echo(f'Request processed in blockchain Tx ID {proof_tx}. Checking:')
 
-    tx_ipfs_hash, tx_merkle_root = get_ipfs_merkle_from_proof_tx(proof_tx, provider, consumer)
+    tx_ipfs_hash, tx_merkle_root = get_ipfs_merkle_from_proof_tx(proof_tx,
+                                                                 provider, consumer)
 
     click.echo(f'IPFS Hash at time of change request: {tx_ipfs_hash}')
     click.echo(f'Merkle Root at time of change request: {tx_merkle_root}')
@@ -570,7 +563,8 @@ def check_change_request(user, request_id):
     current_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
                                           ipfs_hash=current_ipfs_hash)
 
-    current_is_good = verify_proof(current_merkle_root, current_proof_chain, leaf_to_prove)
+    current_is_good = verify_proof(current_merkle_root,
+                                   current_proof_chain, leaf_to_prove)
     click.echo(f'Current IPFS Hash: {current_ipfs_hash}')
     click.echo(f'Current Merkle Root: {current_merkle_root}')
 
