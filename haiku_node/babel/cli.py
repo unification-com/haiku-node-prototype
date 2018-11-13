@@ -247,7 +247,7 @@ def post_permissions(user, password, perm, granted_fields_str: str,
         user, private_key, provider, consumer, granted_fields_str, perm,
         schema_id)
 
-    request_id = babel_db.add_change_request(user, consumer, provider, schema_id,
+    request_id = babel_db.add_change_request(user, provider, consumer, schema_id,
                                              granted_fields_str, p_nonce, p_sig)
 
     mother = UnificationMother(eos_client, provider, cleos)
@@ -299,13 +299,21 @@ def get_proof_chain(user, provider, schema_id='0', consumer=None, ipfs_hash=None
         return d['proof']
 
 
-def verify_proof(user, schema_id, ipfs_hash, merkle_root, proof_chain):
-    ipfs_client = get_ipfs_client()
-    permissions_str = ipfs_client.get_json(ipfs_hash)
+def verify_proof(user, schema_id, ipfs_hash,
+                 merkle_root, proof_chain, permission_obj=None):
 
-    permissions_json = json.loads(permissions_str)
+    if permission_obj is None:
+        ipfs_client = get_ipfs_client()
+        permissions_str = ipfs_client.get_json(ipfs_hash)
 
-    requested_leaf = json.dumps(permissions_json[user][schema_id])
+        permissions_json = json.loads(permissions_str)
+
+        requested_leaf = json.dumps(permissions_json[user][schema_id])
+
+    else:
+        requested_leaf = json.dumps(permission_obj)
+
+    click.echo(requested_leaf)
 
     verify_tree = MerkleTree()
     is_good = verify_tree.verify_leaf(requested_leaf, merkle_root,
@@ -439,19 +447,27 @@ def prove_permission(user, provider, consumer, schema_id):
 
 @main.command()
 @click.argument('user')
-@click.argument('provider')
-@click.argument('consumer')
-@click.argument('proc_id')
-@click.argument('schema_id')
-def check_change_request(user, provider, consumer, proc_id, schema_id):
+@click.argument('request_id')
+def check_change_request(user, request_id):
     """
     Check state of a permission change request, and verify it has been honoured
     :param user: End User's EOS account name
-    :param provider: Provider's EOS account name
-    :param consumer: Consumer's EOS account name
-    :param proc_id: Process ID for batch, as returned by modify_permission
-    :param schema_id: Schema ID to check
+    :param request_id: Request ID from user's BABEL DB
     """
+
+    babel_db = BabelDatabase(default_babel_db(user))
+    request_data = babel_db.get_request_by_id(request_id, user)
+
+    if request_data is None:
+        click.echo(f'Request ID {request_id} for {user} not found')
+        return
+
+    provider = request_data['provider_account']
+    proc_id = request_data['provider_process_id']
+    consumer = request_data['consumer_account']
+    schema_id = request_data['schema_id']
+    p_nonce = request_data['p_nonce']
+    p_sig = request_data['p_sig']
 
     payload = {
         'user': user,
