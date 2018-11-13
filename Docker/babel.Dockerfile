@@ -33,3 +33,4 @@ COPY bin/mother /usr/bin/mother
 COPY haiku_node /haiku/haiku_node
 COPY test /haiku/test
 COPY --from=unification-base /tmp/build/bin /opt/eosio/bin
+COPY test/data/babel_db/ /haiku/haiku_node/dbs
