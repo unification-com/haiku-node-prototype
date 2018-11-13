@@ -1,5 +1,4 @@
 import logging
-import os
 import subprocess
 import json
 import requests
@@ -21,7 +20,6 @@ log = logging.getLogger(__name__)
 bold = lambda s: click.style(str(s), bold=True)
 
 ZERO_MASK = '0000000000000000000000000000000000000000000000'
-
 
 @click.group()
 def main():
@@ -286,13 +284,13 @@ def get_proof_chain(user, provider, schema_id='0', consumer=None, ipfs_hash=None
         return d['proof']
 
 
-def verify_proof(user, ipfs_hash, merkle_root, proof_chain):
+def verify_proof(user, schema_id, ipfs_hash, merkle_root, proof_chain):
     ipfs_client = get_ipfs_client()
     permissions_str = ipfs_client.get_json(ipfs_hash)
 
     permissions_json = json.loads(permissions_str)
 
-    requested_leaf = json.dumps(permissions_json[user])
+    requested_leaf = json.dumps(permissions_json[user][schema_id])
 
     verify_tree = MerkleTree()
     is_good = verify_tree.verify_leaf(requested_leaf, merkle_root,
@@ -393,12 +391,14 @@ def modify_permissions_direct(
 @click.argument('user')
 @click.argument('provider')
 @click.argument('consumer')
-def prove_permission(user, provider, consumer):
+@click.argument('schema_id')
+def prove_permission(user, provider, consumer, schema_id):
     """
     Verify a user's current permission state
     :param user: End User's EOS account name
     :param provider: Provider's EOS account name
     :param consumer: Consumer's EOS account name
+    :param schema_id: Schema ID to check
     """
 
     eos_rpc_client = get_eos_rpc_client()
@@ -406,7 +406,7 @@ def prove_permission(user, provider, consumer):
 
     ipfs_hash, merkle_root = uapp_sc.get_ipfs_perms_for_req_app(consumer)
 
-    proof_chain = get_proof_chain(user, provider, consumer=consumer)
+    proof_chain = get_proof_chain(user, provider, schema_id=schema_id, consumer=consumer)
 
     if proof_chain is None:
         click.echo('Proof chain not found')
@@ -414,9 +414,9 @@ def prove_permission(user, provider, consumer):
 
     click.echo(f'IPFS Hash from {provider} SC: {ipfs_hash}')
     click.echo(f'Merkle Root from {provider} SC: {merkle_root}')
-    click.echo(f'Proof Chain from {url}: {proof_chain}')
+    click.echo(f'Proof Chain from {provider}: {proof_chain}')
 
-    is_good = verify_proof(user, ipfs_hash, merkle_root, proof_chain)
+    is_good = verify_proof(user, schema_id, ipfs_hash, merkle_root, proof_chain)
 
     click.echo(bold(f'Permissions are valid: {is_good}'))
 
@@ -426,13 +426,15 @@ def prove_permission(user, provider, consumer):
 @click.argument('provider')
 @click.argument('consumer')
 @click.argument('proc_id')
-def check_change_request(user, provider, consumer, proc_id):
+@click.argument('schema_id')
+def check_change_request(user, provider, consumer, proc_id, schema_id):
     """
     Check state of a permission change request, and verify it has been honoured
     :param user: End User's EOS account name
     :param provider: Provider's EOS account name
     :param consumer: Consumer's EOS account name
     :param proc_id: Process ID for batch, as returned by modify_permission
+    :param schema_id: Schema ID to check
     """
 
     payload = {
@@ -456,7 +458,8 @@ def check_change_request(user, provider, consumer, proc_id):
 
     if not d['found']:
         click.echo(f'Permission change request ID {proc_id} for User {user}, '
-                   f'Provider {provider}, Consumer {consumer} not found')
+                   f'Provider {provider}, Consumer {consumer}, '
+                   f'Schema ID {schema_id} not found')
         return
 
     if not d['processed']:
@@ -466,12 +469,12 @@ def check_change_request(user, provider, consumer, proc_id):
 
     proof_tx = d['proof_tx']
 
-    click.echo(f'Checking blockchain Tx ID {proof_tx}')
+    click.echo(f'Request processed in blockchain Tx ID {proof_tx}. Checking:')
 
     transaction_data = eos_cleos.get_tx(proof_tx)
 
     if transaction_data is None:
-        click.echo(f'Tx {proof_tx} not found')
+        click.echo(f'Tx {proof_tx} not found on blockchain')
         return
 
     tx_json = json.loads(transaction_data)
@@ -491,22 +494,27 @@ def check_change_request(user, provider, consumer, proc_id):
             tx_ipfs_hash = action['data']['ipfs_hash']
             tx_merkle_root = action['data']['merkle_root']
 
-    click.echo(f'tx_ipfs_hash {tx_ipfs_hash}')
-    click.echo(f'tx_merkle_root {tx_merkle_root}')
+    click.echo(f'IPFS Hash at time of change request: {tx_ipfs_hash}')
+    click.echo(f'Merkle Root at time of change request: {tx_merkle_root}')
 
-    tx_proof_chain = get_proof_chain(user, provider, ipfs_hash=tx_ipfs_hash)
+    tx_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
+                                     ipfs_hash=tx_ipfs_hash)
+
+    tx_is_good = verify_proof(user, schema_id, tx_ipfs_hash, tx_merkle_root, tx_proof_chain)
+    click.echo(bold(f'Tx proof verified: {tx_is_good}'))
 
     uapp_sc = UnificationUapp(eos_rpc_client, provider)
 
     current_ipfs_hash, current_merkle_root = uapp_sc.get_ipfs_perms_for_req_app(consumer)
 
-    current_proof_chain = get_proof_chain(user, provider, ipfs_hash=current_ipfs_hash)
+    current_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
+                                          ipfs_hash=current_ipfs_hash)
 
-    tx_is_good = verify_proof(user, tx_ipfs_hash, tx_merkle_root, tx_proof_chain)
-    current_is_good = verify_proof(user, current_ipfs_hash, current_merkle_root, current_proof_chain)
+    current_is_good = verify_proof(user, schema_id, current_ipfs_hash, current_merkle_root, current_proof_chain)
+    click.echo(f'Current IPFS Hash: {current_ipfs_hash}')
+    click.echo(f'Current Merkle Root: {current_merkle_root}')
 
-    click.echo(f'Tx proof verified: {tx_is_good}')
-    click.echo(f'Current proof verified: {current_is_good}')
+    click.echo(bold(f'Current proof verified: {current_is_good}'))
 
 
 if __name__ == "__main__":
