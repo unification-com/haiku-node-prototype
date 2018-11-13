@@ -299,25 +299,77 @@ def get_proof_chain(user, provider, schema_id='0', consumer=None, ipfs_hash=None
         return d['proof']
 
 
-def verify_proof(user, schema_id, ipfs_hash,
-                 merkle_root, proof_chain, permission_obj=None):
+def generate_leaf_from_ipfs(user, schema_id, ipfs_hash):
+    ipfs_client = get_ipfs_client()
+    permissions_str = ipfs_client.get_json(ipfs_hash)
 
-    if permission_obj is None:
-        ipfs_client = get_ipfs_client()
-        permissions_str = ipfs_client.get_json(ipfs_hash)
+    permissions_json = json.loads(permissions_str)
 
-        permissions_json = json.loads(permissions_str)
+    return json.dumps(permissions_json[user][schema_id])
 
-        requested_leaf = json.dumps(permissions_json[user][schema_id])
 
-    else:
-        requested_leaf = json.dumps(permission_obj)
+def verify_proof(merkle_root, proof_chain, permission_obj):
+
+    requested_leaf = json.dumps(permission_obj)
 
     verify_tree = MerkleTree()
-    is_good = verify_tree.verify_leaf(requested_leaf, merkle_root,
-                                      proof_chain, is_hashed=False)
+    return verify_tree.verify_leaf(requested_leaf, merkle_root,
+                                   proof_chain, is_hashed=False)
 
-    return is_good
+
+def get_rpc_url(provider, endpoint):
+    mother = UnificationMother(get_eos_rpc_client(), provider, get_cleos())
+    provider_obj = Provider(provider, 'https', mother)
+    return f"{provider_obj.base_url()}/{endpoint}"
+
+
+def get_current_ipfs_merkle(provider, consumer):
+    uapp_sc = UnificationUapp(get_eos_rpc_client(), provider)
+    ipfs_hash, merkle_root = uapp_sc.get_ipfs_perms_for_req_app(consumer)
+    return ipfs_hash, merkle_root
+
+
+def get_ipfs_merkle_from_proof_tx(proof_tx, provider, consumer):
+    ipfs_hash = None
+    merkle_root = None
+
+    eos_cleos = get_cleos()
+
+    transaction_data = eos_cleos.get_tx(proof_tx)
+
+    if transaction_data is None:
+        click.echo(f'Tx {proof_tx} not found on blockchain')
+        return
+
+    tx_json = json.loads(transaction_data)
+
+    tx_actions = tx_json["trx"]["trx"]["actions"]
+
+    for action in tx_actions:
+        if (
+                action['account'] == provider
+                and action['name'] == 'updateperm'
+                and action['data']['consumer_id'] == consumer
+        ):
+            click.echo(f'Found change request process')
+            ipfs_hash = action['data']['ipfs_hash']
+            merkle_root = action['data']['merkle_root']
+
+    return ipfs_hash, merkle_root
+
+
+def generate_leaf_to_prove(data, user):
+    leaf_to_prove = {
+        "perms": data['perms'],
+        "p_nonce": data['p_nonce'],
+        "p_sig": data['p_sig'],
+        "pub_key": data['pub_key'],
+        "schema_id": data['schema_id'],
+        "consumer": data['consumer_account'],
+        "user": user
+    }
+
+    return leaf_to_prove
 
 
 @main.command()
@@ -438,7 +490,9 @@ def prove_permission(user, provider, consumer, schema_id):
     click.echo(f'Merkle Root from {provider} SC: {merkle_root}')
     click.echo(f'Proof Chain from {provider}: {proof_chain}')
 
-    is_good = verify_proof(user, schema_id, ipfs_hash, merkle_root, proof_chain)
+    leaf_to_prove = generate_leaf_from_ipfs(user, schema_id, ipfs_hash)
+
+    is_good = verify_proof(merkle_root, proof_chain, leaf_to_prove)
 
     click.echo(bold(f'Permissions are valid: {is_good}'))
 
@@ -464,22 +518,13 @@ def check_change_request(user, request_id):
     proc_id = request_data['provider_process_id']
     consumer = request_data['consumer_account']
     schema_id = request_data['schema_id']
-    p_nonce = request_data['p_nonce']
-    p_sig = request_data['p_sig']
-    pub_key = request_data['pub_key']
-    perms = request_data['perms']
 
     payload = {
         'user': user,
         'proc_id': proc_id
     }
 
-    eos_rpc_client = get_eos_rpc_client()
-    eos_cleos = get_cleos()
-
-    mother = UnificationMother(eos_rpc_client, provider, get_cleos())
-    provider_obj = Provider(provider, 'https', mother)
-    url = f"{provider_obj.base_url()}/get_proof_tx"
+    url = get_rpc_url(provider, 'get_proof_tx')
 
     r = requests.post(url, json=payload, verify=False)
 
@@ -500,31 +545,11 @@ def check_change_request(user, request_id):
         return
 
     proof_tx = d['proof_tx']
+    babel_db.update_processed(request_id, proof_tx)
 
     click.echo(f'Request processed in blockchain Tx ID {proof_tx}. Checking:')
 
-    transaction_data = eos_cleos.get_tx(proof_tx)
-
-    if transaction_data is None:
-        click.echo(f'Tx {proof_tx} not found on blockchain')
-        return
-
-    tx_json = json.loads(transaction_data)
-
-    tx_actions = tx_json["trx"]["trx"]["actions"]
-
-    tx_ipfs_hash = None
-    tx_merkle_root = None
-
-    for action in tx_actions:
-        if (
-                action['account'] == provider
-                and action['name'] == 'updateperm'
-                and action['data']['consumer_id'] == consumer
-        ):
-            click.echo(f'Found change request process')
-            tx_ipfs_hash = action['data']['ipfs_hash']
-            tx_merkle_root = action['data']['merkle_root']
+    tx_ipfs_hash, tx_merkle_root = get_ipfs_merkle_from_proof_tx(proof_tx, provider, consumer)
 
     click.echo(f'IPFS Hash at time of change request: {tx_ipfs_hash}')
     click.echo(f'Merkle Root at time of change request: {tx_merkle_root}')
@@ -532,29 +557,25 @@ def check_change_request(user, request_id):
     tx_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
                                      ipfs_hash=tx_ipfs_hash)
 
-    leaf_to_prove = {
-        "perms": perms,
-        "p_nonce": p_nonce,
-        "p_sig": p_sig,
-        "pub_key": pub_key,
-        "schema_id": schema_id,
-        "consumer": consumer,
-        "user": user
-    }
+    leaf_to_prove = generate_leaf_to_prove(request_data, user)
 
-    tx_is_good = verify_proof(user, schema_id, tx_ipfs_hash, tx_merkle_root, tx_proof_chain, permission_obj=leaf_to_prove)
+    click.echo(f"Verifying {request_data['perms']} were processed by "
+               f'Provider {provider} for Consumer {consumer}...')
+
+    tx_is_good = verify_proof(tx_merkle_root, tx_proof_chain, leaf_to_prove)
     click.echo(bold(f'Tx proof verified: {tx_is_good}'))
 
-    uapp_sc = UnificationUapp(eos_rpc_client, provider)
-
-    current_ipfs_hash, current_merkle_root = uapp_sc.get_ipfs_perms_for_req_app(consumer)
+    current_ipfs_hash, current_merkle_root = get_current_ipfs_merkle(provider, consumer)
 
     current_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
                                           ipfs_hash=current_ipfs_hash)
 
-    current_is_good = verify_proof(user, schema_id, current_ipfs_hash, current_merkle_root, current_proof_chain, permission_obj=leaf_to_prove)
+    current_is_good = verify_proof(current_merkle_root, current_proof_chain, leaf_to_prove)
     click.echo(f'Current IPFS Hash: {current_ipfs_hash}')
     click.echo(f'Current Merkle Root: {current_merkle_root}')
+
+    click.echo(f"Verifying {request_data['perms']} are currently honoured by "
+               f'Provider {provider} for Consumer {consumer}...')
 
     click.echo(bold(f'Current proof verified: {current_is_good}'))
 
