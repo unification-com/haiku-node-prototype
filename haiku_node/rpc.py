@@ -355,11 +355,17 @@ def get_proof():
     d = flask.request.get_json()
     user = d['user']
     consumer = d['consumer']
+    ipfs_hash = d['ipfs_hash']
 
     provider_uapp = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
     permission_db = PermissionBatchDatabase(pb_default_db())
     permissions = UnifPermissions(get_ipfs_client(), provider_uapp, permission_db)
-    permissions.load_consumer_perms(consumer)
+
+    if ipfs_hash is not None:
+        permissions.load_perms_from_ipfs(ipfs_hash)
+    else:
+        permissions.load_consumer_perms(consumer)
+
     proof = permissions.get_proof(user)
 
     # ToDo: send as JWT
@@ -368,3 +374,32 @@ def get_proof():
     }
 
     return flask.jsonify(return_d), 200
+
+
+@app.route('/get_proof_tx', methods=['POST'])
+def get_proof_tx():
+    conf = app.unification_config
+
+    d = flask.request.get_json()
+    user = d['user']
+    proc_id = d['proc_id']
+
+    provider_uapp = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
+    permission_db = PermissionBatchDatabase(pb_default_db())
+    permissions = UnifPermissions(get_ipfs_client(), provider_uapp, permission_db)
+
+    operation_data = permission_db.get_op_for_user(user, proc_id)
+
+    return_data = {
+        'processed': False,
+        'proof_tx': None,
+        'found': False
+    }
+
+    if operation_data:
+        return_data['found'] = True
+        if operation_data['proof_tx']:
+            return_data['processed'] = True
+            return_data['proof_tx'] = operation_data['proof_tx']
+
+    return flask.jsonify(return_data), 200

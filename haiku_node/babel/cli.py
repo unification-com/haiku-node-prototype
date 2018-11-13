@@ -1,4 +1,5 @@
 import logging
+import os
 import subprocess
 import json
 import requests
@@ -261,6 +262,43 @@ def post_permissions(user, password, perm, granted_fields_str: str,
         click.echo("Something went wrong...")
 
 
+def get_proof_chain(user, provider, consumer=None, ipfs_hash=None):
+    payload = {
+        'consumer': consumer,
+        'user': user,
+        'ipfs_hash': ipfs_hash
+    }
+
+    eos_rpc_client = get_eos_rpc_client()
+    mother = UnificationMother(eos_rpc_client, provider, get_cleos())
+    provider_obj = Provider(provider, 'https', mother)
+    url = f"{provider_obj.base_url()}/get_proof"
+
+    r = requests.post(url, json=payload, verify=False)
+
+    d = r.json()
+
+    if r.status_code != 200:
+        return None
+    else:
+        # ToDo: receive as JWT and verify
+        return d['proof']
+
+
+def verify_proof(user, ipfs_hash, merkle_root, proof_chain):
+    ipfs_client = get_ipfs_client()
+    permissions_str = ipfs_client.get_json(ipfs_hash)
+
+    permissions_json = json.loads(permissions_str)
+
+    requested_leaf = json.dumps(permissions_json[user])
+
+    verify_tree = MerkleTree()
+    is_good = verify_tree.verify_leaf(requested_leaf, merkle_root,
+                                      proof_chain, is_hashed=False)
+
+    return is_good
+
 @main.command()
 @click.argument('user')
 @click.argument('password')
@@ -355,20 +393,58 @@ def modify_permissions_direct(
 @click.argument('provider')
 @click.argument('consumer')
 def prove_permission(user, provider, consumer):
-    payload = {
-        'consumer': consumer,
-        'user': user
-    }
+    """
+    Verify a user's current permission state
+    :param user: End User's EOS account name
+    :param provider: Provider's EOS account name
+    :param consumer: Consumer's EOS account name
+    """
 
     eos_rpc_client = get_eos_rpc_client()
-    ipfs_client = get_ipfs_client()
     uapp_sc = UnificationUapp(eos_rpc_client, provider)
 
     ipfs_hash, merkle_root = uapp_sc.get_ipfs_perms_for_req_app(consumer)
 
+    proof_chain = get_proof_chain(user, provider, consumer=consumer)
+
+    if proof_chain is None:
+        click.echo('Proof chain not found')
+        return
+
+    click.echo(f'IPFS Hash from {provider} SC: {ipfs_hash}')
+    click.echo(f'Merkle Root from {provider} SC: {merkle_root}')
+    click.echo(f'Proof Chain from {url}: {proof_chain}')
+
+    is_good = verify_proof(user, ipfs_hash, merkle_root, proof_chain)
+
+    click.echo(bold(f'Permissions are valid: {is_good}'))
+
+
+@main.command()
+@click.argument('user')
+@click.argument('provider')
+@click.argument('consumer')
+@click.argument('proc_id')
+def check_change_request(user, provider, consumer, proc_id):
+    """
+    Check state of a permission change request, and verify it has been honoured
+    :param user: End User's EOS account name
+    :param provider: Provider's EOS account name
+    :param consumer: Consumer's EOS account name
+    :param proc_id: Process ID for batch, as returned by modify_permission
+    """
+
+    payload = {
+        'user': user,
+        'proc_id': proc_id
+    }
+
+    eos_rpc_client = get_eos_rpc_client()
+    eos_cleos = get_cleos()
+
     mother = UnificationMother(eos_rpc_client, provider, get_cleos())
     provider_obj = Provider(provider, 'https', mother)
-    url = f"{provider_obj.base_url()}/get_proof"
+    url = f"{provider_obj.base_url()}/get_proof_tx"
 
     r = requests.post(url, json=payload, verify=False)
 
@@ -377,26 +453,59 @@ def prove_permission(user, provider, consumer):
     if r.status_code != 200:
         raise Exception(d['message'])
 
-    # ToDo: receive as JWT and verify
-    proof_chain = d['proof']
+    if not d['found']:
+        click.echo(f'Permission change request ID {proc_id} for User {user}, '
+                   f'Provider {provider}, Consumer {consumer} not found')
+        return
 
-    click.echo(f'IPFS Hash from {provider} SC: {ipfs_hash}')
-    click.echo(f'Merkle Root from {provider} SC: {merkle_root}')
+    if not d['processed']:
+        click.echo(f'Permission change request ID {proc_id} '
+                   f'has not been processed yet')
+        return
 
-    permissions_str = ipfs_client.get_json(ipfs_hash)
+    proof_tx = d['proof_tx']
 
-    permissions_json = json.loads(permissions_str)
+    click.echo(f'Checking blockchain Tx ID {proof_tx}')
 
-    requested_leaf = json.dumps(permissions_json[user])
+    transaction_data = eos_cleos.get_tx(proof_tx)
 
-    click.echo(f'Current permissions in SC/IPFS: {requested_leaf}')
-    click.echo(f'Proof Chain from {url}: {proof_chain}')
+    if transaction_data is None:
+        click.echo(f'Tx {proof_tx} not found')
+        return
 
-    verify_tree = MerkleTree()
-    is_good = verify_tree.verify_leaf(requested_leaf, merkle_root,
-                                      proof_chain, is_hashed=False)
+    tx_json = json.loads(transaction_data)
 
-    click.echo(bold(f'Permissions are valid: {is_good}'))
+    tx_actions = tx_json["trx"]["trx"]["actions"]
+
+    tx_ipfs_hash = None
+    tx_merkle_root = None
+
+    for action in tx_actions:
+        if (
+                action['account'] == provider
+                and action['name'] == 'updateperm'
+                and action['data']['consumer_id'] == consumer
+        ):
+            click.echo(f'Found change request process')
+            tx_ipfs_hash = action['data']['ipfs_hash']
+            tx_merkle_root = action['data']['merkle_root']
+
+    click.echo(f'tx_ipfs_hash {tx_ipfs_hash}')
+    click.echo(f'tx_merkle_root {tx_merkle_root}')
+
+    tx_proof_chain = get_proof_chain(user, provider, ipfs_hash=tx_ipfs_hash)
+
+    uapp_sc = UnificationUapp(eos_rpc_client, provider)
+
+    current_ipfs_hash, current_merkle_root = uapp_sc.get_ipfs_perms_for_req_app(consumer)
+
+    current_proof_chain = get_proof_chain(user, provider, ipfs_hash=current_ipfs_hash)
+
+    tx_is_good = verify_proof(user, tx_ipfs_hash, tx_merkle_root, tx_proof_chain)
+    current_is_good = verify_proof(user, current_ipfs_hash, current_merkle_root, current_proof_chain)
+
+    click.echo(f'Tx proof verified: {tx_is_good}')
+    click.echo(f'Current proof verified: {current_is_good}')
 
 
 if __name__ == "__main__":
