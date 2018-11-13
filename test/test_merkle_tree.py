@@ -13,6 +13,15 @@ permission_json = {
       "user": "user1",
       "b_nonce": "5215208105881115",
       "b_time": 1541500297.800053
+    },
+    "1": {
+      "perms": "DataBlob,BlobSize",
+      "p_nonce": "1595621598716744",
+      "schema_id": "1",
+      "consumer": "app1",
+      "user": "user1",
+      "b_nonce": "5215208105881115",
+      "b_time": 1541500297.800053
     }
   },
   "user2": {
@@ -179,31 +188,35 @@ def test_get_root_not_grown_exception():
 
 def test_merkle_root():
 
-    target_root = '26ad18e7cb43c6c1af2387039ede4c20366e7aa0b9d320f631c793c2bf255446'
+    target_root = '7102ecb1c3412a29997744c8e18d848c4f668d5563325ada204a453dc694308f'
 
     tree = MerkleTree()
 
     for user, perm in permission_json.items():
-        tree.add_leaf(json.dumps(perm))
+        for schema_id, schema_perm in perm.items():
+            tree.add_leaf(json.dumps(schema_perm))
 
     tree.grow_tree()
 
     m_root = tree.get_root_str()
 
+    print(m_root)
+
     assert m_root == target_root
 
 
 def test_proof_not_hashed():
-    target_root = '26ad18e7cb43c6c1af2387039ede4c20366e7aa0b9d320f631c793c2bf255446'
+    target_root = '7102ecb1c3412a29997744c8e18d848c4f668d5563325ada204a453dc694308f'
 
     tree = MerkleTree()
 
     for user, perm in permission_json.items():
-        tree.add_leaf(json.dumps(perm))
+        for schema_id, schema_perm in perm.items():
+            tree.add_leaf(json.dumps(schema_perm))
 
     tree.grow_tree()
 
-    requested_leaf = json.dumps(permission_json['user2'])
+    requested_leaf = json.dumps(permission_json['user2']['0'])
 
     proof = tree.get_proof(requested_leaf, is_hashed=False)
 
@@ -212,7 +225,7 @@ def test_proof_not_hashed():
 
     assert is_good
 
-    requested_leaf = json.dumps(permission_json['user3'])
+    requested_leaf = json.dumps(permission_json['user3']['0'])
     proof_json = tree.get_proof(requested_leaf, is_hashed=False, as_json=True)
 
     is_good = tree.verify_leaf(requested_leaf,
@@ -223,16 +236,17 @@ def test_proof_not_hashed():
 
 
 def test_proof_new_tree():
-    target_root = '26ad18e7cb43c6c1af2387039ede4c20366e7aa0b9d320f631c793c2bf255446'
+    target_root = '7102ecb1c3412a29997744c8e18d848c4f668d5563325ada204a453dc694308f'
 
     tree = MerkleTree()
 
     for user, perm in permission_json.items():
-        tree.add_leaf(json.dumps(perm))
+        for schema_id, schema_perm in perm.items():
+            tree.add_leaf(json.dumps(schema_perm))
 
     tree.grow_tree()
 
-    requested_leaf = json.dumps(permission_json['user2'])
+    requested_leaf = json.dumps(permission_json['user2']['0'])
 
     proof_chain = tree.get_proof(requested_leaf, is_hashed=False)
 
@@ -249,14 +263,16 @@ def test_proof_all():
     tree = MerkleTree()
 
     for user, perm in permission_json.items():
-        tree.add_leaf(json.dumps(perm))
+        for schema_id, schema_perm in perm.items():
+            tree.add_leaf(json.dumps(schema_perm))
 
     tree.grow_tree()
 
     for user, perm in permission_json.items():
-        requested_leaf = json.dumps(permission_json[user])
-        proof = tree.get_proof(requested_leaf, is_hashed=False)
-        is_good = tree.verify_leaf(requested_leaf, tree.get_root_str(),
+        for schema_id, schema_perm in perm.items():
+            requested_leaf = json.dumps(permission_json[user][schema_id])
+            proof = tree.get_proof(requested_leaf, is_hashed=False)
+            is_good = tree.verify_leaf(requested_leaf, tree.get_root_str(),
                                    proof, is_hashed=False)
 
         assert is_good
@@ -266,7 +282,8 @@ def test_load_from_seed():
     tree = MerkleTree()
 
     for user, perm in permission_json.items():
-        tree.add_leaf(json.dumps(perm))
+        for schema_id, schema_perm in perm.items():
+            tree.add_leaf(json.dumps(schema_perm))
 
     tree.grow_tree()
 
@@ -283,7 +300,8 @@ def test_load_from_seed_json():
     tree = MerkleTree()
 
     for user, perm in permission_json.items():
-        tree.add_leaf(json.dumps(perm))
+        for schema_id, schema_perm in perm.items():
+            tree.add_leaf(json.dumps(schema_perm))
 
     tree.grow_tree()
 
@@ -299,7 +317,8 @@ def test_proof_from_new_seeded_tree():
     tree = MerkleTree()
 
     for user, perm in permission_json.items():
-        tree.add_leaf(json.dumps(perm))
+        for schema_id, schema_perm in perm.items():
+            tree.add_leaf(json.dumps(schema_perm))
 
     tree.grow_tree()
     original_root = tree.get_root_str()
@@ -308,9 +327,9 @@ def test_proof_from_new_seeded_tree():
 
     seeded_tree = MerkleTree(seed_json)
 
-    proof_from_new = seeded_tree.get_proof(json.dumps(permission_json['user2']), is_hashed=False)
+    proof_from_new = seeded_tree.get_proof(json.dumps(permission_json['user2']['0']), is_hashed=False)
 
-    is_good = seeded_tree.verify_leaf(json.dumps(permission_json['user2']),
+    is_good = seeded_tree.verify_leaf(json.dumps(permission_json['user2']['0']),
                                       original_root,
                                       proof_from_new, is_hashed=False)
 
@@ -318,17 +337,18 @@ def test_proof_from_new_seeded_tree():
 
 
 def test_leaf_proof_mismatch():
-    target_root = '26ad18e7cb43c6c1af2387039ede4c20366e7aa0b9d320f631c793c2bf255446'
+    target_root = '7102ecb1c3412a29997744c8e18d848c4f668d5563325ada204a453dc694308f'
 
     tree = MerkleTree()
 
     for user, perm in permission_json.items():
-        tree.add_leaf(json.dumps(perm))
+        for schema_id, schema_perm in perm.items():
+            tree.add_leaf(json.dumps(schema_perm))
 
     tree.grow_tree()
 
-    requested_leaf = json.dumps(permission_json['user2'])
-    rubbish_leaf = json.dumps(permission_json['user3'])
+    requested_leaf = json.dumps(permission_json['user2']['0'])
+    rubbish_leaf = json.dumps(permission_json['user3']['0'])
 
     proof = tree.get_proof(requested_leaf, is_hashed=False)
 
