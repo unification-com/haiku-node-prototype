@@ -248,7 +248,7 @@ def post_permissions(user, password, perm, granted_fields_str: str,
         schema_id)
 
     request_id = babel_db.add_change_request(user, provider, consumer, schema_id,
-                                             granted_fields_str, p_nonce, p_sig)
+                                             granted_fields_str, p_nonce, p_sig, pub_key)
 
     mother = UnificationMother(eos_client, provider, cleos)
     provider_obj = Provider(provider, 'https', mother)
@@ -312,8 +312,6 @@ def verify_proof(user, schema_id, ipfs_hash,
 
     else:
         requested_leaf = json.dumps(permission_obj)
-
-    click.echo(requested_leaf)
 
     verify_tree = MerkleTree()
     is_good = verify_tree.verify_leaf(requested_leaf, merkle_root,
@@ -468,6 +466,8 @@ def check_change_request(user, request_id):
     schema_id = request_data['schema_id']
     p_nonce = request_data['p_nonce']
     p_sig = request_data['p_sig']
+    pub_key = request_data['pub_key']
+    perms = request_data['perms']
 
     payload = {
         'user': user,
@@ -532,7 +532,17 @@ def check_change_request(user, request_id):
     tx_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
                                      ipfs_hash=tx_ipfs_hash)
 
-    tx_is_good = verify_proof(user, schema_id, tx_ipfs_hash, tx_merkle_root, tx_proof_chain)
+    leaf_to_prove = {
+        "perms": perms,
+        "p_nonce": p_nonce,
+        "p_sig": p_sig,
+        "pub_key": pub_key,
+        "schema_id": schema_id,
+        "consumer": consumer,
+        "user": user
+    }
+
+    tx_is_good = verify_proof(user, schema_id, tx_ipfs_hash, tx_merkle_root, tx_proof_chain, permission_obj=leaf_to_prove)
     click.echo(bold(f'Tx proof verified: {tx_is_good}'))
 
     uapp_sc = UnificationUapp(eos_rpc_client, provider)
@@ -542,7 +552,7 @@ def check_change_request(user, request_id):
     current_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
                                           ipfs_hash=current_ipfs_hash)
 
-    current_is_good = verify_proof(user, schema_id, current_ipfs_hash, current_merkle_root, current_proof_chain)
+    current_is_good = verify_proof(user, schema_id, current_ipfs_hash, current_merkle_root, current_proof_chain, permission_obj=leaf_to_prove)
     click.echo(f'Current IPFS Hash: {current_ipfs_hash}')
     click.echo(f'Current Merkle Root: {current_merkle_root}')
 

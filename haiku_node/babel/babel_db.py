@@ -16,7 +16,7 @@ class BabelDatabase:
         self.__db_name = db_name
 
     def add_change_request(self, user_account, provider_account, consumer_account,
-                           schema_id, perms, p_nonce, p_sig):
+                           schema_id, perms, p_nonce, p_sig, public_key):
         self.__open_con()
         self.__c.execute(f"INSERT INTO perm_change_requests "
                          f"VALUES (NULL,"
@@ -27,6 +27,7 @@ class BabelDatabase:
                          f"'{perms}',"
                          f"'{p_nonce}',"
                          f"'{p_sig}',"
+                         f"'{public_key}',"
                          f"0,"
                          f"NULL,"
                          f"NULL)")
