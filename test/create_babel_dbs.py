@@ -45,6 +45,7 @@ def _create_babel_db(db_name: Path):
                  perms text,
                  p_nonce text,
                  p_sig text,
+                 pub_key text,
                  processed INTEGER,
                  proof_tx text NULL,
                  provider_process_id INTEGER NULL)''')
