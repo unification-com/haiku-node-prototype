@@ -380,15 +380,11 @@ def get_proof():
 
 @app.route('/get_proof_tx', methods=['POST'])
 def get_proof_tx():
-    conf = app.unification_config
-
     d = flask.request.get_json()
     user = d['user']
     proc_id = d['proc_id']
 
-    provider_uapp = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
     permission_db = PermissionBatchDatabase(pb_default_db())
-    permissions = UnifPermissions(get_ipfs_client(), provider_uapp, permission_db)
 
     operation_data = permission_db.get_op_for_user(user, proc_id)
 
