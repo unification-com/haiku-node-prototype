@@ -262,11 +262,12 @@ def post_permissions(user, password, perm, granted_fields_str: str,
         click.echo("Something went wrong...")
 
 
-def get_proof_chain(user, provider, consumer=None, ipfs_hash=None):
+def get_proof_chain(user, provider, schema_id='0', consumer=None, ipfs_hash=None):
     payload = {
         'consumer': consumer,
         'user': user,
-        'ipfs_hash': ipfs_hash
+        'ipfs_hash': ipfs_hash,
+        'schema_id': schema_id
     }
 
     eos_rpc_client = get_eos_rpc_client()

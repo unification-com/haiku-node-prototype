@@ -356,6 +356,7 @@ def get_proof():
     user = d['user']
     consumer = d['consumer']
     ipfs_hash = d['ipfs_hash']
+    schema_id = d['schema_id']
 
     provider_uapp = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
     permission_db = PermissionBatchDatabase(pb_default_db())
@@ -366,7 +367,7 @@ def get_proof():
     else:
         permissions.load_consumer_perms(consumer)
 
-    proof = permissions.get_proof(user)
+    proof = permissions.get_proof(user, schema_id=schema_id)
 
     # ToDo: send as JWT
     return_d = {

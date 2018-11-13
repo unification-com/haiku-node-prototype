@@ -264,7 +264,7 @@ def systest_check_permission_requests():
                 log.debug(f'Provider {provider}: load permissions for Consumer {consumer}')
                 permissions.load_consumer_perms(consumer)
                 for user in users:
-                    user_permissions = permissions.get_user_perms(user)
+                    user_permissions = permissions.get_user_perms_for_all_schemas(user)
                     for schema_id, user_perms in user_permissions.items():
                         log.debug(f'User {user}, Schema {schema_id}: {user_perms}')
                         is_valid = permissions.verify_permission(user_perms)
@@ -312,7 +312,8 @@ def systest_merkle_proof_permissions():
                 tree = MerkleTree()
 
                 for user, perm in permissions_obj['permissions'].items():
-                    tree.add_leaf(json.dumps(perm))
+                    for schema_id, schema_perm in perm.items():
+                        tree.add_leaf(json.dumps(schema_perm))
 
                 tree.grow_tree()
 
@@ -320,20 +321,22 @@ def systest_merkle_proof_permissions():
                 log.debug(f"Recorded merkle root: {permissions_obj['merkle_root']}")
 
                 for user, perm in permissions_obj['permissions'].items():
-                    requested_leaf = json.dumps(perm)
-                    proof_chain = tree.get_proof(requested_leaf, is_hashed=False)
-                    log.debug(f'Permission leaf for {user}: {requested_leaf}')
-                    log.debug(f'Proof chain for {user} permission leaf: {json.dumps(proof_chain)}')
+                    for schema_id, schema_perm in perm.items():
+                        requested_leaf = json.dumps(schema_perm)
+                        proof_chain = tree.get_proof(requested_leaf, is_hashed=False)
+                        log.debug(f'Permission leaf for {user}: {requested_leaf}')
+                        log.debug(f'Proof chain for {user} - Schema {schema_id} '
+                                  f'permission leaf: {json.dumps(proof_chain)}')
 
-                    # simulate only having access to leaf, root and proof chain for leaf
-                    verify_tree = MerkleTree()
+                        # simulate only having access to leaf, root and proof chain for leaf
+                        verify_tree = MerkleTree()
 
-                    is_good = verify_tree.verify_leaf(requested_leaf, permissions_obj['merkle_root'],
-                                                      proof_chain, is_hashed=False)
+                        is_good = verify_tree.verify_leaf(requested_leaf, permissions_obj['merkle_root'],
+                                                          proof_chain, is_hashed=False)
 
-                    log.debug(f'Leaf is valid: {is_good}')
+                        log.debug(f'Leaf is valid: {is_good}')
 
-                    assert is_good
+                        assert is_good
 
 
 def completion_banner():
