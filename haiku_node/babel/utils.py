@@ -4,13 +4,15 @@ import subprocess
 
 import click
 
-from haiku_node.babel.babel_db import (BabelDatabase, default_db as default_babel_db)
+from haiku_node.babel.babel_db import (BabelDatabase,
+                                       default_db as default_babel_db)
 from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.config.config import UnificationConfig
 from haiku_node.client import Provider
 from haiku_node.encryption.merkle.merkle_tree import MerkleTree
-from haiku_node.network.eos import get_eos_rpc_client, get_cleos, get_ipfs_client
+from haiku_node.network.eos import (get_eos_rpc_client, get_cleos,
+                                    get_ipfs_client)
 from haiku_node.permissions.utils import generate_payload
 
 bold = lambda s: click.style(str(s), bold=True)
@@ -24,8 +26,10 @@ def get_balance(user):
     :param user: The EOS user account name.
     """
     conf = UnificationConfig()
-    cmd = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
-           "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
+    cmd = ["/opt/eosio/bin/cleos", "--url",
+           f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
+           "--wallet-url",
+           f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
            'get', 'currency', 'balance', 'unif.token', user, 'UND']
 
     ret = subprocess.run(
@@ -89,8 +93,9 @@ def post_permissions(user, password, perm, granted_fields_str: str,
         user, private_key, provider, consumer, granted_fields_str, perm,
         schema_id)
 
-    request_id = babel_db.add_change_request(user, provider, consumer, schema_id,
-                                             granted_fields_str, p_nonce, p_sig, pub_key)
+    request_id = babel_db.add_change_request(user, provider, consumer,
+                                             schema_id, granted_fields_str,
+                                             p_nonce, p_sig, pub_key)
 
     url = get_rpc_url(provider, 'modify_permission')
 
@@ -115,7 +120,8 @@ def post_permissions(user, password, perm, granted_fields_str: str,
         click.echo("Something went wrong...")
 
 
-def get_proof_chain(user, provider, schema_id='0', consumer=None, ipfs_hash=None):
+def get_proof_chain(user, provider, schema_id='0',
+                    consumer=None, ipfs_hash=None):
     payload = {
         'consumer': consumer,
         'user': user,
