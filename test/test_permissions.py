@@ -6,7 +6,7 @@ from unittest.mock import patch, MagicMock
 
 from create_perm_batch_dbs import _create_perm_batch_db
 
-from haiku_node.babel.cli import generate_payload
+from haiku_node.permissions.utils import generate_payload
 from haiku_node.encryption.jwt.jwt import UnifJWT
 from haiku_node.encryption.merkle.merkle_tree import sha256
 from haiku_node.permissions.permission_batcher import PermissionBatcher
