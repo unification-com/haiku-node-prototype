@@ -9,11 +9,13 @@ from pathlib import Path
 from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.ipfs import IPFSDataStore
+from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.client import Provider
 from haiku_node.network.eos import (get_cleos,
                                     get_eos_rpc_client, get_ipfs_client)
 from haiku_node.permissions.utils import generate_payload
+from haiku_node.utils.utils import sha256
 
 BLOCK_SLEEP = 0.5
 
@@ -209,7 +211,8 @@ class AccountManager:
         ret = self.cleos.run(['get', 'code', appname])
         return ret.stdout.strip()[len('code hash: '):]
 
-    def add_to_mother(self, app_config, appname):
+    def add_to_mother(self, app_config, appname,
+                      unif_mother_private_key):
         contract_hash = self.get_code_hash(appname)
         ipfs_client = get_ipfs_client()
 
@@ -229,9 +232,19 @@ class AccountManager:
                 'rpc_server_port': app_conf['rpc_server_port']
             }
 
-            uapp_json = json.dumps(uapp_data)
+            eosk = UnifEosKey(unif_mother_private_key)
+            digest_sha = sha256(json.dumps(uapp_data).encode('utf-8'))
 
-            ipfs_hash = ipfs_client.add_json(uapp_json)
+            mother_sig = eosk.sign(digest_sha)
+
+            mother_data = {
+                'data': uapp_data,
+                'sig': mother_sig
+            }
+
+            mother_json = json.dumps(mother_data)
+
+            ipfs_hash = ipfs_client.add_json(mother_json)
 
             d = {
                 'acl_contract_acc': appname,
@@ -346,6 +359,8 @@ def make_default_accounts(
     demo_apps = demo_config['demo_apps']
     test_net = demo_config['test_net']
 
+    unif_mother_private_key = None
+
     for username in usernames + appnames:
         manager.cleos.open_wallet(username)
         password = demo_config['wallet_passwords'][username]['wallet_password']
@@ -356,6 +371,8 @@ def make_default_accounts(
     for username, keys in zip(usernames + appnames, keys):
         manager.wallet_import_key(username, keys[1])
         manager.create_account(username, keys[0])
+        if username == 'unif.mother':
+            unif_mother_private_key = keys[1]
 
     print("Wait for transactions to process")
     time.sleep(BLOCK_SLEEP)
@@ -416,7 +433,7 @@ def make_default_accounts(
         manager.set_schema(demo_apps, appname)
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
-        manager.add_to_mother(demo_apps, appname)
+        manager.add_to_mother(demo_apps, appname, unif_mother_private_key)
         print("Wait for transactions to process")
         time.sleep(BLOCK_SLEEP)
         manager.issue_unds(demo_apps, appname)

@@ -1,6 +1,8 @@
 import json
 
 from haiku_node.blockchain_helpers.eos import eosio_account
+from haiku_node.blockchain_helpers.eos.eos_keys import UnifEosKey
+from haiku_node.utils.utils import sha256
 
 
 class UnificationMother:
@@ -20,6 +22,7 @@ class UnificationMother:
         self.__eosClient = eos_client
         self.__is_valid_app = False
         self.__is_valid_code = False
+        self.__signed_by_mother = False
         self.__deployed_contract_hash = ""  # the actual deployed contract
         self.__acl_contract_hash_in_mother = ""  # hash held in MOTHER
         self.__haiku_rpc_server_ip = None
@@ -37,6 +40,9 @@ class UnificationMother:
 
     def get_hash_in_mother(self):
         return self.__acl_contract_hash_in_mother
+
+    def signed_by_mother(self):
+        return self.__signed_by_mother
 
     def get_deployed_contract_hash(self):
         return self.__deployed_contract_hash
@@ -76,14 +82,24 @@ class UnificationMother:
                 ipfs_hash = i['ipfs_hash']
                 uapp_json_str = self.__ipfs_client.get_json(ipfs_hash)
                 uapp_json = json.loads(uapp_json_str)
+                uapp_data = uapp_json['data']
+                mother_sig = uapp_json['sig']
+
+                mother_public_key = self.__cleos.get_public_key(
+                    self.__mother, 'active')
+
+                eosk = UnifEosKey()
+                digest_sha = sha256(json.dumps(uapp_data).encode('utf-8'))
+                self.__signed_by_mother = eosk.verify_pub_key(
+                    mother_sig, digest_sha, mother_public_key)
 
                 if int(i['is_valid']) == 1:
                     self.__is_valid_app = True
-                if uapp_json['acl_contract_hash'] == self.__deployed_contract_hash:
+                if uapp_data['acl_contract_hash'] == self.__deployed_contract_hash:
                     self.__is_valid_code = True
-                self.__acl_contract_hash_in_mother = uapp_json['acl_contract_hash']
-                self.__haiku_rpc_server_ip = uapp_json['rpc_server_ip']
-                self.__haiku_rpc_server_port = uapp_json['rpc_server_port']
+                self.__acl_contract_hash_in_mother = uapp_data['acl_contract_hash']
+                self.__haiku_rpc_server_ip = uapp_data['rpc_server_ip']
+                self.__haiku_rpc_server_port = uapp_data['rpc_server_port']
                 break
 
     def __run(self):

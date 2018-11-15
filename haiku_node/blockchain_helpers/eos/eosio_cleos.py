@@ -57,7 +57,6 @@ class EosioCleos:
             cmd, stdout=subprocess.PIPE,
             stderr=subprocess.PIPE, universal_newlines=True)
 
-        log.debug(result.stdout)
         if result.returncode != 0:
             log.warning(result.stdout)
             log.debug(result.stdout)
