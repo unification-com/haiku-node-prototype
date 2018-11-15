@@ -11,7 +11,8 @@ from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain.ipfs import IPFSDataStore
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.client import Provider
-from haiku_node.network.eos import get_cleos, get_eos_rpc_client
+from haiku_node.network.eos import (get_cleos,
+                                    get_eos_rpc_client, get_ipfs_client)
 from haiku_node.permissions.utils import generate_payload
 
 BLOCK_SLEEP = 0.5
@@ -210,6 +211,7 @@ class AccountManager:
 
     def add_to_mother(self, app_config, appname):
         contract_hash = self.get_code_hash(appname)
+        ipfs_client = get_ipfs_client()
 
         app_conf = app_config[appname]
         schema_vers = ""
@@ -219,13 +221,23 @@ class AccountManager:
 
             schema_vers = schema_vers.rstrip(",")
 
-            d = {
+            uapp_data = {
                 'acl_contract_acc': appname,
                 'schema_vers': schema_vers,
                 'acl_contract_hash': contract_hash,
                 'rpc_server_ip': app_conf['rpc_server'],
                 'rpc_server_port': app_conf['rpc_server_port']
             }
+
+            uapp_json = json.dumps(uapp_data)
+
+            ipfs_hash = ipfs_client.add_json(uapp_json)
+            
+            d = {
+                'acl_contract_acc': appname,
+                'ipfs_hash': ipfs_hash
+            }
+
             ret = self.cleos.run(
             ['push', 'action', 'unif.mother', 'addnew', json.dumps(d),
              '-p', 'unif.mother'])
