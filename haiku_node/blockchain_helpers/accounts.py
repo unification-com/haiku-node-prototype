@@ -332,6 +332,9 @@ class AccountManager:
         print("Valid Code: ", um.valid_code())
         assert um.valid_code() is True
 
+        print("Signed by MOTHER: ", um.signed_by_mother())
+        assert um.signed_by_mother() is True
+
         print("RPC IP: ", um.get_haiku_rpc_ip())
         assert um.get_haiku_rpc_ip() == demo_apps[app]['rpc_server']
 
