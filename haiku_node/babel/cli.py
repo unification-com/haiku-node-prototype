@@ -56,7 +56,7 @@ def permissions(user):
         apps.append(eosio_account.name_to_string(int(va['acl_contract_acc'])))
 
     click.echo(f"{bold(user)} Permissions overview:")
-    
+
     for provider in apps:
         click.echo(f'Provider: {bold(provider)}')
         for consumer in apps:
@@ -70,13 +70,13 @@ def permissions(user):
                     permissions_str = ipfs_client.get_json(ipfs_hash)
                     permissions_json = json.loads(permissions_str)
                     user_perms = permissions_json[user]
-                    for schema_id, permissions in user_perms.items():
+                    for schema_id, perms in user_perms.items():
                         click.echo(f'    Schema ID: {schema_id}')
-                        if permissions['perms'] == '':
+                        if perms['perms'] == '':
                             click.echo('      Granted: False')
                         else:
                             click.echo('      Granted: True')
-                            click.echo(f"      Fields: {permissions['perms']}")
+                            click.echo(f"      Fields: {perms['perms']}")
                 else:
                     click.echo('Nothing set')
 
