@@ -1,12 +1,12 @@
+import json
 import logging
 
 import click
-from eosapi import Client
 
-from haiku_node.config.config import UnificationConfig
 from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import AccountManager
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
+from haiku_node.network.eos import get_eos_rpc_client, get_ipfs_client
 
 log = logging.getLogger(__name__)
 
@@ -26,10 +26,8 @@ def validapps():
     \b
     """
     click.echo(bold("Valid apps according to MOTHER:"))
-
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+    eos_client = get_eos_rpc_client()
+    ipfs_client = get_ipfs_client()
 
     valid_apps = eos_client.get_table_rows(
         "unif.mother", "unif.mother", "validapps", True, 0, -1,
@@ -37,12 +35,20 @@ def validapps():
 
     for va in valid_apps['rows']:
         if int(va['is_valid']) == 1:
+            ipfs_hash = va['ipfs_hash']
+            uapp_json_str = ipfs_client.get_json(ipfs_hash)
+            uapp_json = json.loads(uapp_json_str)
+            uapp_data = uapp_json['data']
+            mother_sig = uapp_json['sig']
+
             acc_name = eosio_account.name_to_string(
                 int(va['acl_contract_acc']))
             click.echo(bold(f"{acc_name}"))
-            click.echo(f"Contract Hash: {va['acl_contract_hash']}")
+            click.echo(f"Contract Hash: {uapp_data['acl_contract_hash']}")
             click.echo(f"RPC Server: "
-                       f"http://{va['rpc_server_ip']}:{va['rpc_server_port']}")
+                       f"http://{uapp_data['rpc_server_ip']}:"
+                       f"{uapp_data['rpc_server_port']}")
+            click.echo(f"MOTHER Signature: {mother_sig}")
             click.echo("is valid: true")
 
 
@@ -55,9 +61,8 @@ def invalidapps():
     """
     click.echo(bold("Invalid apps according to MOTHER:"))
 
-    conf = UnificationConfig()
-    eos_client = Client(
-        nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
+    eos_client = get_eos_rpc_client()
+    ipfs_client = get_ipfs_client()
 
     valid_apps = eos_client.get_table_rows(
         "unif.mother", "unif.mother", "validapps", True, 0, -1,
@@ -65,12 +70,20 @@ def invalidapps():
 
     for va in valid_apps['rows']:
         if int(va['is_valid']) == 0:
+            ipfs_hash = va['ipfs_hash']
+            uapp_json_str = ipfs_client.get_json(ipfs_hash)
+            uapp_json = json.loads(uapp_json_str)
+            uapp_data = uapp_json['data']
+            mother_sig = uapp_json['sig']
+
             acc_name = eosio_account.name_to_string(
                 int(va['acl_contract_acc']))
             click.echo(bold(f"{acc_name}"))
-            click.echo(f"Contract Hash: {va['acl_contract_hash']}")
+            click.echo(f"Contract Hash: {uapp_data['acl_contract_hash']}")
             click.echo(f"RPC Server: "
-                       f"http://{va['rpc_server_ip']}:{va['rpc_server_port']}")
+                       f"http://{uapp_data['rpc_server_ip']}:"
+                       f"{uapp_data['rpc_server_port']}")
+            click.echo(f"MOTHER Signature: {mother_sig}")
             click.echo("is valid: false")
 
 
