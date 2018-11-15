@@ -20,6 +20,7 @@ class UnificationAppScValidation:
         self.__acl_contract = acl_contract
         self.__is_valid_app = False
         self.__is_valid_code = False
+        self.__signed_by_mother = False
 
         self.__run()
 
@@ -30,7 +31,9 @@ class UnificationAppScValidation:
         return self.__is_valid_code
 
     def valid(self):
-        if self.__is_valid_app and self.__is_valid_code:
+        if (self.__is_valid_app
+                and self.__is_valid_code
+                and self.__signed_by_mother):
             return True
         else:
             return False
@@ -47,6 +50,7 @@ class UnificationAppScValidation:
             get_cleos(), get_ipfs_client())
         self.__is_valid_app = um.valid_app()
         self.__is_valid_code = um.valid_code()
+        self.__signed_by_mother = um.signed_by_mother()
 
     def __run(self):
         self.__check_req_app_valid()
