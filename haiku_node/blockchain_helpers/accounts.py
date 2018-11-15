@@ -232,7 +232,7 @@ class AccountManager:
             uapp_json = json.dumps(uapp_data)
 
             ipfs_hash = ipfs_client.add_json(uapp_json)
-            
+
             d = {
                 'acl_contract_acc': appname,
                 'ipfs_hash': ipfs_hash

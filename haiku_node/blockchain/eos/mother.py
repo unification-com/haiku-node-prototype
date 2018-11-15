@@ -1,3 +1,5 @@
+import json
+
 from haiku_node.blockchain_helpers.eos import eosio_account
 
 
@@ -6,7 +8,8 @@ class UnificationMother:
     Loads data from MOTHER Smart Contract for a Haiku node's app.
     """
 
-    def __init__(self, eos_client, acl_contract_acc, cleos_client):
+    def __init__(self, eos_client,
+                 acl_contract_acc, cleos_client, ipfs_client):
         """
         :param acl_contract_acc: the eos account name of the app for which the
             class will retrieve data from the ACL/Meta Data smart contract.
@@ -22,6 +25,7 @@ class UnificationMother:
         self.__haiku_rpc_server_ip = None
         self.__haiku_rpc_server_port = None
         self.__cleos = cleos_client
+        self.__ipfs_client = ipfs_client
 
         self.__run()
 
@@ -69,13 +73,17 @@ class UnificationMother:
         for i in table_data['rows']:
 
             if int(i['acl_contract_acc']) == req_app_uint64:
+                ipfs_hash = i['ipfs_hash']
+                uapp_json_str = self.__ipfs_client.get_json(ipfs_hash)
+                uapp_json = json.loads(uapp_json_str)
+
                 if int(i['is_valid']) == 1:
                     self.__is_valid_app = True
-                if i['acl_contract_hash'] == self.__deployed_contract_hash:
+                if uapp_json['acl_contract_hash'] == self.__deployed_contract_hash:
                     self.__is_valid_code = True
-                self.__acl_contract_hash_in_mother = i['acl_contract_hash']
-                self.__haiku_rpc_server_ip = i['rpc_server_ip']
-                self.__haiku_rpc_server_port = i['rpc_server_port']
+                self.__acl_contract_hash_in_mother = uapp_json['acl_contract_hash']
+                self.__haiku_rpc_server_ip = uapp_json['rpc_server_ip']
+                self.__haiku_rpc_server_port = uapp_json['rpc_server_port']
                 break
 
     def __run(self):
