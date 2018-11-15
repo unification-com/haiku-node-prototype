@@ -1,5 +1,5 @@
 from haiku_node.blockchain.eos.mother import UnificationMother
-from haiku_node.network.eos import get_cleos
+from haiku_node.network.eos import get_cleos, get_ipfs_client
 
 """
 Validation class for a single REQUESTING app.
@@ -43,7 +43,8 @@ class UnificationAppScValidation:
         """
 
         um = UnificationMother(
-            self.__eosClient, self.__requesting_app, get_cleos())
+            self.__eosClient, self.__requesting_app,
+            get_cleos(), get_ipfs_client())
         self.__is_valid_app = um.valid_app()
         self.__is_valid_code = um.valid_code()
 

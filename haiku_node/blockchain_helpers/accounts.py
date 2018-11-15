@@ -287,7 +287,8 @@ class AccountManager:
 
                 log.debug(f'request_permission_change payload: {json.dumps(payload)}')
 
-                mother = UnificationMother(get_eos_rpc_client(), provider, get_cleos())
+                mother = UnificationMother(get_eos_rpc_client(), provider,
+                                           get_cleos(), get_ipfs_client())
                 provider_obj = Provider(provider, 'https', mother)
                 url = f"{provider_obj.base_url()}/modify_permission"
 
@@ -307,7 +308,7 @@ class AccountManager:
         print("Contacting MOTHER FOR: ", app)
 
         eos_client = Client(nodes=[self.cleos.get_nodeos_url()])
-        um = UnificationMother(eos_client, app, get_cleos())
+        um = UnificationMother(eos_client, app, get_cleos(), get_ipfs_client())
         print("Valid app: ", um.valid_app())
         assert um.valid_app() is True
 

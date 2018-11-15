@@ -3,7 +3,8 @@ from pathlib import Path
 
 from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.config.config import UnificationConfig
-from haiku_node.network.eos import get_cleos, get_eos_rpc_client
+from haiku_node.network.eos import (get_cleos, get_eos_rpc_client,
+                                    get_ipfs_client)
 
 apps_to_test = ['app1', 'app2', 'app3']
 config = UnificationConfig()
@@ -15,7 +16,7 @@ demo_apps = demo_config["demo_apps"]
 def run_test(app):
     print("Contacting MOTHER FOR: ", app)
     eos_client = get_eos_rpc_client()
-    um = UnificationMother(eos_client, app, get_cleos())
+    um = UnificationMother(eos_client, app, get_cleos(), get_ipfs_client())
     print("Valid app: ", um.valid_app())
     assert um.valid_app() is True
 
