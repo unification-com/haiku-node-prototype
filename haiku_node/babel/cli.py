@@ -56,8 +56,7 @@ def permissions(user):
         apps.append(eosio_account.name_to_string(int(va['acl_contract_acc'])))
 
     click.echo(f"{bold(user)} Permissions overview:")
-
-    # ToDo: get permissions from SC/IPFS
+    
     for provider in apps:
         click.echo(f'Provider: {bold(provider)}')
         for consumer in apps:
