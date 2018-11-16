@@ -99,11 +99,14 @@ def bc_transaction_error():
 def obtain_data(keystore, eos_account_name, eos_client, uapp_contract_acc,
                 users, request_id=None):
     """
-    :param eos_account_name: The account name of the requesting App (Data Consumer).
+    :param eos_account_name: The account name of the
+                             requesting App (Data Consumer).
     :param eos_client: EOS RPC Client
-    :param uapp_contract_acc: The account name of the providing App (Data Provider).
+    :param uapp_contract_acc: The account name of
+                              the providing App (Data Provider).
     :param users: The users to obtain data for. None to get all available users
-    :param request_id: Primary Key for the data request held in the Consumer's UApp smart contract
+    :param request_id: Primary Key for the data request
+                       held in the Consumer's UApp smart contract
     """
 
     data_factory = UnificationDataFactory(
@@ -127,7 +130,8 @@ def obtain_data(keystore, eos_account_name, eos_client, uapp_contract_acc,
                      f'{uapp_contract_acc}@active'])
 
     # write to Consumer's smart contract
-    transaction_id = uapp_sc.update_data_request(request_id, uapp_contract_acc, data_hash, "test")
+    transaction_id = uapp_sc.update_data_request(request_id, uapp_contract_acc,
+                                                 data_hash, "test")
 
     # Remove permission association for action in consumer's contract
     eosio_cleos.run(["set", "action", "permission", uapp_contract_acc,
@@ -145,7 +149,8 @@ def ingest_data(keystore, eos_account_name, uapp_contract_acc):
     response_body = {}
 
     d = bundle(
-        keystore, uapp_contract_acc, eos_account_name, response_body, 'Success')
+        keystore, uapp_contract_acc, eos_account_name,
+        response_body, 'Success')
     return flask.jsonify(d), 200
 
 
@@ -295,7 +300,6 @@ def modify_permission():
                                      payload['p_sig'],
                                      public_key)
 
-        # ToDo: get batch nonce etc. as return values to send to user for storing
         d = {
             'app': conf['uapp_contract'],
             'proc_id': rowid
@@ -335,7 +339,8 @@ def process_permission_batch():
         bundle_d = unbundle(app.keystore, sender, d)
 
         if bundle_d['action'] != 'proc_perms':
-            return generic_error(f"Invalid action {bundle_d['action']} in payload")
+            return generic_error(f"Invalid action "
+                                 f"{bundle_d['action']} in payload")
 
         if bundle_d['who'] != me:
             return generic_error(f'Invalid caller {me} in payload')
@@ -358,9 +363,13 @@ def get_proof():
     ipfs_hash = d['ipfs_hash']
     schema_id = d['schema_id']
 
-    provider_uapp = UnificationUapp(get_eos_rpc_client(), conf['uapp_contract'])
+    provider_uapp = UnificationUapp(get_eos_rpc_client(),
+                                    conf['uapp_contract'])
+
     permission_db = PermissionBatchDatabase(pb_default_db())
-    permissions = UnifPermissions(get_ipfs_client(), provider_uapp, permission_db)
+
+    permissions = UnifPermissions(get_ipfs_client(),
+                                  provider_uapp, permission_db)
 
     if ipfs_hash is not None:
         permissions.load_perms_from_ipfs(ipfs_hash)
