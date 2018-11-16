@@ -1,5 +1,6 @@
 import json
 import logging
+import datetime
 
 import click
 
@@ -40,16 +41,21 @@ def validapps():
             uapp_json = json.loads(uapp_json_str)
             uapp_data = uapp_json['data']
             mother_sig = uapp_json['sig']
+            added = datetime.datetime.utcfromtimestamp(uapp_data['time_added'])
 
             acc_name = eosio_account.name_to_string(
                 int(va['acl_contract_acc']))
-            click.echo(bold(f"{acc_name}"))
+            click.echo(f"{bold(acc_name)}: {bold(uapp_data['name'])}")
+            click.echo(f"{uapp_data['description']}")
+            click.echo(f"{uapp_data['website']}")
             click.echo(f"Contract Hash: {uapp_data['acl_contract_hash']}")
             click.echo(f"RPC Server: "
                        f"http://{uapp_data['rpc_server_ip']}:"
                        f"{uapp_data['rpc_server_port']}")
+            click.echo(f"UApp Registered: {added}")
             click.echo(f"MOTHER Signature: {mother_sig}")
             click.echo("is valid: true")
+            click.echo("------------------------")
 
 
 @main.command()
@@ -78,13 +84,18 @@ def invalidapps():
 
             acc_name = eosio_account.name_to_string(
                 int(va['acl_contract_acc']))
-            click.echo(bold(f"{acc_name}"))
+            click.echo(f"{bold(acc_name)}: {bold(uapp_data['name'])}")
+            click.echo(f"{bold(uapp_data['name'])}")
+            click.echo(f"{uapp_data['description']}")
+            click.echo(f"{uapp_data['website']}")
             click.echo(f"Contract Hash: {uapp_data['acl_contract_hash']}")
             click.echo(f"RPC Server: "
                        f"http://{uapp_data['rpc_server_ip']}:"
                        f"{uapp_data['rpc_server_port']}")
+            click.echo(f"UApp Registered: {added}")
             click.echo(f"MOTHER Signature: {mother_sig}")
             click.echo("is valid: false")
+            click.echo("------------------------")
 
 
 @main.command()
