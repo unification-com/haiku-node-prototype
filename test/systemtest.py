@@ -9,7 +9,6 @@ from eosapi import Client
 import click
 import requests
 
-from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.accounts import (
     AccountManager, make_default_accounts, create_public_data)
 from haiku_node.blockchain.eos.mother import UnificationMother
@@ -20,7 +19,8 @@ from haiku_node.config.config import UnificationConfig
 from haiku_node.encryption.merkle.merkle_tree import MerkleTree
 from haiku_node.encryption.payload import bundle
 from haiku_node.keystore.keystore import UnificationKeystore
-from haiku_node.network.eos import get_eos_rpc_client, get_cleos, get_ipfs_client
+from haiku_node.network.eos import (get_eos_rpc_client,
+                                    get_cleos, get_ipfs_client)
 from haiku_node.permissions.perm_batch_db import (
     default_db as pb_default_db, PermissionBatchDatabase)
 from haiku_node.permissions.permissions import UnifPermissions
@@ -81,8 +81,8 @@ def systest_auth(requesting_app, providing_app, user):
 
 
 def systest_ingest(requesting_app, providing_app, user, balances):
-    log.info(f'Testing Fetch ingestion: {requesting_app} is requesting data from '
-             f'{providing_app}')
+    log.info(f'Testing Fetch ingestion: {requesting_app} '
+             f'is requesting data from {providing_app}')
     request_hash = f'data-request-{providing_app}-{requesting_app}'
 
     app_config = demo_config['demo_apps'][providing_app]
@@ -105,17 +105,20 @@ def systest_ingest(requesting_app, providing_app, user, balances):
 
     price_sched = demo_config['demo_apps'][providing_app]['db_schemas'][0]['price_sched']
 
-    latest_req_id = consumer_uapp_sc.init_data_request(provider_obj.name, "0", "0",
+    latest_req_id = consumer_uapp_sc.init_data_request(provider_obj.name,
+                                                       "0", "0",
                                                        price_sched)
 
     client = HaikuDataClient(keystore)
-    client.make_data_request(requesting_app, provider_obj, user, request_hash, latest_req_id)
+    client.make_data_request(requesting_app, provider_obj, user,
+                             request_hash, latest_req_id)
     client.read_data_from_store(provider_obj, request_hash)
 
     # Update the system test record of the balances
     balances[requesting_app] = balances[requesting_app] - price_sched
     und_rewards = UndRewards(providing_app, price_sched)
-    balances[providing_app] = balances[providing_app] + und_rewards.calculate_reward(is_user=False)
+    balances[providing_app] = (balances[providing_app]
+                               + und_rewards.calculate_reward(is_user=False))
 
     return balances
 
@@ -165,7 +168,8 @@ def systest_smart_contract_mother():
         log.info(
             f"Expecting - config.json: {mother.get_deployed_contract_hash()}")
         log.info(f"Actual - MOTHER: {mother.get_hash_in_mother()}")
-        assert (mother.get_deployed_contract_hash() == mother.get_hash_in_mother()) is True
+        assert (mother.get_deployed_contract_hash()
+                == mother.get_hash_in_mother()) is True
 
         log.info("RPC IP")
         log.info(f"Expecting - config.json: {app_data['rpc_server']}")
@@ -205,10 +209,10 @@ def systest_smart_contract_acl():
 
             # version set to 1, since that's the hard coded version used in
             # accounts.validate_with_mother
-            acl_contract_schema = uapp_sc.get_db_schema_by_pkey(0)
+            uapp_contract_schema = uapp_sc.get_db_schema_by_pkey(0)
             log.info(f"Actual - UApp Smart Contract: "
-                     f"{acl_contract_schema['schema']}")
-            assert (conf_schema == acl_contract_schema['schema']) is True
+                     f"{uapp_contract_schema['schema']}")
+            assert (conf_schema == uapp_contract_schema['schema']) is True
 
 
 def systest_process_permission_batches():
@@ -256,7 +260,8 @@ def systest_check_permission_requests():
     users, consumers, providers = compile_actors()
 
     for provider in providers:
-        log.debug(f'run systest_check_permission_requests for Provider {provider}')
+        log.debug(f'run systest_check_permission_requests'
+                  f' for Provider {provider}')
 
         provider_uapp = UnificationUapp(get_eos_rpc_client(), provider)
 
@@ -265,12 +270,14 @@ def systest_check_permission_requests():
 
         for consumer in consumers:
             if consumer != provider:
-                log.debug(f'Provider {provider}: load permissions for Consumer {consumer}')
+                log.debug(f'Provider {provider}: load permissions '
+                          f'for Consumer {consumer}')
                 permissions.load_consumer_perms(consumer)
                 for user in users:
                     user_permissions = permissions.get_user_perms_for_all_schemas(user)
                     for schema_id, user_perms in user_permissions.items():
-                        log.debug(f'User {user}, Schema {schema_id}: {user_perms}')
+                        log.debug(f'User {user}, '
+                                  f'Schema {schema_id}: {user_perms}')
                         is_valid = permissions.verify_permission(user_perms)
                         log.debug(f'Perm sig valid: {is_valid}')
 
@@ -286,11 +293,15 @@ def systest_check_permission_requests():
 
                         if demo_conf_granted:
                             log.debug("Permission granted")
-                            log.debug(f"Demo fields: {demo_conf_fields}, recorded fields: {user_perms['perms']}")
+                            log.debug(f"Demo fields: {demo_conf_fields}, "
+                                      f"recorded fields: "
+                                      f"{user_perms['perms']}")
                             assert demo_conf_fields == user_perms['perms']
                         else:
-                            log.debug("Permission not granted. Recorded perms should be empty")
-                            log.debug(f"Recorded fields: {user_perms['perms']}")
+                            log.debug("Permission not granted. Recorded "
+                                      "perms should be empty")
+                            log.debug(f"Recorded fields: "
+                                      f"{user_perms['perms']}")
                             assert user_perms['perms'] == ''
 
 
@@ -299,7 +310,8 @@ def systest_merkle_proof_permissions():
     users, consumers, providers = compile_actors()
 
     for provider in providers:
-        log.debug(f'run systest_merkle_proof_permissions for Provider {provider}')
+        log.debug(f'run systest_merkle_proof_'
+                  f'permissions for Provider {provider}')
 
         provider_uapp = UnificationUapp(get_eos_rpc_client(), provider)
 
@@ -308,7 +320,8 @@ def systest_merkle_proof_permissions():
 
         for consumer in consumers:
             if consumer != provider:
-                log.debug(f'Provider {provider}: load permissions for Consumer {consumer}')
+                log.debug(f'Provider {provider}: load '
+                          f'permissions for Consumer {consumer}')
                 permissions.load_consumer_perms(consumer)
 
                 permissions_obj = permissions.get_all_perms()
@@ -322,21 +335,29 @@ def systest_merkle_proof_permissions():
                 tree.grow_tree()
 
                 log.debug(f"Generated merkle root: {tree.get_root_str()}")
-                log.debug(f"Recorded merkle root: {permissions_obj['merkle_root']}")
+                log.debug(f"Recorded merkle root: "
+                          f"{permissions_obj['merkle_root']}")
 
                 for user, perm in permissions_obj['permissions'].items():
                     for schema_id, schema_perm in perm.items():
                         requested_leaf = json.dumps(schema_perm)
-                        proof_chain = tree.get_proof(requested_leaf, is_hashed=False)
-                        log.debug(f'Permission leaf for {user}: {requested_leaf}')
-                        log.debug(f'Proof chain for {user} - Schema {schema_id} '
-                                  f'permission leaf: {json.dumps(proof_chain)}')
+                        proof_chain = tree.get_proof(requested_leaf,
+                                                     is_hashed=False)
+                        log.debug(f'Permission leaf for {user}:'
+                                  f' {requested_leaf}')
+                        log.debug(f'Proof chain for {user} - '
+                                  f'Schema {schema_id} '
+                                  f'permission leaf: '
+                                  f'{json.dumps(proof_chain)}')
 
-                        # simulate only having access to leaf, root and proof chain for leaf
+                        # simulate only having access to leaf,
+                        # root and proof chain for leaf
                         verify_tree = MerkleTree()
 
-                        is_good = verify_tree.verify_leaf(requested_leaf, permissions_obj['merkle_root'],
-                                                          proof_chain, is_hashed=False)
+                        is_good = verify_tree.verify_leaf(requested_leaf,
+                                                          permissions_obj['merkle_root'],
+                                                          proof_chain,
+                                                          is_hashed=False)
 
                         log.debug(f'Leaf is valid: {is_good}')
 
