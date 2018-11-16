@@ -252,6 +252,7 @@
       }
     }
   },
+  "__demo_permissions_comment": "user.consumer.provider",
   "demo_permissions": {
     "user1": {
       "app1": {
@@ -274,7 +275,7 @@
         },
         "app3": {
           "granted": false,
-          "fields": "Image",
+          "fields": "",
           "schema_id": "0"
         }
       },
@@ -307,7 +308,7 @@
       "app2": {
         "app1": {
           "granted": false,
-          "fields": "Heartrate,GeoLocation,TimeStamp,Pulse",
+          "fields": "",
           "schema_id": "0"
         },
         "app3": {
@@ -332,12 +333,12 @@
     "user3": {
       "app1": {
         "app2": {
-          "granted": false,
+          "granted": true,
           "fields": "DataBlob,BlobSize",
           "schema_id": "0"
         },
         "app3": {
-          "granted": false,
+          "granted": true,
           "fields": "Image",
           "schema_id": "0"
         }
@@ -356,13 +357,13 @@
       },
       "app3": {
         "app1": {
-          "granted": true,
-          "fields": "Heartrate,GeoLocation,TimeStamp,Pulse",
+          "granted": false,
+          "fields": "",
           "schema_id": "0"
         },
         "app2": {
-          "granted": true,
-          "fields": "DataBlob,BlobSize",
+          "granted": false,
+          "fields": "",
           "schema_id": "0"
         }
       }
