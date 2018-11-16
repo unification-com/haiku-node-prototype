@@ -70,7 +70,8 @@ class UnificationUapp:
         db_schema = {}
         table_data = self.__eos_rpc_client.get_table_rows(
             self.__uapp_contract_acc,
-            self.__uapp_contract_acc, self.__db_schema_table, True, pkey, pkey + 1, 1)
+            self.__uapp_contract_acc, self.__db_schema_table, True,
+            pkey, pkey + 1, 1)
 
         if table_data['rows']:
             td = table_data['rows'][0]
@@ -139,7 +140,8 @@ class UnificationUapp:
         data_request = {}
         table_data = self.__eos_rpc_client.get_table_rows(
             self.__uapp_contract_acc,
-            self.__uapp_contract_acc, self.__data_requests_table, True, pkey, pkey + 1, 1)
+            self.__uapp_contract_acc, self.__data_requests_table, True,
+            pkey, pkey + 1, 1)
 
         td = table_data['rows'][0]
         if td['pkey'] == pkey:
@@ -156,7 +158,8 @@ class UnificationUapp:
 
         return data_request
 
-    def add_schema(self, schema, schema_vers: int, schedule: int, price_sched: int, price_adhoc: int):
+    def add_schema(self, schema, schema_vers: int, schedule: int,
+                   price_sched: int, price_adhoc: int):
 
         d = {
             'schema': json.dumps(schema),
@@ -166,14 +169,16 @@ class UnificationUapp:
             'price_adhoc': price_adhoc
         }
         ret = self.__cleos.run(
-            ['push', 'action', self.__uapp_contract_acc, 'addschema', json.dumps(d), '-p',
+            ['push', 'action', self.__uapp_contract_acc,
+             'addschema', json.dumps(d), '-p',
              f'{self.__uapp_contract_acc}@modschema'])
 
         print(ret.stdout)
 
         return ret
 
-    def edit_schema(self, pkey: int, schema: str, schema_vers: int, schedule: int, price_sched: int, price_adhoc: int):
+    def edit_schema(self, pkey: int, schema: str, schema_vers: int,
+                    schedule: int, price_sched: int, price_adhoc: int):
 
         d = {
             'pkey': pkey,
@@ -184,8 +189,8 @@ class UnificationUapp:
             'price_adhoc': price_adhoc
         }
         ret = self.__cleos.run(
-            ['push', 'action', self.__uapp_contract_acc, 'editschema', json.dumps(d), '-p',
-             f'{self.__uapp_contract_acc}@modschema'])
+            ['push', 'action', self.__uapp_contract_acc, 'editschema',
+             json.dumps(d), '-p', f'{self.__uapp_contract_acc}@modschema'])
 
         print(ret.stdout)
 
@@ -198,8 +203,8 @@ class UnificationUapp:
             'schema_vers': schema_vers
         }
         ret = self.__cleos.run(
-            ['push', 'action', self.__uapp_contract_acc, 'setvers', json.dumps(d), '-p',
-             f'{self.__uapp_contract_acc}@modschema'])
+            ['push', 'action', self.__uapp_contract_acc, 'setvers',
+             json.dumps(d), '-p', f'{self.__uapp_contract_acc}@modschema'])
 
         print(ret.stdout)
 
@@ -212,8 +217,8 @@ class UnificationUapp:
             'schedule': schedule
         }
         ret = self.__cleos.run(
-            ['push', 'action', self.__uapp_contract_acc, 'setschedule', json.dumps(d), '-p',
-             f'{self.__uapp_contract_acc}@modschema'])
+            ['push', 'action', self.__uapp_contract_acc, 'setschedule',
+             json.dumps(d), '-p', f'{self.__uapp_contract_acc}@modschema'])
 
         print(ret.stdout)
 
@@ -226,8 +231,8 @@ class UnificationUapp:
             'price_sched': price_sched
         }
         ret = self.__cleos.run(
-            ['push', 'action', self.__uapp_contract_acc, 'setpricesch', json.dumps(d), '-p',
-             f'{self.__uapp_contract_acc}@modschema'])
+            ['push', 'action', self.__uapp_contract_acc, 'setpricesch',
+             json.dumps(d), '-p', f'{self.__uapp_contract_acc}@modschema'])
 
         print(ret.stdout)
 
@@ -240,8 +245,8 @@ class UnificationUapp:
             'price_sched': price_adhoc
         }
         ret = self.__cleos.run(
-            ['push', 'action', self.__uapp_contract_acc, 'setpriceadh', json.dumps(d), '-p',
-             f'{self.__uapp_contract_acc}@modschema'])
+            ['push', 'action', self.__uapp_contract_acc, 'setpriceadh',
+             json.dumps(d), '-p', f'{self.__uapp_contract_acc}@modschema'])
 
         print(ret.stdout)
 
@@ -254,8 +259,8 @@ class UnificationUapp:
             'schema': json.dumps(schema)
         }
         ret = self.__cleos.run(
-            ['push', 'action', self.__uapp_contract_acc, 'setchema', json.dumps(d), '-p',
-             f'{self.__uapp_contract_acc}@modschema'])
+            ['push', 'action', self.__uapp_contract_acc, 'setchema',
+             json.dumps(d), '-p', f'{self.__uapp_contract_acc}@modschema'])
 
         print(ret.stdout)
 
@@ -267,8 +272,8 @@ class UnificationUapp:
         }
 
         ret = self.__cleos.run(
-            ['push', 'action', self.__uapp_contract_acc, 'setrsakey', json.dumps(d), '-p',
-             f'{self.__uapp_contract_acc}@modrsakey'])
+            ['push', 'action', self.__uapp_contract_acc, 'setrsakey',
+             json.dumps(d), '-p', f'{self.__uapp_contract_acc}@modrsakey'])
 
         print(ret.stdout)
 
@@ -323,8 +328,8 @@ class UnificationUapp:
         }
 
         ret = self.__cleos.run(
-            ['push', 'action', self.__uapp_contract_acc, 'updateperm', json.dumps(d), '-p',
-             f'{self.__uapp_contract_acc}'])
+            ['push', 'action', self.__uapp_contract_acc, 'updateperm',
+             json.dumps(d), '-p', f'{self.__uapp_contract_acc}'])
 
         print(ret)
 
