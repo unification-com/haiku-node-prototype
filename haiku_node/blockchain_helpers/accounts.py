@@ -226,7 +226,7 @@ class AccountManager:
             schema_vers = schema_vers.rstrip(",")
 
             uapp_data = {
-                'acl_contract_acc': appname,
+                'uapp_contract_acc': appname,
                 'schema_vers': schema_vers,
                 'acl_contract_hash': contract_hash,
                 'rpc_server_ip': app_conf['rpc_server'],
@@ -254,7 +254,7 @@ class AccountManager:
             ipfs_hash = ipfs_client.add_json(mother_json)
 
             d = {
-                'acl_contract_acc': appname,
+                'uapp_contract_acc': appname,
                 'ipfs_hash': ipfs_hash
             }
 
@@ -265,7 +265,7 @@ class AccountManager:
 
     def validate_with_mother(self, appname):
         d = {
-            'acl_contract_acc': appname
+            'uapp_contract_acc': appname
         }
         return self.cleos.run(
             ['push', 'action', 'unif.mother', 'validate', json.dumps(d),
@@ -273,7 +273,7 @@ class AccountManager:
 
     def invalidate_with_mother(self, appname):
         d = {
-            'acl_contract_acc': appname
+            'uapp_contract_acc': appname
         }
         return self.cleos.run(
             ['push', 'action', 'unif.mother', 'invalidate', json.dumps(d),

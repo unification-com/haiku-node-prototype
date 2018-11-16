@@ -78,7 +78,7 @@ class UnificationMother:
 
         for i in table_data['rows']:
 
-            if int(i['acl_contract_acc']) == req_app_uint64:
+            if int(i['uapp_contract_acc']) == req_app_uint64:
                 ipfs_hash = i['ipfs_hash']
                 uapp_json_str = self.__ipfs_client.get_json(ipfs_hash)
                 uapp_json = json.loads(uapp_json_str)

@@ -186,7 +186,7 @@ def uapp_store():
 
     for va in valid_apps['rows']:
         data_provider = eosio_account.name_to_string(
-            int(va['acl_contract_acc']))
+            int(va['uapp_contract_acc']))
         if int(va['is_valid']) == 1 and data_provider != requesting_app:
             uapp_sc = UnificationUapp(eos_client, data_provider)
             db_schemas = uapp_sc.get_all_db_schemas()

@@ -44,7 +44,7 @@ def validapps():
             added = datetime.datetime.utcfromtimestamp(uapp_data['time_added'])
 
             acc_name = eosio_account.name_to_string(
-                int(va['acl_contract_acc']))
+                int(va['uapp_contract_acc']))
             click.echo(f"{bold(acc_name)}: {bold(uapp_data['name'])}")
             click.echo(f"{uapp_data['description']}")
             click.echo(f"{uapp_data['website']}")
@@ -83,7 +83,7 @@ def invalidapps():
             mother_sig = uapp_json['sig']
 
             acc_name = eosio_account.name_to_string(
-                int(va['acl_contract_acc']))
+                int(va['uapp_contract_acc']))
             click.echo(f"{bold(acc_name)}: {bold(uapp_data['name'])}")
             click.echo(f"{bold(uapp_data['name'])}")
             click.echo(f"{uapp_data['description']}")

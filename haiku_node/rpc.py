@@ -96,40 +96,43 @@ def bc_transaction_error():
     }), 500
 
 
-def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
+def obtain_data(keystore, eos_account_name, eos_client, uapp_contract_acc,
                 users, request_id=None):
     """
     :param eos_account_name: The account name of the requesting App (Data Consumer).
     :param eos_client: EOS RPC Client
-    :param acl_contract_acc: The account name of the providing App (Data Provider).
+    :param uapp_contract_acc: The account name of the providing App (Data Provider).
     :param users: The users to obtain data for. None to get all available users
     :param request_id: Primary Key for the data request held in the Consumer's UApp smart contract
     """
 
     data_factory = UnificationDataFactory(
-        eos_client, acl_contract_acc, eos_account_name, users)
+        eos_client, uapp_contract_acc, eos_account_name, users)
     body = {
         'data': data_factory.get_raw_data()
     }
 
-    d = bundle(keystore, acl_contract_acc, eos_account_name, body, 'Success')
+    d = bundle(keystore, uapp_contract_acc, eos_account_name, body, 'Success')
 
     # load UApp SC for requesting app
     uapp_sc = UnificationUapp(eos_client, eos_account_name)
     # generate checksum
     data_hash = hashlib.sha224(str(d['payload']).encode('utf-8')).hexdigest()
 
-    # temporarily allow acl_contract_acc@modreq to interact with consumer's contract
+    # temporarily allow uapp_contract_acc@modreq to
+    # interact with consumer's contract
     eosio_cleos = EosioCleos(False)
-    eosio_cleos.run(["set", "action", "permission", acl_contract_acc,
-                     eos_account_name, 'updatereq', 'modreq', '-p', f'{acl_contract_acc}@active'])
+    eosio_cleos.run(["set", "action", "permission", uapp_contract_acc,
+                     eos_account_name, 'updatereq', 'modreq', '-p',
+                     f'{uapp_contract_acc}@active'])
 
     # write to Consumer's smart contract
-    transaction_id = uapp_sc.update_data_request(request_id, acl_contract_acc, data_hash, "test")
+    transaction_id = uapp_sc.update_data_request(request_id, uapp_contract_acc, data_hash, "test")
 
     # Remove permission association for action in consumer's contract
-    eosio_cleos.run(["set", "action", "permission", acl_contract_acc,
-                     eos_account_name, 'updatereq', 'NULL', '-p', f'{acl_contract_acc}@active'])
+    eosio_cleos.run(["set", "action", "permission", uapp_contract_acc,
+                     eos_account_name, 'updatereq', 'NULL', '-p',
+                     f'{uapp_contract_acc}@active'])
 
     # check transaction has been processed
     if transaction_id is not None:
@@ -138,12 +141,12 @@ def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
         return bc_transaction_error()
 
 
-def ingest_data(keystore, eos_account_name, eos_client, acl_contract_acc,
+def ingest_data(keystore, eos_account_name, eos_client, uapp_contract_acc,
                 users):
     response_body = {}
 
     d = bundle(
-        keystore, acl_contract_acc, eos_account_name, response_body, 'Success')
+        keystore, uapp_contract_acc, eos_account_name, response_body, 'Success')
     return flask.jsonify(d), 200
 
 

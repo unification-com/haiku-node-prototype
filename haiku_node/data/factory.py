@@ -18,19 +18,18 @@ log = logging.getLogger(__name__)
 
 class UnificationDataFactory:
 
-    def __init__(self, eos_client, acl_contract_acc, requesting_app, users):
+    def __init__(self, eos_client, uapp_contract_acc, requesting_app, users):
         """
-
         :param users: A list of users we want to obtain data for. If an empty
         list is provided, then data for all permissible users are provided.
         """
-        self.__acl_contract_acc = acl_contract_acc
+        self.__uapp_contract_acc = uapp_contract_acc
         self.__requesting_app = requesting_app
         self.__haiku_conf = UnificationConfig()
 
         self.__my_mother = UnificationMother(
-            eos_client, acl_contract_acc, get_cleos(), get_ipfs_client())
-        self.__my_uapp_sc = UnificationUapp(eos_client, acl_contract_acc)
+            eos_client, uapp_contract_acc, get_cleos(), get_ipfs_client())
+        self.__my_uapp_sc = UnificationUapp(eos_client, uapp_contract_acc)
         self.__my_lookup = UnificationLookup(default_lookup_db())
         self.__users = None if len(users) == 0 else users
 
@@ -140,7 +139,7 @@ class UnificationDataFactory:
             'dataColumnsToInclude': cols_to_include,
             'native_user_ids': native_user_ids,
             'base64_encode_cols': base64_encode_cols,
-            'providing_app': self.__acl_contract_acc,
+            'providing_app': self.__uapp_contract_acc,
             'db_schema': db_schema,
             'granted_field_lookup': self.__granted_field_lookup
         }
