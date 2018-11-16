@@ -63,10 +63,9 @@ class HaikuDataClient:
     def make_data_request(self, requesting_app, providing_app: Provider, user,
                           request_hash, request_id):
         # Check if the providing app is valid according to MOTHER
-        conf = UnificationConfig()
         eos_client = get_eos_rpc_client()
         v = UnificationAppScValidation(
-            eos_client, conf['acl_contract'], providing_app.name)
+            eos_client, providing_app.name)
 
         if not v.valid():
             raise Exception(f"Providing App {providing_app.name} is "

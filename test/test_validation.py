@@ -16,7 +16,7 @@ def run_test(requesting_app):
     print("THIS app is", conf['acl_contract'])
 
     v = UnificationAppScValidation(
-        eos_client, conf['acl_contract'], requesting_app)
+        eos_client, requesting_app)
 
     app_valid = v.valid_app()
     print(f"Requesting App {requesting_app} Valid according to MOTHER: "

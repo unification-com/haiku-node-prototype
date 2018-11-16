@@ -171,7 +171,7 @@ def data_request():
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP.
         v = UnificationAppScValidation(
-            eos_client, conf['acl_contract'], d['eos_account_name'])
+            eos_client, d['eos_account_name'])
 
         # If the REQUESTING APP is valid according to MOTHER, then we can
         # generate the data. If not, return an invalid_app response
@@ -221,7 +221,7 @@ def data_ingest():
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP.
         v = UnificationAppScValidation(
-            eos_client, conf['acl_contract'], d['eos_account_name'])
+            eos_client, d['eos_account_name'])
 
         # If the REQUESTING APP is valid according to MOTHER, then we can
         # generate the data. If not, return an invalid_app response
