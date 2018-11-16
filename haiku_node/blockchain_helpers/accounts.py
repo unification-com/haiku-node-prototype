@@ -15,7 +15,7 @@ from haiku_node.client import Provider
 from haiku_node.network.eos import (get_cleos,
                                     get_eos_rpc_client, get_ipfs_client)
 from haiku_node.permissions.utils import generate_payload
-from haiku_node.utils.utils import sha256
+from haiku_node.utils.utils import sha256, generate_nonce
 
 BLOCK_SLEEP = 0.5
 
@@ -229,7 +229,13 @@ class AccountManager:
                 'schema_vers': schema_vers,
                 'acl_contract_hash': contract_hash,
                 'rpc_server_ip': app_conf['rpc_server'],
-                'rpc_server_port': app_conf['rpc_server_port']
+                'rpc_server_port': app_conf['rpc_server_port'],
+                'name': app_conf['uapp_name'],
+                'description': app_conf['uapp_desc'],
+                'website': app_conf['uapp_website'],
+                'nonce': generate_nonce(16),
+                'time_added': int(time.time()),
+                'time_updated': int(time.time())
             }
 
             eosk = UnifEosKey(unif_mother_private_key)

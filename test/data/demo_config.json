@@ -18,6 +18,9 @@
       "eos_sc_account": "app1",
       "rpc_server": "haiku-app1",
       "rpc_server_port": "8050",
+      "uapp_name": "HeartBit",
+      "uapp_desc": "Fitness and well-being app for the masses",
+      "uapp_website": "https://unification.com",
       "db_schemas": [
         {
           "schema_name": "app1.db1",
@@ -104,6 +107,9 @@
       "eos_sc_account": "app2",
       "rpc_server": "haiku-app2",
       "rpc_server_port": "8050",
+      "uapp_name": "BlobStore",
+      "uapp_desc": "Blob storage app for the masses",
+      "uapp_website": "https://unification.com",
       "db_schemas": [
         {
           "schema_name": "app2.db1",
@@ -178,6 +184,9 @@
       "eos_sc_account": "app3",
       "rpc_server": "haiku-app3",
       "rpc_server_port": "8050",
+      "uapp_name": "Imagify",
+      "uapp_desc": "Imaging app for the masses",
+      "uapp_website": "https://unification.com",
       "db_schemas": [
         {
           "schema_name": "app3.db1",
