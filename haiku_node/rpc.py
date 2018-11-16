@@ -141,8 +141,7 @@ def obtain_data(keystore, eos_account_name, eos_client, uapp_contract_acc,
         return bc_transaction_error()
 
 
-def ingest_data(keystore, eos_account_name, eos_client, uapp_contract_acc,
-                users):
+def ingest_data(keystore, eos_account_name, uapp_contract_acc):
     response_body = {}
 
     d = bundle(
@@ -216,8 +215,6 @@ def data_ingest():
         conf = app.unification_config
 
         sender = d['eos_account_name']
-        recipient = conf['uapp_contract']
-        bundle_d = unbundle(app.keystore, sender, d)
 
         eos_client = get_eos_rpc_client()
 
@@ -229,9 +226,8 @@ def data_ingest():
         # If the REQUESTING APP is valid according to MOTHER, then we can
         # generate the data. If not, return an invalid_app response
         if v.valid():
-            users = bundle_d.get('users')
             return ingest_data(
-                app.keystore, sender, eos_client, conf['uapp_contract'], users)
+                app.keystore, sender, conf['uapp_contract'])
         else:
             return invalid_app()
 
