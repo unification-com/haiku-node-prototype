@@ -63,7 +63,8 @@ def systest_auth(requesting_app, providing_app, user):
     port = app_config['rpc_server_port']
 
     eos_client = get_eos_rpc_client()
-    mother = UnificationMother(eos_client, providing_app, get_cleos())
+    mother = UnificationMother(eos_client, providing_app, get_cleos(),
+                               get_ipfs_client())
     provider_obj = Provider(providing_app, 'https', mother)
 
     encoded_password = demo_config['system'][requesting_app]['password']
@@ -88,7 +89,8 @@ def systest_ingest(requesting_app, providing_app, user, balances):
     port = app_config['rpc_server_port']
 
     eos_client = get_eos_rpc_client()
-    mother = UnificationMother(eos_client, providing_app, get_cleos())
+    mother = UnificationMother(eos_client, providing_app, get_cleos(),
+                               get_ipfs_client())
     provider_obj = Provider(providing_app, 'https', mother)
 
     password = demo_config['system'][requesting_app]['password']
@@ -146,7 +148,8 @@ def systest_smart_contract_mother():
         app_data = d_apps[appname]
         log.info(f"Contacting MOTHER for {app_data['eos_sc_account']}")
         mother = UnificationMother(
-            eos_client, app_data['eos_sc_account'], get_cleos())
+            eos_client, app_data['eos_sc_account'],
+            get_cleos(), get_ipfs_client())
 
         log.info("App is Valid")
         log.info("Expecting: True")
@@ -213,7 +216,8 @@ def systest_process_permission_batches():
 
     for app_name in appnames:
         log.debug(f'run systest_process_permission_batches for {app_name}')
-        mother = UnificationMother(get_eos_rpc_client(), app_name, get_cleos())
+        mother = UnificationMother(get_eos_rpc_client(), app_name, get_cleos(),
+                                   get_ipfs_client())
         provider_obj = Provider(app_name, 'https', mother)
 
         password = demo_config['system'][app_name]['password']

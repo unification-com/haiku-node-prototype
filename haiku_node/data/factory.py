@@ -29,7 +29,7 @@ class UnificationDataFactory:
         self.__haiku_conf = UnificationConfig()
 
         self.__my_mother = UnificationMother(
-            eos_client, acl_contract_acc, get_cleos())
+            eos_client, acl_contract_acc, get_cleos(), get_ipfs_client())
         self.__my_uapp_sc = UnificationUapp(eos_client, acl_contract_acc)
         self.__my_lookup = UnificationLookup(default_lookup_db())
         self.__users = None if len(users) == 0 else users
