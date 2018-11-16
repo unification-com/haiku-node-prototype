@@ -11,7 +11,7 @@ dec = lambda s: s.decode('utf-8')
 enc = lambda s: s.encode('utf-8')
 
 
-def bundle(ks: UnificationKeystore, acl_contract: str, recipient: str,
+def bundle(ks: UnificationKeystore, uapp_contract: str, recipient: str,
            message_d: dict, message: str) -> dict:
     """
     Bundle an encrypted payload.
@@ -21,7 +21,7 @@ def bundle(ks: UnificationKeystore, acl_contract: str, recipient: str,
     recipient_pub_key = get_public_key(recipient)
 
     return __bundle(
-        sender_priv_key, recipient_pub_key, acl_contract, message_d, message)
+        sender_priv_key, recipient_pub_key, uapp_contract, message_d, message)
 
 
 def __bundle(sender_priv_key, recipient_pub_key, sender: str, message_d: dict,
