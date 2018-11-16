@@ -114,4 +114,5 @@ class EosioCleos:
         return self.run(["get", "actions", acc_name, "--full"])
 
     def get_tx(self, tx):
-        return self.run(["get", "transaction ", tx])
+        tx_ret = self.run(["get", "transaction", tx])
+        return tx_ret.stdout

@@ -296,6 +296,7 @@ def modify_permission():
                                      payload['p_sig'],
                                      public_key)
 
+        # ToDo: get batch nonce etc. as return values to send to user for storing
         d = {
             'app': conf['acl_contract'],
             'proc_id': rowid
@@ -347,3 +348,56 @@ def process_permission_batch():
 
     except InvalidSignature:
         return invalid_response()
+
+
+@app.route('/get_proof', methods=['POST'])
+def get_proof():
+    conf = app.unification_config
+    d = flask.request.get_json()
+    user = d['user']
+    consumer = d['consumer']
+    ipfs_hash = d['ipfs_hash']
+    schema_id = d['schema_id']
+
+    provider_uapp = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
+    permission_db = PermissionBatchDatabase(pb_default_db())
+    permissions = UnifPermissions(get_ipfs_client(), provider_uapp, permission_db)
+
+    if ipfs_hash is not None:
+        permissions.load_perms_from_ipfs(ipfs_hash)
+    else:
+        permissions.load_consumer_perms(consumer)
+
+    proof = permissions.get_proof(user, schema_id=schema_id)
+
+    # ToDo: send as JWT
+    return_d = {
+        'proof': proof
+    }
+
+    return flask.jsonify(return_d), 200
+
+
+@app.route('/get_proof_tx', methods=['POST'])
+def get_proof_tx():
+    d = flask.request.get_json()
+    user = d['user']
+    proc_id = d['proc_id']
+
+    permission_db = PermissionBatchDatabase(pb_default_db())
+
+    operation_data = permission_db.get_op_for_user(user, proc_id)
+
+    return_data = {
+        'processed': False,
+        'proof_tx': None,
+        'found': False
+    }
+
+    if operation_data:
+        return_data['found'] = True
+        if operation_data['proof_tx']:
+            return_data['processed'] = True
+            return_data['proof_tx'] = operation_data['proof_tx']
+
+    return flask.jsonify(return_data), 200

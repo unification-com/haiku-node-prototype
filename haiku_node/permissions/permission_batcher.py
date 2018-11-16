@@ -1,12 +1,10 @@
 import logging
-import time
 from pathlib import Path
 
 from haiku_node.blockchain.eos.uapp import get_self_uapp
 from haiku_node.network.eos import get_ipfs_client
 from haiku_node.permissions.perm_batch_db import PermissionBatchDatabase
 from haiku_node.permissions.permissions import UnifPermissions
-from haiku_node.utils.utils import generate_nonce
 
 
 log = logging.getLogger(__name__)
@@ -36,9 +34,7 @@ class PermissionBatcher:
                 'pub_key': item['pub_key'],
                 'schema_id': item['schema_id'],
                 'consumer': item['consumer_account'],
-                'user': item['end_user_account'],
-                'b_nonce': generate_nonce(16),
-                'b_time': time.time()
+                'user': item['end_user_account']
             }
             is_added = permissions.add_change_request(
                 item['consumer_account'], item['end_user_account'], perm)

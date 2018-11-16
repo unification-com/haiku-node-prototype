@@ -1,24 +1,32 @@
-import logging
-import subprocess
 import json
+import logging
 import requests
-
+import subprocess
+import urllib3
 
 import click
 
-from haiku_node.blockchain.eos.mother import UnificationMother
-from haiku_node.client import Provider
-from haiku_node.config.config import UnificationConfig
+from haiku_node.babel.babel_db import (
+    BabelDatabase, default_db as default_babel_db)
+from haiku_node.babel.utils import (get_balance, get_schemas, post_permissions,
+                                    get_current_ipfs_merkle, get_proof_chain,
+                                    generate_leaf_from_ipfs, verify_proof,
+                                    generate_leaf_to_prove,
+                                    get_ipfs_merkle_from_proof_tx, get_rpc_url)
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos import eosio_account
 from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
-from haiku_node.network.eos import get_eos_rpc_client, get_cleos
-from haiku_node.permissions.utils import generate_payload
+from haiku_node.config.config import UnificationConfig
+from haiku_node.network.eos import get_eos_rpc_client, get_ipfs_client
 
 
 log = logging.getLogger(__name__)
 
 bold = lambda s: click.style(str(s), bold=True)
+
+ZERO_MASK = '0000000000000000000000000000000000000000000000'
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 @click.group()
@@ -35,11 +43,12 @@ def permissions(user):
     \b
     :param user: The EOS user account name to query.
     """
-    eos_client = get_eos_rpc_client()
+    eos_rpc_client = get_eos_rpc_client()
+    ipfs_client = get_ipfs_client()
 
     apps = []
 
-    valid_apps = eos_client.get_table_rows(
+    valid_apps = eos_rpc_client.get_table_rows(
         "unif.mother", "unif.mother", "validapps", True, 0, -1,
         -1)
 
@@ -48,7 +57,28 @@ def permissions(user):
 
     click.echo(f"{bold(user)} Permissions overview:")
 
-    # ToDo: get permissions from SC/IPFS
+    for provider in apps:
+        click.echo(f'Provider: {bold(provider)}')
+        for consumer in apps:
+            if consumer != provider:
+                click.echo(f'  Consumer: {bold(consumer)}')
+                uapp_sc = UnificationUapp(eos_rpc_client, provider)
+                ipfs_hash, merkle_root = uapp_sc.get_ipfs_perms_for_req_app(
+                    consumer)
+
+                if ipfs_hash is not None and ipfs_hash != ZERO_MASK:
+                    permissions_str = ipfs_client.get_json(ipfs_hash)
+                    permissions_json = json.loads(permissions_str)
+                    user_perms = permissions_json[user]
+                    for schema_id, perms in user_perms.items():
+                        click.echo(f'    Schema ID: {schema_id}')
+                        if perms['perms'] == '':
+                            click.echo('      Granted: False')
+                        else:
+                            click.echo('      Granted: True')
+                            click.echo(f"      Fields: {perms['perms']}")
+                else:
+                    click.echo('Nothing set')
 
 
 @main.command()
@@ -128,9 +158,12 @@ def transfer(from_acc, to_acc, amount, password):
         'memo': 'UND transfer'
     }
 
-    cmd = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
-           "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
-           'push', 'action', 'unif.token', 'transfer',  json.dumps(d), "-p", from_acc]
+    cmd = ["/opt/eosio/bin/cleos", "--url",
+           f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
+           "--wallet-url",
+           f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
+           'push', 'action', 'unif.token', 'transfer',
+           json.dumps(d), "-p", from_acc]
 
     ret = subprocess.run(
         cmd, stdout=subprocess.PIPE,
@@ -145,98 +178,6 @@ def transfer(from_acc, to_acc, amount, password):
     click.echo(bold(f'{from_acc} New Balance: {my_balance}'))
     their_balance = get_balance(to_acc)
     click.echo(bold(f'{to_acc} New Balance: {their_balance}'))
-
-
-def get_balance(user):
-    """
-    Get UND Balance for a user
-
-    \b
-    :param user: The EOS user account name.
-    """
-    conf = UnificationConfig()
-    cmd = ["/opt/eosio/bin/cleos", "--url", f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
-           "--wallet-url", f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
-           'get', 'currency', 'balance', 'unif.token', user, 'UND']
-
-    ret = subprocess.run(
-        cmd, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE, universal_newlines=True)
-
-    stripped = ret.stdout.strip()
-
-    if len(stripped) > 0:
-        my_balance = stripped
-    else:
-        my_balance = '0.0000 UND'
-
-    return my_balance
-
-
-def get_schemas(provider):
-    eos_client = get_eos_rpc_client()
-
-    uapp_sc = UnificationUapp(eos_client, provider)
-
-    click.echo(f"{provider} has the following Schemas:\n")
-
-    provider_schemas = uapp_sc.get_all_db_schemas().items()
-    schemas_map = {}
-
-    for key, schema in provider_schemas:
-        s_id = schema['pkey']
-        fields = []
-        for field in schema['schema']['fields']:
-            if field['name'] != 'account_name':
-                fields.append(field['name'])
-        schemas_map[s_id] = fields
-
-    for key, fields in schemas_map.items():
-        click.echo(f"Schema ID {key}:")
-        click.echo(', '.join(fields))
-
-    return schemas_map
-
-
-def post_permissions(user, password, perm, granted_fields_str: str,
-                     schema_id: int, provider, consumer):
-    cleos = get_cleos()
-    eos_client = get_eos_rpc_client()
-
-    cleos.unlock_wallet(user, password)
-
-    pub_key = cleos.get_public_key(user, perm)
-
-    # ToDo: find better way to get public key from EOS account
-    private_key = cleos.get_private_key(user, password, pub_key)
-    cleos.lock_wallet(user)
-
-    if len(private_key) < 0:
-        click.echo(bold(f'Could not get private key for {pub_key}'))
-        return
-
-    payload = generate_payload(
-        user, private_key, provider, consumer, granted_fields_str, perm,
-        schema_id)
-
-    mother = UnificationMother(eos_client, provider, cleos)
-    provider_obj = Provider(provider, 'https', mother)
-    url = f"{provider_obj.base_url()}/modify_permission"
-
-    r = requests.post(url, json=payload, verify=False)
-
-    d = r.json()
-
-    if r.status_code != 200:
-        raise Exception(d['message'])
-
-    proc_id = d['proc_id']
-    ret_app = d['app']
-
-    if ret_app == provider and proc_id > 0:
-        click.echo(f"Success. Process ID {proc_id} Queued by {ret_app}")
-    else:
-        click.echo("Something went wrong...")
 
 
 @main.command()
@@ -292,10 +233,12 @@ def modify_permissions(user, password, provider, consumer, perm='active'):
     granted_fields_str = ",".join(granted_fields)
 
     click.echo(f"{user} is Requesting permission change: Granting access to "
-               f"{consumer} in Provider {provider} for fields {granted_fields}")
+               f"{consumer} in Provider {provider} "
+               f"for fields {granted_fields}")
 
     post_permissions(
-        user, password, perm, granted_fields_str, schema_id, provider, consumer)
+        user, password, perm, granted_fields_str,
+        schema_id, provider, consumer)
 
 
 @main.command()
@@ -304,7 +247,7 @@ def modify_permissions(user, password, provider, consumer, perm='active'):
 @click.argument('provider')
 @click.argument('consumer')
 @click.argument('schema_id')
-@click.argument('granted_fields')
+@click.option('-f', '--fields', 'granted_fields', required=False, default='')
 def modify_permissions_direct(
         user, password, provider, consumer, schema_id, granted_fields):
     """
@@ -320,12 +263,157 @@ def modify_permissions_direct(
     """
     int(schema_id)
 
-    click.echo(f"{user} is Requesting permission change: Granting access to "
-               f"{consumer} in Provider {provider} for fields {granted_fields}")
+    if not granted_fields:
+        click.echo(f"{user} is Requesting permission change: "
+                   f"Revoking access to "
+                   f"{consumer} in Provider {provider} for Schema {schema_id}")
+    else:
+        click.echo(f"{user} is Requesting permission change: "
+                   f"Granting access to "
+                   f"{consumer} in Provider {provider}"
+                   f" for fields {granted_fields}"
+                   f"in Schema {schema_id}")
 
     perm = 'active'
     post_permissions(
         user, password, perm, granted_fields, schema_id, provider, consumer)
+
+
+@main.command()
+@click.argument('user')
+@click.argument('provider')
+@click.argument('consumer')
+@click.argument('schema_id')
+def prove_permission(user, provider, consumer, schema_id):
+    """
+    Verify a user's current permission state on the blockchain
+    :param user: End User's EOS account name
+    :param provider: Provider's EOS account name
+    :param consumer: Consumer's EOS account name
+    :param schema_id: Schema ID to check
+    """
+
+    ipfs_hash, merkle_root = get_current_ipfs_merkle(provider, consumer)
+
+    proof_chain = get_proof_chain(user, provider,
+                                  schema_id=schema_id, consumer=consumer)
+
+    if proof_chain is None:
+        click.echo('Proof chain not found')
+        return
+
+    click.echo(f'IPFS Hash from {provider} SC: {ipfs_hash}')
+    click.echo(f'Merkle Root from {provider} SC: {merkle_root}')
+    click.echo(f'Proof Chain from {provider}: {proof_chain}')
+
+    leaf_to_prove = generate_leaf_from_ipfs(user, schema_id, ipfs_hash)
+
+    is_good = verify_proof(merkle_root, proof_chain, leaf_to_prove)
+
+    click.echo(bold(f'Permissions are valid: {is_good}'))
+
+
+@main.command()
+@click.argument('user')
+@click.argument('request_id')
+def check_change_request(user, request_id):
+    """
+    Check state of a permission change request, and verify it
+    has been honoured
+    :param user: End User's EOS account name
+    :param request_id: Request ID from user's BABEL DB
+    """
+
+    babel_db = BabelDatabase(default_babel_db(user))
+    request_data = babel_db.get_request_by_id(request_id, user)
+
+    if request_data is None:
+        click.echo(f'Request ID {request_id} for {user} not found')
+        return
+
+    provider = request_data['provider_account']
+    proc_id = request_data['provider_process_id']
+    consumer = request_data['consumer_account']
+    schema_id = request_data['schema_id']
+
+    if not request_data['perms']:
+        feedback = f'revoking access to Schema {schema_id}'
+    else:
+        feedback = f"granting access to fields " \
+                   f"{request_data['perms']} in Schema {schema_id}"
+
+    click.echo(f"Verifying {feedback} was processed by "
+               f'Provider {provider} for Consumer {consumer}...')
+
+    payload = {
+        'user': user,
+        'proc_id': proc_id
+    }
+
+    url = get_rpc_url(provider, 'get_proof_tx')
+
+    r = requests.post(url, json=payload, verify=False)
+
+    d = r.json()
+
+    if r.status_code != 200:
+        raise Exception(d['message'])
+
+    if not d['found']:
+        click.echo(f'Permission change request ID {proc_id} for User {user}, '
+                   f'Provider {provider}, Consumer {consumer}, '
+                   f'Schema ID {schema_id} not found')
+        return
+
+    if not d['processed']:
+        click.echo(f'Permission change request ID {proc_id} '
+                   f'has not been processed yet')
+        return
+
+    proof_tx = d['proof_tx']
+    babel_db.update_processed(request_id, proof_tx)
+
+    click.echo(f'Request processed in blockchain Tx ID {proof_tx}. Checking:')
+
+    tx_ipfs_hash, tx_merkle_root = get_ipfs_merkle_from_proof_tx(
+        proof_tx, provider, consumer)
+
+    if tx_ipfs_hash is None:
+        click.echo('Could not find required information from proof Tx')
+        return
+
+    click.echo(f'IPFS Hash on blockchain at time of '
+               f'change request: {tx_ipfs_hash}')
+    click.echo(f'Merkle Root on blockchain at time of '
+               f'change request: {tx_merkle_root}')
+
+    click.echo(f'Requesting proof chain from {provider}')
+
+    tx_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
+                                     ipfs_hash=tx_ipfs_hash)
+
+    leaf_to_prove = generate_leaf_to_prove(request_data, user)
+
+    tx_is_good = verify_proof(tx_merkle_root, tx_proof_chain, leaf_to_prove)
+    click.echo(bold(f'Tx proof verified: {tx_is_good}'))
+
+    click.echo(f"Verifying {feedback} is currently honoured by "
+               f'Provider {provider} for Consumer {consumer}...')
+
+    current_ipfs_hash, current_merkle_root = get_current_ipfs_merkle(
+        provider, consumer)
+
+    click.echo(f'Current IPFS Hash on blockchain: {current_ipfs_hash}')
+    click.echo(f'Current Merkle Root on blockchain: {current_merkle_root}')
+
+    click.echo(f'Requesting proof chain from {provider}')
+    current_proof_chain = get_proof_chain(user, provider, schema_id=schema_id,
+                                          ipfs_hash=current_ipfs_hash)
+
+    current_is_good = verify_proof(current_merkle_root,
+                                   current_proof_chain, leaf_to_prove)
+
+    click.echo(bold(f'Current proof verified: {current_is_good}'))
 
 
 if __name__ == "__main__":

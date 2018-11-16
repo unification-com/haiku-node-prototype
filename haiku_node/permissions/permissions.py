@@ -165,7 +165,13 @@ class UnifPermissions:
         perms_str = self.__ipfs.get_json(ipfs_hash)
         self.__consumer_perms = json.loads(perms_str)
 
-    def get_user_perms(self, user_account):
+    def get_user_perms_for_schema_id(self, user_account, schema_id='0'):
+        if user_account in self.__consumer_perms:
+            return self.__consumer_perms[user_account][schema_id]
+        else:
+            return None
+
+    def get_user_perms_for_all_schemas(self, user_account):
         if user_account in self.__consumer_perms:
             return self.__consumer_perms[user_account]
         else:
@@ -185,6 +191,19 @@ class UnifPermissions:
     def verify_permission(self, perm: dict):
         return self.__verify_change_request(perm)
 
+    def get_proof(self, user, schema_id='0'):
+        user_permissions = self.__consumer_perms[user][schema_id]
+        tree = MerkleTree()
+        for user, perm in self.__consumer_perms.items():
+            for schema_id, schema_perm in perm.items():
+                tree.add_leaf(json.dumps(schema_perm))
+
+        tree.grow_tree()
+
+        proof = tree.get_proof(json.dumps(user_permissions), is_hashed=False)
+
+        return proof
+
     def __verify_change_request(self, perm: dict) -> bool:
         perm_digest_sha = generate_perm_digest_sha(
             perm['perms'], perm['schema_id'],
@@ -202,7 +221,8 @@ class UnifPermissions:
     def __generate_merkle(self, perms):
         tree = MerkleTree()
         for user, perm in perms.items():
-            tree.add_leaf(json.dumps(perm))
+            for schema_id, schema_perm in perm.items():
+                tree.add_leaf(json.dumps(schema_perm))
 
         tree.grow_tree()
 

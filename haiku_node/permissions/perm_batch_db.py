@@ -149,6 +149,23 @@ class PermissionBatchDatabase:
         self.__conn.commit()
         self.__close_con()
 
+    def get_op_for_user(self, user_account, op_id):
+        op_data = None
+        self.__open_con()
+        self.__c.execute(f'SELECT * FROM permissions '
+                         f"WHERE end_user_account='{user_account}' "
+                         f"AND op_id='{op_id}' "
+                         f'LIMIT 1')
+        columns = [d[0] for d in self.__c.description]
+        res = [dict(zip(columns, row)) for row in self.__c.fetchall()]
+
+        self.__close_con()
+
+        if res:
+            op_data = res[0]
+
+        return op_data
+
     def __open_con(self):
         self.__conn = sqlite3.connect(str(self.__db_name))
         self.__c = self.__conn.cursor()
