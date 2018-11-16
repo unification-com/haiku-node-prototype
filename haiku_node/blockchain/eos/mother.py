@@ -11,20 +11,20 @@ class UnificationMother:
     """
 
     def __init__(self, eos_client,
-                 acl_contract_acc, cleos_client, ipfs_client):
+                 uapp_contract_acc, cleos_client, ipfs_client):
         """
-        :param acl_contract_acc: the eos account name of the app for which the
+        :param uapp_contract_acc: the eos account name of the app for which the
             class will retrieve data from the ACL/Meta Data smart contract.
         """
         self.__mother = "unif.mother"
         self.__valid_apps_table = "validapps"
-        self.__acl_contract_acc = acl_contract_acc
+        self.__uapp_contract_acc = uapp_contract_acc
         self.__eosClient = eos_client
         self.__is_valid_app = False
         self.__is_valid_code = False
         self.__signed_by_mother = False
         self.__deployed_contract_hash = ""  # the actual deployed contract
-        self.__acl_contract_hash_in_mother = ""  # hash held in MOTHER
+        self.__uapp_sc_hash_in_mother = ""  # hash held in MOTHER
         self.__haiku_rpc_server_ip = None
         self.__haiku_rpc_server_port = None
         self.__cleos = cleos_client
@@ -39,7 +39,7 @@ class UnificationMother:
         return self.__is_valid_code
 
     def get_hash_in_mother(self):
-        return self.__acl_contract_hash_in_mother
+        return self.__uapp_sc_hash_in_mother
 
     def signed_by_mother(self):
         return self.__signed_by_mother
@@ -59,7 +59,7 @@ class UnificationMother:
 
     def __get_contract_hash(self):
         prefix = 'code hash: '
-        result = self.__cleos.run(['get', 'code', self.__acl_contract_acc])
+        result = self.__cleos.run(['get', 'code', self.__uapp_contract_acc])
         return result.stdout.strip()[len(prefix):]
 
     def __call_mother(self):
@@ -74,7 +74,7 @@ class UnificationMother:
             self.__mother, self.__mother, self.__valid_apps_table, True, 0, -1,
             -1)
 
-        req_app_uint64 = eosio_account.string_to_name(self.__acl_contract_acc)
+        req_app_uint64 = eosio_account.string_to_name(self.__uapp_contract_acc)
 
         for i in table_data['rows']:
 
@@ -95,9 +95,10 @@ class UnificationMother:
 
                 if int(i['is_valid']) == 1:
                     self.__is_valid_app = True
-                if uapp_data['acl_contract_hash'] == self.__deployed_contract_hash:
+                if (uapp_data['acl_contract_hash']
+                        == self.__deployed_contract_hash):
                     self.__is_valid_code = True
-                self.__acl_contract_hash_in_mother = uapp_data['acl_contract_hash']
+                self.__uapp_sc_hash_in_mother = uapp_data['acl_contract_hash']
                 self.__haiku_rpc_server_ip = uapp_data['rpc_server_ip']
                 self.__haiku_rpc_server_port = uapp_data['rpc_server_port']
                 break
