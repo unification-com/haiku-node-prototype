@@ -185,7 +185,7 @@ def systest_smart_contract_mother():
         log.info("------------------------------------------")
 
 
-def systest_smart_contract_acl():
+def systest_smart_contract_uapp():
     log.info('Running systest smart contract UApp')
     d_conf = json.loads(Path('data/demo_config.json').read_text())
     appnames = ['app1', 'app2', 'app3']
@@ -393,7 +393,7 @@ def wait():
     # Deploy and populate Smart Contracts
     log.info('Ensure accounts are created, and contracts populated')
     systest_smart_contract_mother()
-    systest_smart_contract_acl()
+    systest_smart_contract_uapp()
 
     systest_process_permission_batches()
 
