@@ -37,10 +37,12 @@ def validapps():
 
     for va in valid_apps['rows']:
         if int(va['is_valid']) == 1:
-            click.echo(bold(f"{eosio_account.name_to_string(int(va['acl_contract_acc']))}"))
-            click.echo(f"Schema Version: {va['schema_vers']}")
+            acc_name = eosio_account.name_to_string(
+                int(va['acl_contract_acc']))
+            click.echo(bold(f"{acc_name}"))
             click.echo(f"Contract Hash: {va['acl_contract_hash']}")
-            click.echo(f"RPC Server: http://{va['rpc_server_ip']}:{va['rpc_server_port']}")
+            click.echo(f"RPC Server: "
+                       f"http://{va['rpc_server_ip']}:{va['rpc_server_port']}")
             click.echo("is valid: true")
 
 
@@ -63,10 +65,12 @@ def invalidapps():
 
     for va in valid_apps['rows']:
         if int(va['is_valid']) == 0:
-            click.echo(bold(f"{eosio_account.name_to_string(int(va['acl_contract_acc']))}"))
-            click.echo(f"Schema Version: {va['schema_vers']}")
+            acc_name = eosio_account.name_to_string(
+                int(va['acl_contract_acc']))
+            click.echo(bold(f"{acc_name}"))
             click.echo(f"Contract Hash: {va['acl_contract_hash']}")
-            click.echo(f"RPC Server: http://{va['rpc_server_ip']}:{va['rpc_server_port']}")
+            click.echo(f"RPC Server: "
+                       f"http://{va['rpc_server_ip']}:{va['rpc_server_port']}")
             click.echo("is valid: false")
 
 
