@@ -8,7 +8,7 @@ from haiku_node.network.eos import get_cleos, get_eos_rpc_client
 def get_self_uapp():
     conf = UnificationConfig()
     eos_client = get_eos_rpc_client()
-    return UnificationUapp(eos_client, conf['acl_contract'])
+    return UnificationUapp(eos_client, conf['uapp_contract'])
 
 
 def unix_timestamp():

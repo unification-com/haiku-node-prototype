@@ -36,7 +36,7 @@ shutil.copy(
 
 print(f"set config/config.json values for host {app_name}")
 uc = UnificationConfig()
-uc["acl_contract"] = app_name
+uc["uapp_contract"] = app_name
 uc["eos_rpc_ip"] = "nodeosd"
 
 # set up DB config values

@@ -13,7 +13,7 @@ def run_test(requesting_app):
     eos_client = Client(
         nodes=[f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}"])
 
-    print("THIS app is", conf['acl_contract'])
+    print("THIS app is", conf['uapp_contract'])
 
     v = UnificationAppScValidation(
         eos_client, requesting_app)

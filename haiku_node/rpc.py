@@ -162,7 +162,7 @@ def data_request():
         conf = app.unification_config
 
         sender = d['eos_account_name']
-        recipient = conf['acl_contract']
+        recipient = conf['uapp_contract']
 
         if sender == recipient:
             return error_request_self()
@@ -184,14 +184,14 @@ def data_request():
 
             # before processing data, check for any stashed permissions
             ipfs = get_ipfs_client()
-            provider_uapp = UnificationUapp(eos_client, conf['acl_contract'])
+            provider_uapp = UnificationUapp(eos_client, conf['uapp_contract'])
 
             permission_db = PermissionBatchDatabase(pb_default_db())
             permissions = UnifPermissions(ipfs, provider_uapp, permission_db)
             permissions.check_and_process_stashed(sender)
 
             return obtain_data(
-                app.keystore, sender, eos_client, conf['acl_contract'],
+                app.keystore, sender, eos_client, conf['uapp_contract'],
                 users, request_id)
         else:
             return invalid_app()
@@ -216,7 +216,7 @@ def data_ingest():
         conf = app.unification_config
 
         sender = d['eos_account_name']
-        recipient = conf['acl_contract']
+        recipient = conf['uapp_contract']
         bundle_d = unbundle(app.keystore, sender, d)
 
         eos_client = get_eos_rpc_client()
@@ -231,7 +231,7 @@ def data_ingest():
         if v.valid():
             users = bundle_d.get('users')
             return ingest_data(
-                app.keystore, sender, eos_client, conf['acl_contract'], users)
+                app.keystore, sender, eos_client, conf['uapp_contract'], users)
         else:
             return invalid_app()
 
@@ -264,7 +264,7 @@ def modify_permission():
         issuer = unif_jwt.get_issuer()
         audience = unif_jwt.get_audience()
 
-        if audience != conf['acl_contract']:
+        if audience != conf['uapp_contract']:
             return error_request_not_me()
 
         if req_sender != issuer:
@@ -276,7 +276,7 @@ def modify_permission():
         if len(payload['perms']) > 0:
             field_list = payload['perms'].split(',')
 
-            uapp_sc = UnificationUapp(eos_rpc_client, conf['acl_contract'])
+            uapp_sc = UnificationUapp(eos_rpc_client, conf['uapp_contract'])
             db_schema = uapp_sc.get_db_schema_by_pkey(int(payload['schema_id']))
 
             if not db_schema:
@@ -301,7 +301,7 @@ def modify_permission():
 
         # ToDo: get batch nonce etc. as return values to send to user for storing
         d = {
-            'app': conf['acl_contract'],
+            'app': conf['uapp_contract'],
             'proc_id': rowid
         }
 
@@ -331,7 +331,7 @@ def process_permission_batch():
         conf = app.unification_config
 
         sender = d['eos_account_name']
-        me = conf['acl_contract']
+        me = conf['uapp_contract']
 
         if sender != me:
             return generic_error(f'Only {me} can call this endpoint')
@@ -362,7 +362,7 @@ def get_proof():
     ipfs_hash = d['ipfs_hash']
     schema_id = d['schema_id']
 
-    provider_uapp = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
+    provider_uapp = UnificationUapp(get_eos_rpc_client(), conf['uapp_contract'])
     permission_db = PermissionBatchDatabase(pb_default_db())
     permissions = UnifPermissions(get_ipfs_client(), provider_uapp, permission_db)
 
