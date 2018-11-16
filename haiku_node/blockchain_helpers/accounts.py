@@ -359,7 +359,7 @@ class AccountManager:
         print("RPC Server: ", um.get_haiku_rpc_server())
         print("-----------------------------------")
 
-    def run_test_uapp(self, app, demo_apps, appnames):
+    def run_test_uapp(self, app):
         print("Loading UApp Contract for: ", app)
 
         eos_client = Client(nodes=[self.cleos.get_nodeos_url()])
@@ -492,7 +492,7 @@ def make_default_accounts(
     for appname in appnames:
         log.info(f'==========RUN CONTRACT DUMPS FOR {appname}==========')
         manager.run_test_mother(appname, demo_apps)
-        manager.run_test_uapp(appname, demo_apps, appnames)
+        manager.run_test_uapp(appname)
         log.info(f'==========END CONTRACT DUMPS FOR {appname}==========')
 
 
