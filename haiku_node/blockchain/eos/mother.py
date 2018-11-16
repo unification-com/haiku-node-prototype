@@ -14,7 +14,7 @@ class UnificationMother:
                  uapp_contract_acc, cleos_client, ipfs_client):
         """
         :param uapp_contract_acc: the eos account name of the app for which the
-            class will retrieve data from the ACL/Meta Data smart contract.
+            class will retrieve data.
         """
         self.__mother = "unif.mother"
         self.__valid_apps_table = "validapps"

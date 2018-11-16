@@ -16,13 +16,13 @@ END_USERS = 0.67
 
 
 class UndRewards:
-    def __init__(self, acl_acc: str, und_amt: int):
+    def __init__(self, uapp_acc: str, und_amt: int):
         """
 
-        :param acl_acc: The account name of the payer.
+        :param uapp_acc: The account name of the payer.
         :param und_amt: The amount of UND to be processed
         """
-        self.__my_acl_acc = acl_acc
+        self.__my_uapp_acc = uapp_acc
         self.__cleos = get_cleos()
 
         #TODO: I think I can deprecate the following
@@ -42,17 +42,17 @@ class UndRewards:
         reward_timestamp = "%.20f" % time.time()
 
         d = {
-            'from': self.__my_acl_acc,
+            'from': self.__my_uapp_acc,
             'to': to,
             'quantity': f'{reward} UND',
             'memo': f'UND Reward {self.tx_id_generator()} {reward_timestamp}'
         }
 
-        log.debug(f"{self.__my_acl_acc} is paying {to} {reward} UND")
+        log.debug(f"{self.__my_uapp_acc} is paying {to} {reward} UND")
 
         subcommands = [
             "push", "action", "unif.token", "transfer",
-            json.dumps(d), "-p", self.__my_acl_acc]
+            json.dumps(d), "-p", self.__my_uapp_acc]
 
         result = self.__cleos.run(subcommands)
 
@@ -64,7 +64,7 @@ class UndRewards:
         reward_timestamp = "%.20f" % time.time()
 
         d = {
-            'from': self.__my_acl_acc,
+            'from': self.__my_uapp_acc,
             'to': 'unif.mother',
             'quantity': f'{und} UND',
             'memo': f'UND Tax {self.tx_id_generator()} {reward_timestamp}'
@@ -72,7 +72,7 @@ class UndRewards:
 
         subcommands = [
             "push", "action", "unif.token", "transfer", json.dumps(d),
-            "-p", self.__my_acl_acc]
+            "-p", self.__my_uapp_acc]
 
         result = self.__cleos.run(subcommands)
 
