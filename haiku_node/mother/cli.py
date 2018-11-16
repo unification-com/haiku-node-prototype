@@ -48,7 +48,7 @@ def validapps():
             click.echo(f"{bold(acc_name)}: {bold(uapp_data['name'])}")
             click.echo(f"{uapp_data['description']}")
             click.echo(f"{uapp_data['website']}")
-            click.echo(f"Contract Hash: {uapp_data['acl_contract_hash']}")
+            click.echo(f"Contract Hash: {uapp_data['uapp_contract_hash']}")
             click.echo(f"RPC Server: "
                        f"http://{uapp_data['rpc_server_ip']}:"
                        f"{uapp_data['rpc_server_port']}")
@@ -88,7 +88,7 @@ def invalidapps():
             click.echo(f"{bold(uapp_data['name'])}")
             click.echo(f"{uapp_data['description']}")
             click.echo(f"{uapp_data['website']}")
-            click.echo(f"Contract Hash: {uapp_data['acl_contract_hash']}")
+            click.echo(f"Contract Hash: {uapp_data['uapp_contract_hash']}")
             click.echo(f"RPC Server: "
                        f"http://{uapp_data['rpc_server_ip']}:"
                        f"{uapp_data['rpc_server_port']}")

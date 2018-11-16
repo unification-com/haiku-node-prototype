@@ -95,10 +95,10 @@ class UnificationMother:
 
                 if int(i['is_valid']) == 1:
                     self.__is_valid_app = True
-                if (uapp_data['acl_contract_hash']
+                if (uapp_data['uapp_contract_hash']
                         == self.__deployed_contract_hash):
                     self.__is_valid_code = True
-                self.__uapp_sc_hash_in_mother = uapp_data['acl_contract_hash']
+                self.__uapp_sc_hash_in_mother = uapp_data['uapp_contract_hash']
                 self.__haiku_rpc_server_ip = uapp_data['rpc_server_ip']
                 self.__haiku_rpc_server_port = uapp_data['rpc_server_port']
                 break

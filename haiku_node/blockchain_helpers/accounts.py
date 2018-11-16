@@ -228,7 +228,7 @@ class AccountManager:
             uapp_data = {
                 'uapp_contract_acc': appname,
                 'schema_vers': schema_vers,
-                'acl_contract_hash': contract_hash,
+                'uapp_contract_hash': contract_hash,
                 'rpc_server_ip': app_conf['rpc_server'],
                 'rpc_server_port': app_conf['rpc_server_port'],
                 'name': app_conf['uapp_name'],
