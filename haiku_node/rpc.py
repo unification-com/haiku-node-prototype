@@ -160,7 +160,7 @@ def data_request():
         d = flask.request.get_json()
 
         # Validate requesting app against smart contracts
-        # config is this Haiku Node's config fle, containing its ACL/Meta Data
+        # config is this Haiku Node's config fle, containing its UApp
         # Smart Contract account/address and the EOS RPC server/port used for
         # communicating with the blockchain.
         conf = app.unification_config
@@ -214,7 +214,7 @@ def data_ingest():
         d = flask.request.get_json()
 
         # Validate requesting app against smart contracts
-        # config is this Haiku Node's config fle, containing its ACL/Meta Data
+        # config is this Haiku Node's config fle, containing its UApp
         # Smart Contract account/address and the EOS RPC server/port used for
         # communicating with the blockchain.
         conf = app.unification_config
