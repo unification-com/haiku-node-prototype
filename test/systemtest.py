@@ -74,9 +74,7 @@ def systest_auth(requesting_app, providing_app, user):
     payload = bundle(ks, requesting_app, provider_obj.name, body, 'Success')
     payload = broken(payload, 'signature')
 
-    base = provider_obj.base_url()
-
-    r = requests.post(f"{base}/data_request", json=payload, verify=False)
+    r = provider_obj.post('data_request', payload)
     assert r.status_code == 401
 
 

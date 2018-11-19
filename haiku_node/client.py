@@ -32,6 +32,10 @@ class Provider:
         else:
             return f"{self.protocol}://{self.host}:{self.port}"
 
+    def post(self, segment: str, payload):
+        base = self.base_url()
+        return requests.post(f"{base}/{segment}", json=payload, verify=False)
+
     def __repr__(self):
         return self.base_url()
 
@@ -76,8 +80,7 @@ class HaikuDataClient:
         payload = bundle(
             self.keystore, requesting_app, providing_app.name, body, 'Success')
 
-        base = providing_app.base_url()
-        r = requests.post(f"{base}/data_request", json=payload, verify=False)
+        r = providing_app.post('data_request', payload)
         d = r.json()
 
         if r.status_code != 200:
@@ -152,8 +155,7 @@ class HaikuDataClient:
             self.keystore, providing_app.name,
             providing_app.name, body, 'Process permission batch queue')
 
-        base = providing_app.base_url()
-        r = requests.post(f"{base}/process_permission_batch", json=payload, verify=False)
+        r = providing_app.post('process_permission_batch', payload)
         d = r.json()
 
         if r.status_code != 200:

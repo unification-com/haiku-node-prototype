@@ -303,10 +303,8 @@ class AccountManager:
                 mother = UnificationMother(get_eos_rpc_client(), provider,
                                            get_cleos(), get_ipfs_client())
                 provider_obj = Provider(provider, 'https', mother)
-                url = f"{provider_obj.base_url()}/modify_permission"
 
-                r = requests.post(url, json=payload, verify=False)
-
+                r = provider_obj.post('modify_permission', payload)
                 d = r.json()
 
                 if r.status_code != 200:
