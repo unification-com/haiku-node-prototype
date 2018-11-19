@@ -18,6 +18,9 @@
       "eos_sc_account": "app1",
       "rpc_server": "haiku-app1",
       "rpc_server_port": "8050",
+      "uapp_name": "HeartBit",
+      "uapp_desc": "Fitness and well-being app for the masses",
+      "uapp_website": "https://unification.com",
       "db_schemas": [
         {
           "schema_name": "app1.db1",
@@ -104,6 +107,9 @@
       "eos_sc_account": "app2",
       "rpc_server": "haiku-app2",
       "rpc_server_port": "8050",
+      "uapp_name": "BlobStore",
+      "uapp_desc": "Blob storage app for the masses",
+      "uapp_website": "https://unification.com",
       "db_schemas": [
         {
           "schema_name": "app2.db1",
@@ -178,6 +184,9 @@
       "eos_sc_account": "app3",
       "rpc_server": "haiku-app3",
       "rpc_server_port": "8050",
+      "uapp_name": "Imagify",
+      "uapp_desc": "Imaging app for the masses",
+      "uapp_website": "https://unification.com",
       "db_schemas": [
         {
           "schema_name": "app3.db1",
@@ -243,6 +252,7 @@
       }
     }
   },
+  "__demo_permissions_comment": "user.consumer.provider",
   "demo_permissions": {
     "user1": {
       "app1": {
@@ -265,7 +275,7 @@
         },
         "app3": {
           "granted": false,
-          "fields": "Image",
+          "fields": "",
           "schema_id": "0"
         }
       },
@@ -298,7 +308,7 @@
       "app2": {
         "app1": {
           "granted": false,
-          "fields": "Heartrate,GeoLocation,TimeStamp,Pulse",
+          "fields": "",
           "schema_id": "0"
         },
         "app3": {
@@ -323,12 +333,12 @@
     "user3": {
       "app1": {
         "app2": {
-          "granted": false,
+          "granted": true,
           "fields": "DataBlob,BlobSize",
           "schema_id": "0"
         },
         "app3": {
-          "granted": false,
+          "granted": true,
           "fields": "Image",
           "schema_id": "0"
         }
@@ -347,13 +357,13 @@
       },
       "app3": {
         "app1": {
-          "granted": true,
-          "fields": "Heartrate,GeoLocation,TimeStamp,Pulse",
+          "granted": false,
+          "fields": "",
           "schema_id": "0"
         },
         "app2": {
-          "granted": true,
-          "fields": "DataBlob,BlobSize",
+          "granted": false,
+          "fields": "",
           "schema_id": "0"
         }
       }

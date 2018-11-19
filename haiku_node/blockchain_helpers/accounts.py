@@ -15,7 +15,7 @@ from haiku_node.client import Provider
 from haiku_node.network.eos import (get_cleos,
                                     get_eos_rpc_client, get_ipfs_client)
 from haiku_node.permissions.utils import generate_payload
-from haiku_node.utils.utils import sha256
+from haiku_node.utils.utils import sha256, generate_nonce
 
 BLOCK_SLEEP = 0.5
 
@@ -54,8 +54,10 @@ class AccountManager:
 
         print(ret.stdout)
 
-    def create_account_permissions(self, username, perm_name, public_key, eosio_code=False):
-        log.info(f"Creating permission {perm_name} for {username} with key {public_key}")
+    def create_account_permissions(self, username, perm_name,
+                                   public_key, eosio_code=False):
+        log.info(f"Creating permission {perm_name} "
+                 f"for {username} with key {public_key}")
 
         keys = []
         k = {
@@ -66,9 +68,6 @@ class AccountManager:
         keys.append(k)
 
         if eosio_code:
-            # cleos set account permission app2 modreq
-            # '{"threshold": 1,"keys": [{"key": "EOS6aj3Bc71sVMeAzAU7BQXcSv8zcSjUecXVW2YecD5dnFJs9ERPJ","weight": 1}],
-            # "accounts": [{"permission":{"actor":"app2","permission":"eosio.code"},"weight":1}]}' -p app2@active
             accounts = []
             actor = {
                 'actor': username,
@@ -96,11 +95,13 @@ class AccountManager:
 
         print(ret.stdout)
 
-    def lock_account_permissions(self, username, smart_contract, contract_action, perm_name):
+    def lock_account_permissions(self, username, smart_contract,
+                                 contract_action, perm_name):
         log.info(f"Lock permission {perm_name} for {username} to "
                  f"action {contract_action} in contract {smart_contract}")
         ret = self.cleos.run(["set", "action", "permission", username,
-                          smart_contract, contract_action, perm_name, '-p', f'{username}@active'])
+                              smart_contract, contract_action, perm_name,
+                              '-p', f'{username}@active'])
 
         print(ret.stdout)
 
@@ -111,7 +112,8 @@ class AccountManager:
                     self.init_permission_struct(provider, consumer)
 
     def init_permission_struct(self, provider, consumer):
-        log.debug(f'init_permission_struct Provider {provider}, Consumer {consumer}')
+        log.debug(f'init_permission_struct Provider'
+                  f' {provider}, Consumer {consumer}')
         d = {
             'consumer_id': consumer
         }
@@ -152,7 +154,9 @@ class AccountManager:
 
     def issue_unds(self, app_config, appname):
         app_conf = app_config[appname]
-        quantity = "{0:.4f}".format(round(float(app_conf['und_rewards']['start_balance']), 4))
+        quantity = "{0:.4f}".format(round(float(
+            app_conf['und_rewards']['start_balance']), 4))
+
         log.info(f'Issue 100 UND tokens to {appname}')
 
         d = {
@@ -169,9 +173,9 @@ class AccountManager:
     def associate_contracts(self, username):
         log.info('Associating UApp contracts')
         ret = self.cleos.run(["set", "contract", username,
-                          "/eos/contracts/unification_uapp",
-                          "unification_uapp.wasm", "unification_uapp.abi",
-                          "-p", username])
+                              "/eos/contracts/unification_uapp",
+                              "unification_uapp.wasm", "unification_uapp.abi",
+                              "-p", username])
         print(ret.stdout)
 
     def set_schema(self, app_config, appname):
@@ -185,9 +189,6 @@ class AccountManager:
                 'price_adhoc': i['price_adhoc']
             }
 
-            # ret = self.cleos.run(
-            #     ['push', 'action', appname, 'addschema', json.dumps(d), '-p',
-            #      appname])
             ret = self.cleos.run(
                 ['push', 'action', appname, 'addschema', json.dumps(d), '-p',
                  f'{appname}@modschema'])
@@ -225,11 +226,17 @@ class AccountManager:
             schema_vers = schema_vers.rstrip(",")
 
             uapp_data = {
-                'acl_contract_acc': appname,
+                'uapp_contract_acc': appname,
                 'schema_vers': schema_vers,
-                'acl_contract_hash': contract_hash,
+                'uapp_contract_hash': contract_hash,
                 'rpc_server_ip': app_conf['rpc_server'],
-                'rpc_server_port': app_conf['rpc_server_port']
+                'rpc_server_port': app_conf['rpc_server_port'],
+                'name': app_conf['uapp_name'],
+                'description': app_conf['uapp_desc'],
+                'website': app_conf['uapp_website'],
+                'nonce': generate_nonce(16),
+                'time_added': int(time.time()),
+                'time_updated': int(time.time())
             }
 
             eosk = UnifEosKey(unif_mother_private_key)
@@ -247,7 +254,7 @@ class AccountManager:
             ipfs_hash = ipfs_client.add_json(mother_json)
 
             d = {
-                'acl_contract_acc': appname,
+                'uapp_contract_acc': appname,
                 'ipfs_hash': ipfs_hash
             }
 
@@ -258,7 +265,7 @@ class AccountManager:
 
     def validate_with_mother(self, appname):
         d = {
-            'acl_contract_acc': appname
+            'uapp_contract_acc': appname
         }
         return self.cleos.run(
             ['push', 'action', 'unif.mother', 'validate', json.dumps(d),
@@ -266,7 +273,7 @@ class AccountManager:
 
     def invalidate_with_mother(self, appname):
         d = {
-            'acl_contract_acc': appname
+            'uapp_contract_acc': appname
         }
         return self.cleos.run(
             ['push', 'action', 'unif.mother', 'invalidate', json.dumps(d),
@@ -280,7 +287,8 @@ class AccountManager:
             ['push', 'action', provider, 'setrsakey', json.dumps(d),
              '-p', f'{provider}@modrsakey'])
 
-    def request_permission_change(self, user, app_permission_list, private_key):
+    def request_permission_change(self, user,
+                                  app_permission_list, private_key):
         log.info(f"Process {user} permission change requests")
         for consumer, providers in app_permission_list.items():
             for provider, permissions in providers.items():
@@ -291,14 +299,18 @@ class AccountManager:
                     fields = ''
                 schema_id = int(permissions['schema_id'])
 
-                log.debug(f'request_permission_change {user} requesting {provider} '
+                log.debug(f'request_permission_change '
+                          f'{user} requesting {provider} '
                           f'update perms for {consumer} '
                           f'in schema {schema_id}: {granted} {fields}')
 
-                payload, p_nonce, p_sig = generate_payload(user, private_key, provider, consumer,
-                                           fields, 'active', schema_id)
+                payload, p_nonce, p_sig = generate_payload(user, private_key,
+                                                           provider, consumer,
+                                                           fields, 'active',
+                                                           schema_id)
 
-                log.debug(f'request_permission_change payload: {json.dumps(payload)}')
+                log.debug(f'request_permission_change payload: '
+                          f'{json.dumps(payload)}')
 
                 mother = UnificationMother(get_eos_rpc_client(), provider,
                                            get_cleos(), get_ipfs_client())
@@ -313,18 +325,20 @@ class AccountManager:
                 proc_id = d['proc_id']
                 ret_app = d['app']
 
-                log.debug(f"request_permission_change success: {ret_app}: Process ID {proc_id}")
+                log.debug(f"request_permission_change success: "
+                          f"{ret_app}: Process ID {proc_id}")
 
     def run_test_mother(self, app, demo_apps):
         print("Contacting MOTHER FOR: ", app)
 
         eos_client = Client(nodes=[self.cleos.get_nodeos_url()])
-        um = UnificationMother(eos_client, app, get_cleos(), get_ipfs_client())
+        um = UnificationMother(eos_client, app, get_cleos(),
+                               get_ipfs_client())
         print("Valid app: ", um.valid_app())
         assert um.valid_app() is True
 
         print("UApp SC Hash in MOTHER: ", um.get_hash_in_mother())
-        print("Deployed UApp SC Contract hash: ", um.get_deployed_contract_hash())
+        print("Deployed UApp SC hash: ", um.get_deployed_contract_hash())
         assert um.get_hash_in_mother() == um.get_deployed_contract_hash()
 
         print("Valid Code: ", um.valid_code())
@@ -343,7 +357,7 @@ class AccountManager:
         print("RPC Server: ", um.get_haiku_rpc_server())
         print("-----------------------------------")
 
-    def run_test_uapp(self, app, demo_apps, appnames):
+    def run_test_uapp(self, app):
         print("Loading UApp Contract for: ", app)
 
         eos_client = Client(nodes=[self.cleos.get_nodeos_url()])
@@ -401,34 +415,42 @@ def make_default_accounts(
         app_account_perms = ['modschema', 'modreq', 'modrsakey']
 
         # smart contract actions the permissions are allowed to use
-        modschema_actions = ['addschema', 'editschema', 'setvers', 'setschedule', 'setminund', 'setschema']
+        modschema_actions = ['addschema', 'editschema', 'setvers',
+                             'setschedule', 'setminund', 'setschema']
         modreq_actions = ['initreq', 'updatereq']
         modrsakey_actions = ['setrsakey']
         
         for app_account_perm in app_account_perms:
             pub_key, priv_key = manager.create_key()
             manager.wallet_import_key(appname, priv_key)
-            manager.create_account_permissions(appname, app_account_perm, pub_key)
+            manager.create_account_permissions(appname,
+                                               app_account_perm, pub_key)
 
             if app_account_perm == 'modschema':
                 contract_actions = modschema_actions
             elif app_account_perm == 'modreq':
                 contract_actions = modreq_actions
-                manager.create_account_permissions(appname, app_account_perm, pub_key, True)
+                manager.create_account_permissions(appname, app_account_perm,
+                                                   pub_key, True)
             elif app_account_perm == 'modrsakey':
                 contract_actions = modrsakey_actions
             else:
                 contract_actions = []
 
             for contract_action in contract_actions:
-                manager.lock_account_permissions(appname, appname, contract_action, app_account_perm)
+                manager.lock_account_permissions(appname, appname,
+                                                 contract_action,
+                                                 app_account_perm)
 
-            # ToDo: This is probably better suited as a temporary assignment, set in the client
+            # ToDo: This is probably better suited as a
+            #  temporary assignment, set in the client
             if app_account_perm == 'modreq':
                 # need to set for initperm for consumer in provider contracts
                 for prov_app in appnames:
                     if prov_app != appname:
-                        manager.lock_account_permissions(appname, prov_app, 'initperm', app_account_perm)
+                        manager.lock_account_permissions(appname, prov_app,
+                                                         'initperm',
+                                                         app_account_perm)
                         time.sleep(BLOCK_SLEEP)
 
         manager.set_schema(demo_apps, appname)
@@ -443,17 +465,21 @@ def make_default_accounts(
 
     manager.init_permission_structures(appnames)
 
+    user_wallet_passwords = demo_config['wallet_passwords']
+
     for username in usernames:
-        if username not in ['unif.mother', 'unif.token']:  # Todo: maybe have sys_users list?
+        # Todo: maybe have sys_users list?
+        if username not in ['unif.mother', 'unif.token']:
             print(f"Create account permissions for user {username}")
             pub_key = manager.cleos.get_public_key(username, 'active')
-            priv_key = manager.cleos.get_private_key(username,
-                                                     demo_config['wallet_passwords'][username]['wallet_password'],
+            wallet_pass = user_wallet_passwords[username]['wallet_password']
+            priv_key = manager.cleos.get_private_key(username,  wallet_pass,
                                                      pub_key)
 
             try:
+                permission_obj = demo_config['demo_permissions'][username]
                 manager.request_permission_change(username,
-                                                  demo_config['demo_permissions'][username],
+                                                  permission_obj,
                                                   priv_key)
             except Exception as e:
                 log.error(f'request_permission_change Failed with error: {e}')
@@ -464,7 +490,7 @@ def make_default_accounts(
     for appname in appnames:
         log.info(f'==========RUN CONTRACT DUMPS FOR {appname}==========')
         manager.run_test_mother(appname, demo_apps)
-        manager.run_test_uapp(appname, demo_apps, appnames)
+        manager.run_test_uapp(appname)
         log.info(f'==========END CONTRACT DUMPS FOR {appname}==========')
 
 

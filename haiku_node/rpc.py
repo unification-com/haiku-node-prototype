@@ -96,40 +96,47 @@ def bc_transaction_error():
     }), 500
 
 
-def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
+def obtain_data(keystore, eos_account_name, eos_client, uapp_contract_acc,
                 users, request_id=None):
     """
-    :param eos_account_name: The account name of the requesting App (Data Consumer).
+    :param eos_account_name: The account name of the
+                             requesting App (Data Consumer).
     :param eos_client: EOS RPC Client
-    :param acl_contract_acc: The account name of the providing App (Data Provider).
+    :param uapp_contract_acc: The account name of
+                              the providing App (Data Provider).
     :param users: The users to obtain data for. None to get all available users
-    :param request_id: Primary Key for the data request held in the Consumer's UApp smart contract
+    :param request_id: Primary Key for the data request
+                       held in the Consumer's UApp smart contract
     """
 
     data_factory = UnificationDataFactory(
-        eos_client, acl_contract_acc, eos_account_name, users)
+        eos_client, uapp_contract_acc, eos_account_name, users)
     body = {
         'data': data_factory.get_raw_data()
     }
 
-    d = bundle(keystore, acl_contract_acc, eos_account_name, body, 'Success')
+    d = bundle(keystore, uapp_contract_acc, eos_account_name, body, 'Success')
 
     # load UApp SC for requesting app
     uapp_sc = UnificationUapp(eos_client, eos_account_name)
     # generate checksum
     data_hash = hashlib.sha224(str(d['payload']).encode('utf-8')).hexdigest()
 
-    # temporarily allow acl_contract_acc@modreq to interact with consumer's contract
+    # temporarily allow uapp_contract_acc@modreq to
+    # interact with consumer's contract
     eosio_cleos = EosioCleos(False)
-    eosio_cleos.run(["set", "action", "permission", acl_contract_acc,
-                     eos_account_name, 'updatereq', 'modreq', '-p', f'{acl_contract_acc}@active'])
+    eosio_cleos.run(["set", "action", "permission", uapp_contract_acc,
+                     eos_account_name, 'updatereq', 'modreq', '-p',
+                     f'{uapp_contract_acc}@active'])
 
     # write to Consumer's smart contract
-    transaction_id = uapp_sc.update_data_request(request_id, acl_contract_acc, data_hash, "test")
+    transaction_id = uapp_sc.update_data_request(request_id, uapp_contract_acc,
+                                                 data_hash, "test")
 
     # Remove permission association for action in consumer's contract
-    eosio_cleos.run(["set", "action", "permission", acl_contract_acc,
-                     eos_account_name, 'updatereq', 'NULL', '-p', f'{acl_contract_acc}@active'])
+    eosio_cleos.run(["set", "action", "permission", uapp_contract_acc,
+                     eos_account_name, 'updatereq', 'NULL', '-p',
+                     f'{uapp_contract_acc}@active'])
 
     # check transaction has been processed
     if transaction_id is not None:
@@ -138,12 +145,12 @@ def obtain_data(keystore, eos_account_name, eos_client, acl_contract_acc,
         return bc_transaction_error()
 
 
-def ingest_data(keystore, eos_account_name, eos_client, acl_contract_acc,
-                users):
+def ingest_data(keystore, eos_account_name, uapp_contract_acc):
     response_body = {}
 
     d = bundle(
-        keystore, acl_contract_acc, eos_account_name, response_body, 'Success')
+        keystore, uapp_contract_acc, eos_account_name,
+        response_body, 'Success')
     return flask.jsonify(d), 200
 
 
@@ -153,13 +160,13 @@ def data_request():
         d = flask.request.get_json()
 
         # Validate requesting app against smart contracts
-        # config is this Haiku Node's config fle, containing its ACL/Meta Data
+        # config is this Haiku Node's config fle, containing its UApp
         # Smart Contract account/address and the EOS RPC server/port used for
         # communicating with the blockchain.
         conf = app.unification_config
 
         sender = d['eos_account_name']
-        recipient = conf['acl_contract']
+        recipient = conf['uapp_contract']
 
         if sender == recipient:
             return error_request_self()
@@ -171,7 +178,7 @@ def data_request():
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP.
         v = UnificationAppScValidation(
-            eos_client, conf['acl_contract'], d['eos_account_name'])
+            eos_client, d['eos_account_name'])
 
         # If the REQUESTING APP is valid according to MOTHER, then we can
         # generate the data. If not, return an invalid_app response
@@ -181,14 +188,14 @@ def data_request():
 
             # before processing data, check for any stashed permissions
             ipfs = get_ipfs_client()
-            provider_uapp = UnificationUapp(eos_client, conf['acl_contract'])
+            provider_uapp = UnificationUapp(eos_client, conf['uapp_contract'])
 
             permission_db = PermissionBatchDatabase(pb_default_db())
             permissions = UnifPermissions(ipfs, provider_uapp, permission_db)
             permissions.check_and_process_stashed(sender)
 
             return obtain_data(
-                app.keystore, sender, eos_client, conf['acl_contract'],
+                app.keystore, sender, eos_client, conf['uapp_contract'],
                 users, request_id)
         else:
             return invalid_app()
@@ -207,28 +214,25 @@ def data_ingest():
         d = flask.request.get_json()
 
         # Validate requesting app against smart contracts
-        # config is this Haiku Node's config fle, containing its ACL/Meta Data
+        # config is this Haiku Node's config fle, containing its UApp
         # Smart Contract account/address and the EOS RPC server/port used for
         # communicating with the blockchain.
         conf = app.unification_config
 
         sender = d['eos_account_name']
-        recipient = conf['acl_contract']
-        bundle_d = unbundle(app.keystore, sender, d)
 
         eos_client = get_eos_rpc_client()
 
         # Init the validation class for THIS Haiku, and validate the
         # REQUESTING APP.
         v = UnificationAppScValidation(
-            eos_client, conf['acl_contract'], d['eos_account_name'])
+            eos_client, d['eos_account_name'])
 
         # If the REQUESTING APP is valid according to MOTHER, then we can
         # generate the data. If not, return an invalid_app response
         if v.valid():
-            users = bundle_d.get('users')
             return ingest_data(
-                app.keystore, sender, eos_client, conf['acl_contract'], users)
+                app.keystore, sender, conf['uapp_contract'])
         else:
             return invalid_app()
 
@@ -261,7 +265,7 @@ def modify_permission():
         issuer = unif_jwt.get_issuer()
         audience = unif_jwt.get_audience()
 
-        if audience != conf['acl_contract']:
+        if audience != conf['uapp_contract']:
             return error_request_not_me()
 
         if req_sender != issuer:
@@ -273,7 +277,7 @@ def modify_permission():
         if len(payload['perms']) > 0:
             field_list = payload['perms'].split(',')
 
-            uapp_sc = UnificationUapp(eos_rpc_client, conf['acl_contract'])
+            uapp_sc = UnificationUapp(eos_rpc_client, conf['uapp_contract'])
             db_schema = uapp_sc.get_db_schema_by_pkey(int(payload['schema_id']))
 
             if not db_schema:
@@ -296,9 +300,8 @@ def modify_permission():
                                      payload['p_sig'],
                                      public_key)
 
-        # ToDo: get batch nonce etc. as return values to send to user for storing
         d = {
-            'app': conf['acl_contract'],
+            'app': conf['uapp_contract'],
             'proc_id': rowid
         }
 
@@ -328,7 +331,7 @@ def process_permission_batch():
         conf = app.unification_config
 
         sender = d['eos_account_name']
-        me = conf['acl_contract']
+        me = conf['uapp_contract']
 
         if sender != me:
             return generic_error(f'Only {me} can call this endpoint')
@@ -336,7 +339,8 @@ def process_permission_batch():
         bundle_d = unbundle(app.keystore, sender, d)
 
         if bundle_d['action'] != 'proc_perms':
-            return generic_error(f"Invalid action {bundle_d['action']} in payload")
+            return generic_error(f"Invalid action "
+                                 f"{bundle_d['action']} in payload")
 
         if bundle_d['who'] != me:
             return generic_error(f'Invalid caller {me} in payload')
@@ -359,9 +363,13 @@ def get_proof():
     ipfs_hash = d['ipfs_hash']
     schema_id = d['schema_id']
 
-    provider_uapp = UnificationUapp(get_eos_rpc_client(), conf['acl_contract'])
+    provider_uapp = UnificationUapp(get_eos_rpc_client(),
+                                    conf['uapp_contract'])
+
     permission_db = PermissionBatchDatabase(pb_default_db())
-    permissions = UnifPermissions(get_ipfs_client(), provider_uapp, permission_db)
+
+    permissions = UnifPermissions(get_ipfs_client(),
+                                  provider_uapp, permission_db)
 
     if ipfs_hash is not None:
         permissions.load_perms_from_ipfs(ipfs_hash)

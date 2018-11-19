@@ -20,8 +20,8 @@ def run_test(app):
     print("Valid app: ", um.valid_app())
     assert um.valid_app() is True
 
-    print("ACL Hash in MOTHER: ", um.get_hash_in_mother())
-    print("Deployed ACL Contract hash: ", um.get_deployed_contract_hash())
+    print("UApp SC Hash in MOTHER: ", um.get_hash_in_mother())
+    print("Deployed UApp SC hash: ", um.get_deployed_contract_hash())
     assert um.get_hash_in_mother() == um.get_deployed_contract_hash()
 
     print("Valid Code: ", um.valid_code())

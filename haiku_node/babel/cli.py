@@ -53,7 +53,7 @@ def permissions(user):
         -1)
 
     for va in valid_apps['rows']:
-        apps.append(eosio_account.name_to_string(int(va['acl_contract_acc'])))
+        apps.append(eosio_account.name_to_string(int(va['uapp_contract_acc'])))
 
     click.echo(f"{bold(user)} Permissions overview:")
 

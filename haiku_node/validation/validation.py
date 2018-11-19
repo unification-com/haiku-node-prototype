@@ -11,13 +11,12 @@ Validation class for a single REQUESTING app.
 
 class UnificationAppScValidation:
 
-    def __init__(self, eos_client, acl_contract, requesting_app):
+    def __init__(self, eos_client, app_to_validate):
         """
-        :param requesting_app: the eos account name of the requesting app
+        :param app_to_validate: the eos account name of the requesting app
         """
-        self.__requesting_app = requesting_app
+        self.__app_to_validate = app_to_validate
         self.__eosClient = eos_client
-        self.__acl_contract = acl_contract
         self.__is_valid_app = False
         self.__is_valid_code = False
         self.__signed_by_mother = False
@@ -38,7 +37,7 @@ class UnificationAppScValidation:
         else:
             return False
 
-    def __check_req_app_valid(self):
+    def __check_app_is_valid(self):
         """
         Call the MOTHER Smart Contract, and check if the requesting_app is both
         a verified app, and that it's smart contract code is valid (by checking
@@ -46,14 +45,14 @@ class UnificationAppScValidation:
         """
 
         um = UnificationMother(
-            self.__eosClient, self.__requesting_app,
+            self.__eosClient, self.__app_to_validate,
             get_cleos(), get_ipfs_client())
         self.__is_valid_app = um.valid_app()
         self.__is_valid_code = um.valid_code()
         self.__signed_by_mother = um.signed_by_mother()
 
     def __run(self):
-        self.__check_req_app_valid()
+        self.__check_app_is_valid()
 
 
 if __name__ == '__main__':
