@@ -150,7 +150,8 @@ def verify_proof(merkle_root, proof_chain, permission_obj):
 
 
 def get_rpc_url(provider, endpoint):
-    mother = UnificationMother(get_eos_rpc_client(), provider, get_cleos())
+    mother = UnificationMother(
+        get_eos_rpc_client(), provider, get_cleos(), get_ipfs_client())
     provider_obj = Provider(provider, 'https', mother)
     return f"{provider_obj.base_url()}/{endpoint}"
 
