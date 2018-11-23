@@ -1,6 +1,5 @@
 import json
 import requests
-import subprocess
 
 import click
 
@@ -8,11 +7,10 @@ from haiku_node.babel.babel_db import (BabelDatabase,
                                        default_db as default_babel_db)
 from haiku_node.blockchain.eos.mother import UnificationMother
 from haiku_node.blockchain.eos.uapp import UnificationUapp
-from haiku_node.config.config import UnificationConfig
 from haiku_node.client import Provider
 from haiku_node.encryption.merkle.merkle_tree import MerkleTree
-from haiku_node.network.eos import (get_eos_rpc_client, get_cleos,
-                                    get_ipfs_client)
+from haiku_node.network.eos import (
+    get_eos_rpc_client, get_cleos, get_ipfs_client)
 from haiku_node.permissions.utils import generate_payload
 
 bold = lambda s: click.style(str(s), bold=True)
@@ -25,17 +23,8 @@ def get_balance(user):
     \b
     :param user: The EOS user account name.
     """
-    conf = UnificationConfig()
-    cmd = ["/opt/eosio/bin/cleos", "--url",
-           f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
-           "--wallet-url",
-           f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
-           'get', 'currency', 'balance', 'unif.token', user, 'UND']
-
-    ret = subprocess.run(
-        cmd, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE, universal_newlines=True)
-
+    cleos = get_cleos()
+    ret = cleos.run(['get', 'currency', 'balance', 'unif.token', user, 'UND'])
     stripped = ret.stdout.strip()
 
     if len(stripped) > 0:
@@ -161,7 +150,8 @@ def verify_proof(merkle_root, proof_chain, permission_obj):
 
 
 def get_rpc_url(provider, endpoint):
-    mother = UnificationMother(get_eos_rpc_client(), provider, get_cleos())
+    mother = UnificationMother(
+        get_eos_rpc_client(), provider, get_cleos(), get_ipfs_client())
     provider_obj = Provider(provider, 'https', mother)
     return f"{provider_obj.base_url()}/{endpoint}"
 

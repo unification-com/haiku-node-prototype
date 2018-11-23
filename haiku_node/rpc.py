@@ -324,34 +324,11 @@ def modify_permission():
         return generic_error()
 
 
-@app.route('/process_permission_batch', methods=['POST'])
+@app.route('/process_permission_batch', methods=['GET'])
 def process_permission_batch():
-    try:
-        d = flask.request.get_json()
-        conf = app.unification_config
-
-        sender = d['eos_account_name']
-        me = conf['uapp_contract']
-
-        if sender != me:
-            return generic_error(f'Only {me} can call this endpoint')
-
-        bundle_d = unbundle(app.keystore, sender, d)
-
-        if bundle_d['action'] != 'proc_perms':
-            return generic_error(f"Invalid action "
-                                 f"{bundle_d['action']} in payload")
-
-        if bundle_d['who'] != me:
-            return generic_error(f'Invalid caller {me} in payload')
-
-        pb = PermissionBatcher(pb_default_db())
-        result = pb.process_batch_queue()
-
-        return flask.jsonify(result), 200
-
-    except InvalidSignature:
-        return invalid_response()
+    pb = PermissionBatcher(pb_default_db())
+    result = pb.process_batch_queue()
+    return flask.jsonify(result), 200
 
 
 @app.route('/get_proof', methods=['POST'])

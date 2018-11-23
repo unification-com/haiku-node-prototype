@@ -36,6 +36,10 @@ class Provider:
         base = self.base_url()
         return requests.post(f"{base}/{segment}", json=payload, verify=False)
 
+    def get(self, segment: str):
+        base = self.base_url()
+        return requests.get(f"{base}/{segment}", verify=False)
+
     def __repr__(self):
         return self.base_url()
 
@@ -145,16 +149,7 @@ class HaikuDataClient:
         return decrypted_body
 
     def process_permissions_batch(self, providing_app: Provider):
-        body = {
-            'action': 'proc_perms',
-            'who': providing_app.name
-        }
-
-        payload = bundle(
-            self.keystore, providing_app.name,
-            providing_app.name, body, 'Process permission batch queue')
-
-        r = providing_app.post('process_permission_batch', payload)
+        r = providing_app.get('process_permission_batch')
         d = r.json()
 
         if r.status_code != 200:

@@ -1,7 +1,6 @@
 import json
 import logging
 import requests
-import subprocess
 import urllib3
 
 import click
@@ -15,9 +14,9 @@ from haiku_node.babel.utils import (get_balance, get_schemas, post_permissions,
                                     get_ipfs_merkle_from_proof_tx, get_rpc_url)
 from haiku_node.blockchain.eos.uapp import UnificationUapp
 from haiku_node.blockchain_helpers.eos import eosio_account
-from haiku_node.blockchain_helpers.eos.eosio_cleos import EosioCleos
 from haiku_node.config.config import UnificationConfig
-from haiku_node.network.eos import get_eos_rpc_client, get_ipfs_client
+from haiku_node.network.eos import (
+    get_eos_rpc_client, get_ipfs_client, get_cleos)
 
 
 log = logging.getLogger(__name__)
@@ -112,7 +111,7 @@ def balance(user, password):
     :param user: The EOS user account name.
     :param password: The EOS user account's wallet password.
     """
-    cleos = EosioCleos()
+    cleos = get_cleos()
     cleos.unlock_wallet(user, password)
     my_balance = get_balance(user)
     cleos.lock_wallet(user)
@@ -147,10 +146,9 @@ def transfer(from_acc, to_acc, amount, password):
     their_balance = get_balance(to_acc)
     click.echo(bold(f'{to_acc} Old Balance: {their_balance}'))
 
-    cleos = EosioCleos()
+    cleos = get_cleos()
     cleos.unlock_wallet(from_acc, password)
 
-    conf = UnificationConfig()
     d = {
         'from': from_acc,
         'to': to_acc,
@@ -158,16 +156,9 @@ def transfer(from_acc, to_acc, amount, password):
         'memo': 'UND transfer'
     }
 
-    cmd = ["/opt/eosio/bin/cleos", "--url",
-           f"http://{conf['eos_rpc_ip']}:{conf['eos_rpc_port']}",
-           "--wallet-url",
-           f"http://{conf['eos_wallet_ip']}:{conf['eos_wallet_port']}",
-           'push', 'action', 'unif.token', 'transfer',
-           json.dumps(d), "-p", from_acc]
-
-    ret = subprocess.run(
-        cmd, stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE, universal_newlines=True)
+    ret = cleos.run(
+        ['push', 'action', 'unif.token', 'transfer', json.dumps(d),
+         '-p', from_acc])
 
     cleos.lock_wallet(from_acc)
 
